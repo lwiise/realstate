@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Playfair_Display, Inter } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
-import { SITE_DESCRIPTION, SITE_KEYWORDS, SITE_NAME } from "@/lib/seo";
+import { SITE_DESCRIPTION, SITE_KEYWORDS, SITE_NAME, SITE_SHARE_IMAGE, SITE_URL } from "@/lib/seo";
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -17,6 +17,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: SITE_URL ? new URL(SITE_URL) : undefined,
   title: {
     default: SITE_NAME,
     template: `%s | ${SITE_NAME}`,
@@ -30,11 +31,22 @@ export const metadata: Metadata = {
     siteName: SITE_NAME,
     locale: "fr_MA",
     type: "website",
+    images: [
+      {
+        url: SITE_SHARE_IMAGE,
+        alt: SITE_NAME,
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: SITE_NAME,
     description: SITE_DESCRIPTION,
+    images: [SITE_SHARE_IMAGE],
+  },
+  icons: {
+    icon: SITE_SHARE_IMAGE,
+    apple: "/apple-icon.png",
   },
 };
 
