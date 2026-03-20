@@ -484,9 +484,184 @@ export const properties: Property[] = [
       email: "karim@aurumtanger.com",
     },
   },
+  {
+    id: "13",
+    title: "Bureau Signature Vue Marina",
+    slug: "bureau-signature-vue-marina",
+    transactionType: TRANSACTION_TYPES[0],
+    propertyType: "Bureau",
+    price: 6800000,
+    city: "Tanger",
+    neighborhood: "Marina Bay",
+    area: 8200,
+    description:
+      "Plateau de bureaux haut de gamme avec vue sur la marina, reception privee et espaces de reunion modulables pour une entreprise en croissance.",
+    features: [
+      "Reception Privee",
+      "Salle de Conseil",
+      "Open Space Premium",
+      "Bureaux Prives",
+      "Fibre Dediee",
+      "Parking Securise",
+      "Acces 24/7",
+      "Vue Marina",
+    ],
+    images: [
+      "https://images.unsplash.com/photo-1497366412874-3415097a27e7?w=1200&q=80",
+      "https://images.unsplash.com/photo-1497215842964-222b430dc094?w=1200&q=80",
+      "https://images.unsplash.com/photo-1497366858526-0766cadbe8fa?w=1200&q=80",
+    ],
+    featured: false,
+    agent: {
+      name: "Salma Idrissi",
+      image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80",
+      phone: "+212 6 18-22-44-66",
+      email: "salma@aurumtanger.com",
+    },
+  },
+  {
+    id: "14",
+    title: "Terrain Naturel Route du Cap",
+    slug: "terrain-naturel-route-du-cap",
+    transactionType: TRANSACTION_TYPES[1],
+    propertyType: "Terrain",
+    price: 18000,
+    priceUnit: "/mois",
+    city: "Tanger",
+    neighborhood: "Route du Cap Spartel",
+    area: 56000,
+    description:
+      "Grand terrain amenage pour activations saisonnieres, hospitality events ou projets modulaires avec acces direct depuis la route du Cap.",
+    features: [
+      "Acces Facile",
+      "Vue Ocean",
+      "Surface Plane",
+      "Cloture Partielle",
+      "Raccordements Proches",
+      "Usage Evenementiel",
+      "Parking Temporaire",
+      "Zone Premium",
+    ],
+    images: [
+      "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=1200&q=80",
+      "https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=1200&q=80",
+      "https://images.unsplash.com/photo-1472396961693-142e6e269027?w=1200&q=80",
+    ],
+    featured: false,
+    agent: {
+      name: "Youssef El Amrani",
+      image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200&q=80",
+      phone: "+212 6 58-11-29-73",
+      email: "youssef@aurumtanger.com",
+    },
+  },
+  {
+    id: "15",
+    title: "Showroom Evenementiel Waterfront",
+    slug: "showroom-evenementiel-waterfront",
+    transactionType: TRANSACTION_TYPES[2],
+    propertyType: "Commercial",
+    price: 1900,
+    priceUnit: "/jour",
+    city: "Tanger",
+    neighborhood: "Waterfront",
+    area: 3600,
+    description:
+      "Espace commercial scenographique pour lancements de produit, pop-ups et receptions privees avec facade vitree et services de conciergerie.",
+    features: [
+      "Facade Vitree",
+      "Eclairage Scenique",
+      "Back Office",
+      "Cuisine Traiteur",
+      "Acces VIP",
+      "Sonorisation",
+      "Wifi Professionnel",
+      "Parking Invite",
+    ],
+    images: [
+      "https://images.unsplash.com/photo-1556740749-887f6717d7e4?w=1200&q=80",
+      "https://images.unsplash.com/photo-1519567241046-7f570eee3ce6?w=1200&q=80",
+      "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=1200&q=80",
+    ],
+    featured: false,
+    agent: {
+      name: "Leila Bennouna",
+      image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&q=80",
+      phone: "+212 6 70-30-40-50",
+      email: "leila@aurumtanger.com",
+    },
+  },
+  {
+    id: "16",
+    title: "Terrain Panoramique Camp Horizon",
+    slug: "terrain-panoramique-camp-horizon",
+    transactionType: TRANSACTION_TYPES[2],
+    propertyType: "Terrain",
+    price: 950,
+    priceUnit: "/jour",
+    city: "Tanger",
+    neighborhood: "Peripherie Achakar",
+    area: 64000,
+    description:
+      "Terrain panoramique privatisable pour retraites exclusives, installations lifestyle et evenements outdoor avec vues degagees sur la cote.",
+    features: [
+      "Vue Panoramique",
+      "Acces Securise",
+      "Zone Evenementielle",
+      "Point Eau",
+      "Surface Modulable",
+      "Coucher de Soleil",
+      "Parking Service",
+      "Calme Absolu",
+    ],
+    images: [
+      "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200&q=80",
+      "https://images.unsplash.com/photo-1473448912268-2022ce9509d8?w=1200&q=80",
+      "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=1200&q=80",
+    ],
+    featured: false,
+    agent: {
+      name: "Omar Chraibi",
+      image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=80",
+      phone: "+212 6 63-21-18-45",
+      email: "omar@aurumtanger.com",
+    },
+  },
 ];
 
 // Helper functions
+const TRANSACTION_TYPE_ALIASES: Record<string, TransactionType> = {
+  [TRANSACTION_TYPES[0]]: TRANSACTION_TYPES[0],
+  Buy: TRANSACTION_TYPES[0],
+  [TRANSACTION_TYPES[1]]: TRANSACTION_TYPES[1],
+  Rent: TRANSACTION_TYPES[1],
+  [TRANSACTION_TYPES[2]]: TRANSACTION_TYPES[2],
+  "Location Journaliere": TRANSACTION_TYPES[2],
+  "Location JournaliÃ¨re": TRANSACTION_TYPES[2],
+  "Daily Rent": TRANSACTION_TYPES[2],
+};
+
+const PROPERTY_TYPE_ALIASES: Record<string, PropertyType> = {
+  Appartement: "Appartement",
+  Appartements: "Appartement",
+  Villa: "Villa",
+  Villas: "Villa",
+  Bureau: "Bureau",
+  Bureaux: "Bureau",
+  Commercial: "Commercial",
+  Terrain: "Terrain",
+  Terrains: "Terrain",
+};
+
+export function normalizeTransactionType(value?: string | null): TransactionType | undefined {
+  if (!value) return undefined;
+  return TRANSACTION_TYPE_ALIASES[value];
+}
+
+export function normalizePropertyType(value?: string | null): PropertyType | undefined {
+  if (!value) return undefined;
+  return PROPERTY_TYPE_ALIASES[value];
+}
 export function getPropertyBySlug(slug: string): Property | undefined {
   return properties.find((p) => p.slug === slug);
 }

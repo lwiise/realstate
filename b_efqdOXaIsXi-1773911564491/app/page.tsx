@@ -5,6 +5,7 @@ import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { PropertyCard } from "@/components/property-card";
 import { SearchBar } from "@/components/search-bar";
+import { TestimonialsSection } from "@/components/testimonials-section";
 import { getFeaturedProperties } from "@/lib/data";
 
 export default function HomePage() {
@@ -167,7 +168,7 @@ export default function HomePage() {
           <div className="text-center mt-12">
             <Link
               href="/properties"
-              className="inline-flex items-center gap-3 bg-black text-white px-8 py-4 font-medium text-sm tracking-wide uppercase hover:bg-gold hover:text-black transition-all duration-300"
+              className="cta-dark-button inline-flex items-center gap-3 px-8 py-4 font-medium text-sm tracking-wide uppercase"
             >
               Voir Toutes les Propriétés
               <ArrowRight className="w-4 h-4" />
@@ -175,6 +176,8 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      <TestimonialsSection />
 
       {/* CTA Section */}
       <section className="relative py-24 lg:py-32 overflow-hidden">
@@ -308,7 +311,7 @@ export default function HomePage() {
 
                 <button
                   type="submit"
-                  className="w-full h-14 bg-black text-white font-medium text-sm tracking-wide uppercase hover:bg-gold hover:text-black transition-all duration-300"
+                  className="cta-dark-button w-full h-14 font-medium text-sm tracking-wide uppercase"
                 >
                   Envoyer le Message
                 </button>

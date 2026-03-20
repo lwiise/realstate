@@ -151,4 +151,44 @@
   .hover\:border-gold:hover {
     border-color: var(--gold);
   }
+  .cta-dark-button {
+    @apply relative isolate overflow-hidden bg-black text-white transition-all duration-500 ease-out;
+    box-shadow: 0 18px 40px -28px rgba(0, 0, 0, 0.88);
+  }
+  .cta-dark-button::before {
+    content: "";
+    position: absolute;
+    inset: -30% auto -30% -35%;
+    width: 34%;
+    background: linear-gradient(120deg, transparent 0%, rgba(212, 175, 55, 0.9) 50%, transparent 100%);
+    transform: translateX(-160%) skewX(-24deg);
+    transition: transform 0.7s ease;
+    pointer-events: none;
+  }
+  .cta-dark-button::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border: 1px solid rgba(212, 175, 55, 0);
+    transition: border-color 0.4s ease;
+    pointer-events: none;
+  }
+  .cta-dark-button:hover,
+  .cta-dark-button:focus-visible {
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 24px 48px -28px rgba(212, 175, 55, 0.55), 0 18px 30px -24px rgba(0, 0, 0, 0.95);
+  }
+  .cta-dark-button:hover::before,
+  .cta-dark-button:focus-visible::before {
+    transform: translateX(420%) skewX(-24deg);
+  }
+  .cta-dark-button:hover::after,
+  .cta-dark-button:focus-visible::after {
+    border-color: rgba(212, 175, 55, 0.6);
+  }
+  .cta-dark-button > * {
+    position: relative;
+    z-index: 1;
+  }
 }

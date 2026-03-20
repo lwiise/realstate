@@ -2,46 +2,57 @@
 
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { ChevronRight, Grid3X3, List, SlidersHorizontal } from "lucide-react";
+import { ChevronRight, SlidersHorizontal } from "lucide-react";
 import { PropertyCard } from "@/components/property-card";
 import { SearchBar } from "@/components/search-bar";
 import {
   getPropertiesByFilter,
+  normalizePropertyType,
+  normalizeTransactionType,
   TransactionType,
   PropertyType,
   TRANSACTION_TYPES,
   PROPERTY_TYPES,
 } from "@/lib/data";
+import { cn } from "@/lib/utils";
+
+function buildPropertiesHref(transactionType?: TransactionType, propertyType?: PropertyType) {
+  const params = new URLSearchParams();
+
+  if (transactionType) params.set("transaction", transactionType);
+  if (propertyType) params.set("type", propertyType);
+
+  const query = params.toString();
+  return query ? `/properties?${query}` : "/properties";
+}
 
 export function PropertiesContent() {
   const searchParams = useSearchParams();
-  const transactionType = searchParams.get("transaction") as TransactionType | null;
-  const propertyType = searchParams.get("type") as PropertyType | null;
+  const transactionType = normalizeTransactionType(searchParams.get("transaction"));
+  const propertyType = normalizePropertyType(searchParams.get("type"));
 
-  const properties = getPropertiesByFilter(
-    transactionType || undefined,
-    propertyType || undefined
-  );
+  const properties = getPropertiesByFilter(transactionType, propertyType);
 
   const getPageTitle = () => {
     if (transactionType && propertyType) {
-      return `${propertyType}s for ${transactionType === "Daily Rent" ? "Daily Rent" : transactionType}`;
+      return `${propertyType} - ${transactionType}`;
     }
+
     if (transactionType) {
-      return `Properties for ${transactionType === "Daily Rent" ? "Daily Rent" : transactionType}`;
+      return `Proprietes - ${transactionType}`;
     }
+
     if (propertyType) {
-      return `${propertyType}s`;
+      return propertyType;
     }
-    return "All Properties";
+
+    return "Toutes les Proprietes";
   };
 
   return (
     <>
-      {/* Header */}
       <section className="bg-black py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Breadcrumbs */}
           <nav className="flex items-center gap-2 text-sm mb-6">
             <Link href="/" className="text-white/60 hover:text-gold transition-colors">
               Home
@@ -71,87 +82,81 @@ export function PropertiesContent() {
         </div>
       </section>
 
-      {/* Filters */}
       <section className="py-8 bg-secondary border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SearchBar
             variant="compact"
-            defaultTransaction={transactionType || undefined}
-            defaultPropertyType={propertyType || undefined}
+            defaultTransaction={transactionType}
+            defaultPropertyType={propertyType}
           />
         </div>
       </section>
 
-      {/* Properties Grid */}
       <section className="py-16 lg:py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Toolbar */}
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-4">
-              {/* Quick filters */}
-              <div className="hidden md:flex items-center gap-2">
+          <div className="flex flex-col gap-4 mb-8">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex flex-wrap gap-2">
                 <Link
                   href="/properties"
-                  className={`px-4 py-2 text-sm transition-colors ${
+                  className={cn(
+                    "px-4 py-2 text-sm border transition-colors",
                     !transactionType && !propertyType
-                      ? "bg-black text-white"
-                      : "bg-secondary text-foreground hover:bg-border"
-                  }`}
+                      ? "bg-black text-white border-black"
+                      : "border-border text-foreground hover:border-gold"
+                  )}
                 >
                   All
                 </Link>
                 {TRANSACTION_TYPES.map((type) => (
                   <Link
                     key={type}
-                    href={`/properties?transaction=${encodeURIComponent(type)}`}
-                    className={`px-4 py-2 text-sm transition-colors ${
+                    href={buildPropertiesHref(type, propertyType)}
+                    className={cn(
+                      "px-4 py-2 text-sm border transition-colors",
                       transactionType === type
-                        ? "bg-black text-white"
-                        : "bg-secondary text-foreground hover:bg-border"
-                    }`}
+                        ? "bg-black text-white border-black"
+                        : "border-border text-foreground hover:border-gold"
+                    )}
                   >
                     {type}
                   </Link>
                 ))}
               </div>
+
+              <span className="text-sm text-muted-foreground">
+                {properties.length} {properties.length === 1 ? "result" : "results"}
+              </span>
             </div>
 
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-muted-foreground hidden sm:block">
-                {properties.length} results
-              </span>
-              <button className="p-2 border border-border hover:border-gold transition-colors" aria-label="Grid view">
-                <Grid3X3 className="w-4 h-4" />
-              </button>
-              <button className="p-2 border border-border hover:border-gold transition-colors" aria-label="List view">
-                <List className="w-4 h-4" />
-              </button>
-            </div>
+            {transactionType && (
+              <div className="flex flex-wrap gap-2">
+                {PROPERTY_TYPES.map((type) => {
+                  const count = getPropertiesByFilter(transactionType, type).length;
+                  const href =
+                    propertyType === type
+                      ? buildPropertiesHref(transactionType)
+                      : buildPropertiesHref(transactionType, type);
+
+                  return (
+                    <Link
+                      key={type}
+                      href={href}
+                      className={cn(
+                        "px-4 py-2 text-sm border transition-colors",
+                        propertyType === type
+                          ? "bg-gold text-black border-gold"
+                          : "border-border text-foreground hover:border-gold"
+                      )}
+                    >
+                      {type} ({count})
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
-          {/* Property Type Pills */}
-          {transactionType && (
-            <div className="flex flex-wrap gap-2 mb-8">
-              {PROPERTY_TYPES.map((type) => {
-                const count = getPropertiesByFilter(transactionType, type).length;
-                return (
-                  <Link
-                    key={type}
-                    href={`/properties?transaction=${encodeURIComponent(transactionType)}&type=${encodeURIComponent(type)}`}
-                    className={`px-4 py-2 text-sm border transition-colors ${
-                      propertyType === type
-                        ? "bg-gold text-black border-gold"
-                        : "border-border text-foreground hover:border-gold"
-                    }`}
-                  >
-                    {type} ({count})
-                  </Link>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Results */}
           {properties.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {properties.map((property) => (
@@ -169,7 +174,7 @@ export function PropertiesContent() {
               </p>
               <Link
                 href="/properties"
-                className="inline-flex items-center gap-2 bg-black text-white px-6 py-3 text-sm tracking-wide uppercase hover:bg-gold hover:text-black transition-colors"
+                className="cta-dark-button inline-flex items-center gap-2 px-6 py-3 text-sm tracking-wide uppercase"
               >
                 Clear Filters
               </Link>

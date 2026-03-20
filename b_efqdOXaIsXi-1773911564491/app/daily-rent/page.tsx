@@ -2,7 +2,7 @@ import Image from "next/image";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { PropertyTypeCard } from "@/components/property-type-card";
-import { PROPERTY_TYPES } from "@/lib/data";
+import { PROPERTY_TYPES, TRANSACTION_TYPES } from "@/lib/data";
 
 export const metadata = {
   title: "Locations Journalières | Aurum Tanger",
@@ -61,7 +61,7 @@ export default function DailyRentPage() {
               <PropertyTypeCard
                 key={type}
                 propertyType={type}
-                transactionType="Daily Rent"
+                transactionType={TRANSACTION_TYPES[2]}
               />
             ))}
           </div>

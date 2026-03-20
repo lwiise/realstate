@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
 import { TRANSACTION_TYPES, PROPERTY_TYPES, TransactionType, PropertyType } from "@/lib/data";
@@ -19,6 +19,14 @@ export function SearchBar({
   const router = useRouter();
   const [transactionType, setTransactionType] = useState<TransactionType | "">(defaultTransaction || "");
   const [propertyType, setPropertyType] = useState<PropertyType | "">(defaultPropertyType || "");
+
+  useEffect(() => {
+    setTransactionType(defaultTransaction || "");
+  }, [defaultTransaction]);
+
+  useEffect(() => {
+    setPropertyType(defaultPropertyType || "");
+  }, [defaultPropertyType]);
 
   const handleSearch = () => {
     const params = new URLSearchParams();
@@ -125,7 +133,7 @@ export function SearchBar({
           <div className="flex items-end">
             <button
               onClick={handleSearch}
-              className="w-full h-12 bg-black text-white font-medium text-sm tracking-wide uppercase hover:bg-gold transition-colors duration-300 flex items-center justify-center gap-3"
+              className="cta-dark-button w-full h-12 font-medium text-sm tracking-wide uppercase flex items-center justify-center gap-3"
             >
               <Search className="w-5 h-5" />
               Search Properties

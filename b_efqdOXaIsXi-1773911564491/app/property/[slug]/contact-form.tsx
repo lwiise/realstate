@@ -96,7 +96,7 @@ export function ContactForm({ propertyTitle, agentPhone }: ContactFormProps) {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full h-12 bg-black text-white font-medium text-sm tracking-wide uppercase hover:bg-gold hover:text-black transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          className="cta-dark-button w-full h-12 font-medium text-sm tracking-wide uppercase disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
           {isSubmitting ? (
             "Envoi..."

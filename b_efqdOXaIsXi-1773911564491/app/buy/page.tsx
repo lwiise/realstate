@@ -2,7 +2,7 @@ import Image from "next/image";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { PropertyTypeCard } from "@/components/property-type-card";
-import { PROPERTY_TYPES } from "@/lib/data";
+import { PROPERTY_TYPES, TRANSACTION_TYPES } from "@/lib/data";
 
 export const metadata = {
   title: "Acheter une Propriété | Aurum Tanger",
@@ -61,7 +61,7 @@ export default function BuyPage() {
               <PropertyTypeCard
                 key={type}
                 propertyType={type}
-                transactionType="Buy"
+                transactionType={TRANSACTION_TYPES[0]}
               />
             ))}
           </div>
