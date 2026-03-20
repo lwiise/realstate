@@ -4,8 +4,9 @@ import { Footer } from "@/components/footer";
 import { PropertiesContent } from "./properties-content";
 
 export const metadata = {
-  title: "Properties | Aurum Estates",
-  description: "Browse our exclusive collection of luxury properties for sale, rent, and daily rental.",
+  title: "Toutes les Propriétés",
+  description:
+    "Parcourez toutes les propriétés à vendre, à louer et en location journalière proposées par MDK IMMOBILIER Real Estate à Tanger.",
 };
 
 export default function PropertiesPage() {

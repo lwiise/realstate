@@ -5,8 +5,9 @@ import { PropertyTypeCard } from "@/components/property-type-card";
 import { PROPERTY_TYPES, TRANSACTION_TYPES } from "@/lib/data";
 
 export const metadata = {
-  title: "Acheter une Propriété | Aurum Tanger",
-  description: "Découvrez les propriétés exceptionnelles à vendre. Des appartements de luxe aux villas en bord de mer, trouvez votre maison de rêve avec Aurum Tanger.",
+  title: "Acheter une Propriété",
+  description:
+    "Achetez des appartements, villas, bureaux, biens commerciaux et terrains avec MDK IMMOBILIER Real Estate à Tanger.",
 };
 
 export default function BuyPage() {

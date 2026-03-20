@@ -23,6 +23,7 @@ import {
   formatPrice,
   properties,
 } from "@/lib/data";
+import { SITE_NAME } from "@/lib/seo";
 import { PropertyGallery } from "./property-gallery";
 import { ContactForm } from "./contact-form";
 
@@ -39,11 +40,16 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: PropertyPageProps) {
   const { slug } = await params;
   const property = getPropertyBySlug(slug);
-  if (!property) return { title: "Property Not Found | Aurum Estates" };
+  if (!property) {
+    return {
+      title: "Propriété introuvable",
+      description: `${SITE_NAME} ne trouve pas cette annonce immobilière à Tanger.`,
+    };
+  }
 
   return {
-    title: `${property.title} | Aurum Estates`,
-    description: property.description.slice(0, 160),
+    title: property.title,
+    description: `${property.description.slice(0, 120)} ${SITE_NAME} vous accompagne pour cette annonce à Tanger.`,
   };
 }
 

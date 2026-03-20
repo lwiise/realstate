@@ -5,8 +5,9 @@ import { PropertyTypeCard } from "@/components/property-type-card";
 import { PROPERTY_TYPES, TRANSACTION_TYPES } from "@/lib/data";
 
 export const metadata = {
-  title: "Locations Journalières | Aurum Tanger",
-  description: "Expérimentez le luxe selon vos termes avec nos propriétés en location journalière. Parfait pour séjours courts, événements et expériences exclusives.",
+  title: "Locations Journalières",
+  description:
+    "Réservez des propriétés premium pour des séjours courts, événements et expériences exclusives avec MDK IMMOBILIER Real Estate à Tanger.",
 };
 
 export default function DailyRentPage() {

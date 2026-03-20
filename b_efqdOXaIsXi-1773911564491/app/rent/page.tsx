@@ -5,8 +5,9 @@ import { PropertyTypeCard } from "@/components/property-type-card";
 import { PROPERTY_TYPES, TRANSACTION_TYPES } from "@/lib/data";
 
 export const metadata = {
-  title: "Louer une Propriété | Aurum Tanger",
-  description: "Trouvez des propriétés de luxe à louer. Appartements premium, villas et bureaux disponibles pour location long terme.",
+  title: "Louer une Propriété",
+  description:
+    "Trouvez des appartements, villas, bureaux, biens commerciaux et terrains à louer avec MDK IMMOBILIER Real Estate à Tanger.",
 };
 
 export default function RentPage() {
