@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { deleteTransactionTypeAction } from "@/app/admin/actions";
+import { AdminDeleteSubmit } from "@/components/admin/admin-delete-submit";
 import { getTransactionTypes } from "@/lib/admin-cms";
 
 export default async function AdminTransactionTypesPage() {
@@ -55,12 +56,7 @@ export default async function AdminTransactionTypesPage() {
                       </Link>
                       <form action={deleteTransactionTypeAction}>
                         <input type="hidden" name="id" value={item.id} />
-                        <button
-                          type="submit"
-                          className="rounded-md border border-border px-3 py-2 text-xs uppercase tracking-wide text-muted-foreground transition-colors hover:border-destructive hover:text-destructive"
-                        >
-                          Delete
-                        </button>
+                        <AdminDeleteSubmit />
                       </form>
                     </div>
                   </td>

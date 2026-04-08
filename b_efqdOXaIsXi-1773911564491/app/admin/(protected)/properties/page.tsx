@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { deletePropertyAction } from "@/app/admin/actions";
+import { AdminDeleteSubmit } from "@/components/admin/admin-delete-submit";
 import { getProperties } from "@/lib/admin-cms";
 
 export default async function AdminPropertiesPage() {
@@ -63,12 +64,7 @@ export default async function AdminPropertiesPage() {
                       <form action={deletePropertyAction}>
                         <input type="hidden" name="id" value={property.id} />
                         <input type="hidden" name="slug" value={property.slug} />
-                        <button
-                          type="submit"
-                          className="rounded-md border border-border px-3 py-2 text-xs uppercase tracking-wide text-muted-foreground transition-colors hover:border-destructive hover:text-destructive"
-                        >
-                          Delete
-                        </button>
+                        <AdminDeleteSubmit />
                       </form>
                     </div>
                   </td>

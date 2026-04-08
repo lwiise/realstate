@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { deleteAgentAction } from "@/app/admin/actions";
+import { AdminDeleteSubmit } from "@/components/admin/admin-delete-submit";
 import { getAgents } from "@/lib/admin-cms";
 
 export default async function AdminAgentsPage() {
@@ -59,12 +60,7 @@ export default async function AdminAgentsPage() {
                       </Link>
                       <form action={deleteAgentAction}>
                         <input type="hidden" name="id" value={agent.id} />
-                        <button
-                          type="submit"
-                          className="rounded-md border border-border px-3 py-2 text-xs uppercase tracking-wide text-muted-foreground transition-colors hover:border-destructive hover:text-destructive"
-                        >
-                          Delete
-                        </button>
+                        <AdminDeleteSubmit />
                       </form>
                     </div>
                   </td>
