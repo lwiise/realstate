@@ -1,4 +1,5 @@
 import { saveNavigationAction } from "@/app/admin/actions";
+import { AdminFormSubmit } from "@/components/admin/admin-form-submit";
 import { ImageInput } from "@/components/admin/image-input";
 import { ObjectListInput } from "@/components/admin/object-list-input";
 import type { MediaAsset, NavigationSettings } from "@/lib/cms-types";
@@ -52,12 +53,7 @@ export function NavigationForm({ navigation, mediaAssets }: NavigationFormProps)
         </div>
       </section>
 
-      <button
-        type="submit"
-        className="cta-dark-button rounded-md px-5 py-3 text-xs font-medium uppercase tracking-wide"
-      >
-        Save navigation
-      </button>
+      <AdminFormSubmit label="Save navigation" />
     </form>
   );
 }

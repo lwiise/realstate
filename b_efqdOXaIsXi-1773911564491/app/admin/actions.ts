@@ -93,6 +93,11 @@ function revalidateSite(propertySlug?: string) {
   paths.forEach((path) => revalidatePath(path));
 }
 
+function withSavedParam(path: string) {
+  const separator = path.includes("?") ? "&" : "?";
+  return `${path}${separator}saved=1`;
+}
+
 export async function setupAdminAction(formData: FormData) {
   try {
     if ((await countAdminUsers()) > 0) {
@@ -168,7 +173,7 @@ export async function savePropertyAction(formData: FormData) {
     redirect(`/admin/properties${id ? `/${id}` : "/new"}?error=missing-fields`);
   }
 
-  await upsertProperty({
+  const savedId = await upsertProperty({
     id: id ?? undefined,
     title: getValue(formData, "title"),
     slug,
@@ -202,7 +207,7 @@ export async function savePropertyAction(formData: FormData) {
   });
 
   revalidateSite(slug);
-  redirect("/admin/properties");
+  redirect(withSavedParam(`/admin/properties/${savedId}`));
 }
 
 export async function deletePropertyAction(formData: FormData) {
@@ -218,7 +223,7 @@ export async function saveAgentAction(formData: FormData) {
   await requireAdminUser();
   const id = getNumberValue(formData, "id");
 
-  await upsertAgent({
+  const savedId = await upsertAgent({
     id: id ?? undefined,
     name: getValue(formData, "name"),
     slug: getValue(formData, "slug"),
@@ -235,7 +240,7 @@ export async function saveAgentAction(formData: FormData) {
   });
 
   revalidateSite();
-  redirect("/admin/agents");
+  redirect(withSavedParam(`/admin/agents/${savedId}`));
 }
 
 export async function deleteAgentAction(formData: FormData) {
@@ -249,7 +254,7 @@ export async function savePropertyTypeAction(formData: FormData) {
   await requireAdminUser();
   const id = getNumberValue(formData, "id");
 
-  await upsertPropertyType({
+  const savedId = await upsertPropertyType({
     id: id ?? undefined,
     label: getValue(formData, "label"),
     slug: getValue(formData, "slug"),
@@ -260,7 +265,7 @@ export async function savePropertyTypeAction(formData: FormData) {
   });
 
   revalidateSite();
-  redirect("/admin/property-types");
+  redirect(withSavedParam(`/admin/property-types/${savedId}`));
 }
 
 export async function deletePropertyTypeAction(formData: FormData) {
@@ -274,7 +279,7 @@ export async function saveTransactionTypeAction(formData: FormData) {
   await requireAdminUser();
   const id = getNumberValue(formData, "id");
 
-  await upsertTransactionType({
+  const savedId = await upsertTransactionType({
     id: id ?? undefined,
     label: getValue(formData, "label"),
     slug: getValue(formData, "slug"),
@@ -289,7 +294,7 @@ export async function saveTransactionTypeAction(formData: FormData) {
   });
 
   revalidateSite();
-  redirect("/admin/transaction-types");
+  redirect(withSavedParam(`/admin/transaction-types/${savedId}`));
 }
 
 export async function deleteTransactionTypeAction(formData: FormData) {
@@ -320,7 +325,7 @@ export async function saveNavigationAction(formData: FormData) {
 
   await updateNavigationSettings(input);
   revalidateSite();
-  redirect("/admin/navigation");
+  redirect(withSavedParam("/admin/navigation"));
 }
 
 export async function saveFooterAction(formData: FormData) {
@@ -345,7 +350,7 @@ export async function saveFooterAction(formData: FormData) {
 
   await updateFooterSettings(input);
   revalidateSite();
-  redirect("/admin/footer");
+  redirect(withSavedParam("/admin/footer"));
 }
 
 export async function saveSiteSettingsAction(formData: FormData) {
@@ -372,7 +377,7 @@ export async function saveSiteSettingsAction(formData: FormData) {
 
   await updateSiteSettings(input);
   revalidateSite();
-  redirect("/admin/settings");
+  redirect(withSavedParam("/admin/settings"));
 }
 
 export async function savePageContentAction(formData: FormData) {
@@ -393,7 +398,7 @@ export async function savePageContentAction(formData: FormData) {
 
   await updatePageContent(record);
   revalidateSite();
-  redirect(`/admin/content/${pageKey}`);
+  redirect(withSavedParam(`/admin/content/${pageKey}`));
 }
 
 function parsePageContent<TPageKey extends PageKey>(

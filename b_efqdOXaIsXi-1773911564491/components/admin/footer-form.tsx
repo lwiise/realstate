@@ -1,4 +1,5 @@
 import { saveFooterAction } from "@/app/admin/actions";
+import { AdminFormSubmit } from "@/components/admin/admin-form-submit";
 import { ObjectListInput } from "@/components/admin/object-list-input";
 import type { FooterSettings } from "@/lib/cms-types";
 
@@ -83,12 +84,7 @@ export function FooterForm({ footer }: FooterFormProps) {
         </div>
       </section>
 
-      <button
-        type="submit"
-        className="cta-dark-button rounded-md px-5 py-3 text-xs font-medium uppercase tracking-wide"
-      >
-        Save footer
-      </button>
+      <AdminFormSubmit label="Save footer" />
     </form>
   );
 }

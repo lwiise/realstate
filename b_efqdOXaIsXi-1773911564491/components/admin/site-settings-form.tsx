@@ -1,4 +1,5 @@
 import { saveSiteSettingsAction } from "@/app/admin/actions";
+import { AdminFormSubmit } from "@/components/admin/admin-form-submit";
 import { ImageInput } from "@/components/admin/image-input";
 import { StringListInput } from "@/components/admin/string-list-input";
 import type { MediaAsset, SiteSettings } from "@/lib/cms-types";
@@ -155,12 +156,7 @@ export function SiteSettingsForm({ settings, mediaAssets }: SiteSettingsFormProp
         </div>
       </section>
 
-      <button
-        type="submit"
-        className="cta-dark-button rounded-md px-5 py-3 text-xs font-medium uppercase tracking-wide"
-      >
-        Save site settings
-      </button>
+      <AdminFormSubmit label="Save site settings" />
     </form>
   );
 }

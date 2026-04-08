@@ -1,4 +1,5 @@
 import { savePageContentAction } from "@/app/admin/actions";
+import { AdminFormSubmit } from "@/components/admin/admin-form-submit";
 import { ImageInput } from "@/components/admin/image-input";
 import { ImageListInput } from "@/components/admin/image-list-input";
 import { ObjectListInput } from "@/components/admin/object-list-input";
@@ -519,12 +520,7 @@ export function PageContentForm({ page, mediaAssets }: PageContentFormProps) {
 
       <SeoFields page={page} mediaAssets={mediaAssets} />
 
-      <button
-        type="submit"
-        className="cta-dark-button rounded-md px-5 py-3 text-xs font-medium uppercase tracking-wide"
-      >
-        Save page content
-      </button>
+      <AdminFormSubmit label="Save page content" />
     </form>
   );
 }

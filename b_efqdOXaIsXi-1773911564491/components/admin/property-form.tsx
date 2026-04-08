@@ -1,4 +1,5 @@
 import { savePropertyAction } from "@/app/admin/actions";
+import { AdminFormSubmit } from "@/components/admin/admin-form-submit";
 import { ImageInput } from "@/components/admin/image-input";
 import { ImageListInput } from "@/components/admin/image-list-input";
 import { StringListInput } from "@/components/admin/string-list-input";
@@ -363,14 +364,7 @@ export function PropertyForm({
         </div>
       </section>
 
-      <div className="flex flex-wrap items-center gap-3">
-        <button
-          type="submit"
-          className="cta-dark-button rounded-md px-5 py-3 text-xs font-medium uppercase tracking-wide"
-        >
-          Save property
-        </button>
-      </div>
+      <AdminFormSubmit label="Save property" />
     </form>
   );
 }

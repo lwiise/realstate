@@ -1,4 +1,5 @@
 import { saveAgentAction } from "@/app/admin/actions";
+import { AdminFormSubmit } from "@/components/admin/admin-form-submit";
 import { ImageInput } from "@/components/admin/image-input";
 import type { Agent, MediaAsset } from "@/lib/cms-types";
 
@@ -123,12 +124,7 @@ export function AgentForm({ agent, mediaAssets }: AgentFormProps) {
         </div>
       </section>
 
-      <button
-        type="submit"
-        className="cta-dark-button rounded-md px-5 py-3 text-xs font-medium uppercase tracking-wide"
-      >
-        Save agent
-      </button>
+      <AdminFormSubmit label="Save agent" />
     </form>
   );
 }
