@@ -52,6 +52,7 @@ export function getRemotePool() {
     connectionString,
     max: 5,
     idleTimeoutMillis: 30_000,
+    connectionTimeoutMillis: 10_000,
     ssl: isLocalhost ? false : { rejectUnauthorized: false },
   });
 

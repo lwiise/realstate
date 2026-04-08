@@ -16,141 +16,233 @@ import * as localCms from "@/lib/cms-local";
 import * as remoteCms from "@/lib/cms-remote";
 import { isRemoteDatabaseConfigured } from "@/lib/remote-db";
 
+let remoteReadFailed = false;
+let remoteReadWarningShown = false;
+
 function useRemoteCms() {
   return isRemoteDatabaseConfigured();
 }
 
+function canUseRemoteReads() {
+  return useRemoteCms() && !remoteReadFailed;
+}
+
+function formatErrorMessage(error: unknown) {
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+
+  return "Unknown remote CMS error";
+}
+
+function warnRemoteReadFallback(error: unknown) {
+  if (remoteReadWarningShown) {
+    return;
+  }
+
+  remoteReadWarningShown = true;
+  console.warn(
+    `[cms] Remote CMS read failed, falling back to local seed data. ${formatErrorMessage(error)}`
+  );
+}
+
+async function readWithFallback<T>(
+  remoteReader: () => Promise<T>,
+  localReader: () => T | Promise<T>
+) {
+  if (!canUseRemoteReads()) {
+    return Promise.resolve(localReader());
+  }
+
+  try {
+    return await remoteReader();
+  } catch (error) {
+    remoteReadFailed = true;
+    warnRemoteReadFallback(error);
+    return Promise.resolve(localReader());
+  }
+}
+
+async function writeWithProvider<T>(
+  remoteWriter: () => Promise<T>,
+  localWriter: () => T | Promise<T>
+) {
+  if (useRemoteCms()) {
+    return remoteWriter();
+  }
+
+  return Promise.resolve(localWriter());
+}
+
 export async function getSiteSettings() {
-  return useRemoteCms() ? remoteCms.getSiteSettingsRemote() : localCms.getSiteSettings();
+  return readWithFallback(
+    () => remoteCms.getSiteSettingsRemote(),
+    () => localCms.getSiteSettings()
+  );
 }
 
 export async function updateSiteSettings(input: SiteSettings) {
-  return useRemoteCms()
-    ? remoteCms.updateSiteSettingsRemote(input)
-    : localCms.updateSiteSettings(input);
+  return writeWithProvider(
+    () => remoteCms.updateSiteSettingsRemote(input),
+    () => localCms.updateSiteSettings(input)
+  );
 }
 
 export async function getNavigationSettings() {
-  return useRemoteCms()
-    ? remoteCms.getNavigationSettingsRemote()
-    : localCms.getNavigationSettings();
+  return readWithFallback(
+    () => remoteCms.getNavigationSettingsRemote(),
+    () => localCms.getNavigationSettings()
+  );
 }
 
 export async function updateNavigationSettings(input: NavigationSettings) {
-  return useRemoteCms()
-    ? remoteCms.updateNavigationSettingsRemote(input)
-    : localCms.updateNavigationSettings(input);
+  return writeWithProvider(
+    () => remoteCms.updateNavigationSettingsRemote(input),
+    () => localCms.updateNavigationSettings(input)
+  );
 }
 
 export async function getFooterSettings() {
-  return useRemoteCms() ? remoteCms.getFooterSettingsRemote() : localCms.getFooterSettings();
+  return readWithFallback(
+    () => remoteCms.getFooterSettingsRemote(),
+    () => localCms.getFooterSettings()
+  );
 }
 
 export async function updateFooterSettings(input: FooterSettings) {
-  return useRemoteCms()
-    ? remoteCms.updateFooterSettingsRemote(input)
-    : localCms.updateFooterSettings(input);
+  return writeWithProvider(
+    () => remoteCms.updateFooterSettingsRemote(input),
+    () => localCms.updateFooterSettings(input)
+  );
 }
 
 export async function getPageContent<TPageKey extends PageKey>(pageKey: TPageKey) {
-  return useRemoteCms()
-    ? remoteCms.getPageContentRemote(pageKey)
-    : localCms.getPageContent(pageKey);
+  return readWithFallback(
+    () => remoteCms.getPageContentRemote(pageKey),
+    () => localCms.getPageContent(pageKey)
+  );
 }
 
 export async function updatePageContent<TPageKey extends PageKey>(input: PageRecord<TPageKey>) {
-  return useRemoteCms()
-    ? remoteCms.updatePageContentRemote(input)
-    : localCms.updatePageContent(input);
+  return writeWithProvider(
+    () => remoteCms.updatePageContentRemote(input),
+    () => localCms.updatePageContent(input)
+  );
 }
 
 export async function getTransactionTypes(options?: { includeInactive?: boolean }) {
-  return useRemoteCms()
-    ? remoteCms.getTransactionTypesRemote(options)
-    : localCms.getTransactionTypes(options);
+  return readWithFallback(
+    () => remoteCms.getTransactionTypesRemote(options),
+    () => localCms.getTransactionTypes(options)
+  );
 }
 
 export async function findTransactionType(value?: string | null) {
-  return useRemoteCms()
-    ? remoteCms.findTransactionTypeRemote(value)
-    : localCms.findTransactionType(value);
+  return readWithFallback(
+    () => remoteCms.findTransactionTypeRemote(value),
+    () => localCms.findTransactionType(value)
+  );
 }
 
 export async function upsertTransactionType(input: Omit<TransactionType, "id"> & { id?: number }) {
-  return useRemoteCms()
-    ? remoteCms.upsertTransactionTypeRemote(input)
-    : localCms.upsertTransactionType(input);
+  return writeWithProvider(
+    () => remoteCms.upsertTransactionTypeRemote(input),
+    () => localCms.upsertTransactionType(input)
+  );
 }
 
 export async function deleteTransactionType(id: number) {
-  return useRemoteCms()
-    ? remoteCms.deleteTransactionTypeRemote(id)
-    : localCms.deleteTransactionType(id);
+  return writeWithProvider(
+    () => remoteCms.deleteTransactionTypeRemote(id),
+    () => localCms.deleteTransactionType(id)
+  );
 }
 
 export async function getPropertyTypes(options?: { includeInactive?: boolean }) {
-  return useRemoteCms()
-    ? remoteCms.getPropertyTypesRemote(options)
-    : localCms.getPropertyTypes(options);
+  return readWithFallback(
+    () => remoteCms.getPropertyTypesRemote(options),
+    () => localCms.getPropertyTypes(options)
+  );
 }
 
 export async function findPropertyType(value?: string | string[] | null) {
   const normalized = Array.isArray(value) ? value[0] : value;
-  return useRemoteCms()
-    ? remoteCms.findPropertyTypeRemote(normalized)
-    : localCms.findPropertyType(normalized);
+  return readWithFallback(
+    () => remoteCms.findPropertyTypeRemote(normalized),
+    () => localCms.findPropertyType(normalized)
+  );
 }
 
 export async function upsertPropertyType(input: Omit<PropertyType, "id"> & { id?: number }) {
-  return useRemoteCms()
-    ? remoteCms.upsertPropertyTypeRemote(input)
-    : localCms.upsertPropertyType(input);
+  return writeWithProvider(
+    () => remoteCms.upsertPropertyTypeRemote(input),
+    () => localCms.upsertPropertyType(input)
+  );
 }
 
 export async function deletePropertyType(id: number) {
-  return useRemoteCms()
-    ? remoteCms.deletePropertyTypeRemote(id)
-    : localCms.deletePropertyType(id);
+  return writeWithProvider(
+    () => remoteCms.deletePropertyTypeRemote(id),
+    () => localCms.deletePropertyType(id)
+  );
 }
 
 export async function getAgents(options?: { includeUnpublished?: boolean }) {
-  return useRemoteCms() ? remoteCms.getAgentsRemote(options) : localCms.getAgents(options);
+  return readWithFallback(
+    () => remoteCms.getAgentsRemote(options),
+    () => localCms.getAgents(options)
+  );
 }
 
 export async function getAgentById(id: number) {
-  return useRemoteCms() ? remoteCms.getAgentByIdRemote(id) : localCms.getAgentById(id);
+  return readWithFallback(
+    () => remoteCms.getAgentByIdRemote(id),
+    () => localCms.getAgentById(id)
+  );
 }
 
 export async function upsertAgent(
   input: Omit<Agent, "id" | "createdAt" | "updatedAt"> & { id?: number }
 ) {
-  return useRemoteCms() ? remoteCms.upsertAgentRemote(input) : localCms.upsertAgent(input);
+  return writeWithProvider(
+    () => remoteCms.upsertAgentRemote(input),
+    () => localCms.upsertAgent(input)
+  );
 }
 
 export async function deleteAgent(id: number) {
-  return useRemoteCms() ? remoteCms.deleteAgentRemote(id) : localCms.deleteAgent(id);
+  return writeWithProvider(
+    () => remoteCms.deleteAgentRemote(id),
+    () => localCms.deleteAgent(id)
+  );
 }
 
 export async function getProperties(filters: PropertyFilters = {}, options?: { includeDrafts?: boolean }) {
-  return useRemoteCms()
-    ? remoteCms.getPropertiesRemote(filters, options)
-    : localCms.getProperties(filters, options);
+  return readWithFallback(
+    () => remoteCms.getPropertiesRemote(filters, options),
+    () => localCms.getProperties(filters, options)
+  );
 }
 
 export async function getPropertyBySlug(slug: string) {
-  return useRemoteCms()
-    ? remoteCms.getPropertyBySlugRemote(slug)
-    : localCms.getPropertyBySlug(slug);
+  return readWithFallback(
+    () => remoteCms.getPropertyBySlugRemote(slug),
+    () => localCms.getPropertyBySlug(slug)
+  );
 }
 
 export async function getPropertyById(id: number) {
-  return useRemoteCms() ? remoteCms.getPropertyByIdRemote(id) : localCms.getPropertyById(id);
+  return readWithFallback(
+    () => remoteCms.getPropertyByIdRemote(id),
+    () => localCms.getPropertyById(id)
+  );
 }
 
 export async function getFeaturedProperties(limit = 6) {
-  return useRemoteCms()
-    ? remoteCms.getFeaturedPropertiesRemote(limit)
-    : localCms.getFeaturedProperties(limit);
+  return readWithFallback(
+    () => remoteCms.getFeaturedPropertiesRemote(limit),
+    () => localCms.getFeaturedProperties(limit)
+  );
 }
 
 export async function getSimilarProperties(
@@ -159,23 +251,26 @@ export async function getSimilarProperties(
   propertyTypeSlug: string,
   limit = 4
 ) {
-  return useRemoteCms()
-    ? remoteCms.getSimilarPropertiesRemote(currentId, transactionTypeSlug, propertyTypeSlug, limit)
-    : localCms.getSimilarProperties(currentId, transactionTypeSlug, propertyTypeSlug, limit);
+  return readWithFallback(
+    () => remoteCms.getSimilarPropertiesRemote(currentId, transactionTypeSlug, propertyTypeSlug, limit),
+    () => localCms.getSimilarProperties(currentId, transactionTypeSlug, propertyTypeSlug, limit)
+  );
 }
 
 export async function getPropertyCities(
   filters?: Pick<PropertyFilters, "transactionSlug" | "propertyTypeSlug">
 ) {
-  return useRemoteCms()
-    ? remoteCms.getPropertyCitiesRemote(filters)
-    : localCms.getPropertyCities(filters);
+  return readWithFallback(
+    () => remoteCms.getPropertyCitiesRemote(filters),
+    () => localCms.getPropertyCities(filters)
+  );
 }
 
 export async function getPropertyCountByType(transactionSlug?: string) {
-  return useRemoteCms()
-    ? remoteCms.getPropertyCountByTypeRemote(transactionSlug)
-    : localCms.getPropertyCountByType(transactionSlug);
+  return readWithFallback(
+    () => remoteCms.getPropertyCountByTypeRemote(transactionSlug),
+    () => localCms.getPropertyCountByType(transactionSlug)
+  );
 }
 
 export async function upsertProperty(
@@ -191,39 +286,57 @@ export async function upsertProperty(
     | "agent"
   > & { id?: number }
 ) {
-  return useRemoteCms() ? remoteCms.upsertPropertyRemote(input) : localCms.upsertProperty(input);
+  return writeWithProvider(
+    () => remoteCms.upsertPropertyRemote(input),
+    () => localCms.upsertProperty(input)
+  );
 }
 
 export async function deleteProperty(id: number) {
-  return useRemoteCms() ? remoteCms.deletePropertyRemote(id) : localCms.deleteProperty(id);
+  return writeWithProvider(
+    () => remoteCms.deletePropertyRemote(id),
+    () => localCms.deleteProperty(id)
+  );
 }
 
 export async function getMediaAssets() {
-  return useRemoteCms() ? remoteCms.getMediaAssetsRemote() : localCms.getMediaAssets();
+  return readWithFallback(
+    () => remoteCms.getMediaAssetsRemote(),
+    () => localCms.getMediaAssets()
+  );
 }
 
 export async function createMediaAsset(input: Omit<MediaAsset, "id" | "createdAt">) {
-  return useRemoteCms()
-    ? remoteCms.createMediaAssetRemote(input)
-    : localCms.createMediaAsset(input);
+  return writeWithProvider(
+    () => remoteCms.createMediaAssetRemote(input),
+    () => localCms.createMediaAsset(input)
+  );
 }
 
 export async function updateMediaAsset(id: number, input: Pick<MediaAsset, "title" | "altText">) {
-  return useRemoteCms()
-    ? remoteCms.updateMediaAssetRemote(id, input)
-    : localCms.updateMediaAsset(id, input);
+  return writeWithProvider(
+    () => remoteCms.updateMediaAssetRemote(id, input),
+    () => localCms.updateMediaAsset(id, input)
+  );
 }
 
 export async function createInquiry(input: Omit<Inquiry, "id" | "createdAt">) {
-  return useRemoteCms() ? remoteCms.createInquiryRemote(input) : localCms.createInquiry(input);
+  return writeWithProvider(
+    () => remoteCms.createInquiryRemote(input),
+    () => localCms.createInquiry(input)
+  );
 }
 
 export async function getInquiries() {
-  return useRemoteCms() ? remoteCms.getInquiriesRemote() : localCms.getInquiries();
+  return readWithFallback(
+    () => remoteCms.getInquiriesRemote(),
+    () => localCms.getInquiries()
+  );
 }
 
 export async function getDashboardStats() {
-  return useRemoteCms()
-    ? remoteCms.getDashboardStatsRemote()
-    : localCms.getDashboardStats();
+  return readWithFallback(
+    () => remoteCms.getDashboardStatsRemote(),
+    () => localCms.getDashboardStats()
+  );
 }
