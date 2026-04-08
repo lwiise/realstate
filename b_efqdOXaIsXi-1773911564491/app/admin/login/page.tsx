@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { countAdminUsers, getCurrentAdminUser } from "@/lib/auth";
+import { getAdminAuthStatus, getCurrentAdminUser } from "@/lib/auth";
 import { loginAdminAction, setupAdminAction } from "@/app/admin/actions";
 
 export const dynamic = "force-dynamic";
@@ -13,6 +13,8 @@ const errorCopy: Record<string, string> = {
   "setup-invalid": "Name, email and a password with at least 8 characters are required.",
   "missing-fields": "Email and password are required.",
   "invalid-credentials": "Invalid email or password.",
+  "auth-unavailable":
+    "The admin panel cannot connect to its database right now. Verify your Netlify and Supabase environment variables, then redeploy.",
 };
 
 function AuthShell({
@@ -41,24 +43,34 @@ function AuthShell({
 }
 
 export default async function AdminLoginPage({ searchParams }: AdminLoginPageProps) {
-  const [admin, params] = await Promise.all([getCurrentAdminUser(), searchParams]);
+  const [admin, params, authStatus] = await Promise.all([
+    getCurrentAdminUser(),
+    searchParams,
+    getAdminAuthStatus(),
+  ]);
 
   if (admin) {
     redirect("/admin");
   }
 
-  const hasUsers = (await countAdminUsers()) > 0;
   const errorParam = params.error;
   const errorKey = Array.isArray(errorParam) ? errorParam[0] : errorParam;
-  const errorMessage = errorKey ? errorCopy[errorKey] : "";
+  const errorMessage = !authStatus.available
+    ? authStatus.message
+    : errorKey
+      ? errorCopy[errorKey]
+      : "";
+  const hasUsers = authStatus.hasUsers;
 
   return (
     <AuthShell
-      title={hasUsers ? "Admin sign in" : "Create the first admin"}
+      title={!authStatus.available ? "Admin temporarily unavailable" : hasUsers ? "Admin sign in" : "Create the first admin"}
       description={
-        hasUsers
-          ? "Access the content management area to update pages, listings, agents, taxonomies and media."
-          : "The CMS has not been initialized yet. Create the first admin account to activate the protected management area."
+        !authStatus.available
+          ? "The public website is still online, but the admin area cannot reach its remote database."
+          : hasUsers
+            ? "Access the content management area to update pages, listings, agents, taxonomies and media."
+            : "The CMS has not been initialized yet. Create the first admin account to activate the protected management area."
       }
     >
       {errorMessage ? (
@@ -67,7 +79,7 @@ export default async function AdminLoginPage({ searchParams }: AdminLoginPagePro
         </div>
       ) : null}
 
-      {hasUsers ? (
+      {!authStatus.available ? null : hasUsers ? (
         <form action={loginAdminAction} className="space-y-5">
           <div className="space-y-2">
             <label htmlFor="email" className="text-xs uppercase tracking-wide text-muted-foreground">

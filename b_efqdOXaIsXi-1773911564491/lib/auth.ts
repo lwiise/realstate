@@ -6,6 +6,14 @@ import { isRemoteDatabaseConfigured, executeRemote, queryRemoteRow } from "@/lib
 
 const SESSION_COOKIE_NAME = "mdk_admin_session";
 const SESSION_DURATION_DAYS = 14;
+let remoteAuthWarningShown = false;
+
+export class AdminAuthUnavailableError extends Error {
+  constructor(message = "Admin authentication storage is unavailable.") {
+    super(message);
+    this.name = "AdminAuthUnavailableError";
+  }
+}
 
 function now() {
   return new Date();
@@ -46,17 +54,73 @@ function useRemoteAuth() {
   return isRemoteDatabaseConfigured();
 }
 
+function formatErrorMessage(error: unknown) {
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+
+  return "Unknown admin auth error";
+}
+
+function logRemoteAuthFailure(error: unknown) {
+  if (remoteAuthWarningShown) {
+    return;
+  }
+
+  remoteAuthWarningShown = true;
+  console.error(`[auth] Remote admin auth failed. ${formatErrorMessage(error)}`);
+}
+
+function toAdminAuthUnavailableError(error: unknown) {
+  if (error instanceof AdminAuthUnavailableError) {
+    return error;
+  }
+
+  logRemoteAuthFailure(error);
+  return new AdminAuthUnavailableError(formatErrorMessage(error));
+}
+
+export function isAdminAuthUnavailableError(error: unknown): error is AdminAuthUnavailableError {
+  return error instanceof AdminAuthUnavailableError;
+}
+
 export async function countAdminUsers() {
   if (useRemoteAuth()) {
-    const result = await queryRemoteRow<{ count: string }>(
-      "SELECT COUNT(*)::text as count FROM admin_users"
-    );
-    return Number(result?.count ?? 0);
+    try {
+      const result = await queryRemoteRow<{ count: string }>(
+        "SELECT COUNT(*)::text as count FROM admin_users"
+      );
+      return Number(result?.count ?? 0);
+    } catch (error) {
+      throw toAdminAuthUnavailableError(error);
+    }
   }
 
   const db = getDb();
   const result = db.prepare("SELECT COUNT(*) as count FROM admin_users").get() as { count: number };
   return result.count;
+}
+
+export async function getAdminAuthStatus() {
+  try {
+    const count = await countAdminUsers();
+    return {
+      available: true,
+      hasUsers: count > 0,
+      message: "",
+    };
+  } catch (error) {
+    if (!isAdminAuthUnavailableError(error)) {
+      throw error;
+    }
+
+    return {
+      available: false,
+      hasUsers: false,
+      message:
+        "The admin panel cannot connect to its database right now. Verify DATABASE_URL and Supabase environment variables in Netlify, then redeploy.",
+    };
+  }
 }
 
 export async function getCurrentAdminUser() {
@@ -68,36 +132,42 @@ export async function getCurrentAdminUser() {
   }
 
   if (useRemoteAuth()) {
-    const session = await queryRemoteRow<{
-      id: number;
-      name: string;
-      email: string;
-      expiresat: string;
-    }>(
-      `
-        SELECT
-          admin_users.id,
-          admin_users.name,
-          admin_users.email,
-          admin_sessions.expires_at as expiresAt
-        FROM admin_sessions
-        INNER JOIN admin_users ON admin_users.id = admin_sessions.user_id
-        WHERE admin_sessions.token_hash = $1 AND admin_sessions.expires_at > $2
-      `,
-      [hashToken(rawSession), new Date().toISOString()]
-    );
+    try {
+      const session = await queryRemoteRow<{
+        id: number;
+        name: string;
+        email: string;
+        expiresat: string;
+      }>(
+        `
+          SELECT
+            admin_users.id,
+            admin_users.name,
+            admin_users.email,
+            admin_sessions.expires_at as expiresAt
+          FROM admin_sessions
+          INNER JOIN admin_users ON admin_users.id = admin_sessions.user_id
+          WHERE admin_sessions.token_hash = $1 AND admin_sessions.expires_at > $2
+        `,
+        [hashToken(rawSession), new Date().toISOString()]
+      );
 
-    if (!session) {
+      if (!session) {
+        cookieStore.delete(SESSION_COOKIE_NAME);
+        return null;
+      }
+
+      return {
+        id: Number(session.id),
+        name: session.name,
+        email: session.email,
+        expiresAt: session.expiresat,
+      };
+    } catch (error) {
       cookieStore.delete(SESSION_COOKIE_NAME);
+      logRemoteAuthFailure(error);
       return null;
     }
-
-    return {
-      id: Number(session.id),
-      name: session.name,
-      email: session.email,
-      expiresAt: session.expiresat,
-    };
   }
 
   const db = getDb();
@@ -146,22 +216,26 @@ export async function createInitialAdminUser(input: {
   const timestamp = new Date().toISOString();
 
   if (useRemoteAuth()) {
-    const result = await queryRemoteRow<{ id: number }>(
-      `
-        INSERT INTO admin_users (name, email, password_hash, created_at, updated_at)
-        VALUES ($1, $2, $3, $4, $5)
-        RETURNING id
-      `,
-      [
-        input.name.trim(),
-        normalizeEmail(input.email),
-        hashPassword(input.password),
-        timestamp,
-        timestamp,
-      ]
-    );
+    try {
+      const result = await queryRemoteRow<{ id: number }>(
+        `
+          INSERT INTO admin_users (name, email, password_hash, created_at, updated_at)
+          VALUES ($1, $2, $3, $4, $5)
+          RETURNING id
+        `,
+        [
+          input.name.trim(),
+          normalizeEmail(input.email),
+          hashPassword(input.password),
+          timestamp,
+          timestamp,
+        ]
+      );
 
-    return Number(result?.id ?? 0);
+      return Number(result?.id ?? 0);
+    } catch (error) {
+      throw toAdminAuthUnavailableError(error);
+    }
   }
 
   const db = getDb();
@@ -188,13 +262,17 @@ async function createSessionForUser(userId: number) {
   const expiresAt = addDays(now(), SESSION_DURATION_DAYS);
 
   if (useRemoteAuth()) {
-    await executeRemote(
-      `
-        INSERT INTO admin_sessions (user_id, token_hash, expires_at, created_at)
-        VALUES ($1, $2, $3, $4)
-      `,
-      [userId, hashToken(token), expiresAt.toISOString(), now().toISOString()]
-    );
+    try {
+      await executeRemote(
+        `
+          INSERT INTO admin_sessions (user_id, token_hash, expires_at, created_at)
+          VALUES ($1, $2, $3, $4)
+        `,
+        [userId, hashToken(token), expiresAt.toISOString(), now().toISOString()]
+      );
+    } catch (error) {
+      throw toAdminAuthUnavailableError(error);
+    }
   } else {
     const db = getDb();
     db.prepare(
@@ -219,17 +297,21 @@ export async function signInAdmin(input: { email: string; password: string }) {
   const normalizedEmail = normalizeEmail(input.email);
 
   if (useRemoteAuth()) {
-    const user = await queryRemoteRow<{ id: number; password_hash: string }>(
-      "SELECT id, password_hash FROM admin_users WHERE email = $1",
-      [normalizedEmail]
-    );
+    try {
+      const user = await queryRemoteRow<{ id: number; password_hash: string }>(
+        "SELECT id, password_hash FROM admin_users WHERE email = $1",
+        [normalizedEmail]
+      );
 
-    if (!user || !verifyPassword(input.password, user.password_hash)) {
-      return false;
+      if (!user || !verifyPassword(input.password, user.password_hash)) {
+        return false;
+      }
+
+      await createSessionForUser(user.id);
+      return true;
+    } catch (error) {
+      throw toAdminAuthUnavailableError(error);
     }
-
-    await createSessionForUser(user.id);
-    return true;
   }
 
   const db = getDb();
@@ -253,7 +335,11 @@ export async function signOutAdmin() {
   }
 
   if (useRemoteAuth()) {
-    await executeRemote("DELETE FROM admin_sessions WHERE token_hash = $1", [hashToken(rawSession)]);
+    try {
+      await executeRemote("DELETE FROM admin_sessions WHERE token_hash = $1", [hashToken(rawSession)]);
+    } catch (error) {
+      throw toAdminAuthUnavailableError(error);
+    }
   } else {
     const db = getDb();
     db.prepare("DELETE FROM admin_sessions WHERE token_hash = ?").run(hashToken(rawSession));

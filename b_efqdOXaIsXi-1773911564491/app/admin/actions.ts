@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import {
   countAdminUsers,
   createInitialAdminUser,
+  isAdminAuthUnavailableError,
   requireAdminUser,
   signInAdmin,
   signOutAdmin,
@@ -93,44 +94,68 @@ function revalidateSite(propertySlug?: string) {
 }
 
 export async function setupAdminAction(formData: FormData) {
-  if ((await countAdminUsers()) > 0) {
-    redirect("/admin/login?error=setup-disabled");
+  try {
+    if ((await countAdminUsers()) > 0) {
+      redirect("/admin/login?error=setup-disabled");
+    }
+
+    const name = getValue(formData, "name");
+    const email = getValue(formData, "email");
+    const password = getValue(formData, "password");
+
+    if (!name || !email || password.length < 8) {
+      redirect("/admin/login?error=setup-invalid");
+    }
+
+    await createInitialAdminUser({ name, email, password });
+    await signInAdmin({ email, password });
+
+    redirect("/admin");
+  } catch (error) {
+    if (isAdminAuthUnavailableError(error)) {
+      redirect("/admin/login?error=auth-unavailable");
+    }
+
+    throw error;
   }
-
-  const name = getValue(formData, "name");
-  const email = getValue(formData, "email");
-  const password = getValue(formData, "password");
-
-  if (!name || !email || password.length < 8) {
-    redirect("/admin/login?error=setup-invalid");
-  }
-
-  await createInitialAdminUser({ name, email, password });
-  await signInAdmin({ email, password });
-
-  redirect("/admin");
 }
 
 export async function loginAdminAction(formData: FormData) {
-  const email = getValue(formData, "email");
-  const password = getValue(formData, "password");
+  try {
+    const email = getValue(formData, "email");
+    const password = getValue(formData, "password");
 
-  if (!email || !password) {
-    redirect("/admin/login?error=missing-fields");
+    if (!email || !password) {
+      redirect("/admin/login?error=missing-fields");
+    }
+
+    const success = await signInAdmin({ email, password });
+    if (!success) {
+      redirect("/admin/login?error=invalid-credentials");
+    }
+
+    redirect("/admin");
+  } catch (error) {
+    if (isAdminAuthUnavailableError(error)) {
+      redirect("/admin/login?error=auth-unavailable");
+    }
+
+    throw error;
   }
-
-  const success = await signInAdmin({ email, password });
-  if (!success) {
-    redirect("/admin/login?error=invalid-credentials");
-  }
-
-  redirect("/admin");
 }
 
 export async function logoutAdminAction() {
-  await requireAdminUser();
-  await signOutAdmin();
-  redirect("/admin/login");
+  try {
+    await requireAdminUser();
+    await signOutAdmin();
+    redirect("/admin/login");
+  } catch (error) {
+    if (isAdminAuthUnavailableError(error)) {
+      redirect("/admin/login?error=auth-unavailable");
+    }
+
+    throw error;
+  }
 }
 
 export async function savePropertyAction(formData: FormData) {
