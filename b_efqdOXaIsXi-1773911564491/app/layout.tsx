@@ -16,7 +16,7 @@ const inter = Inter({
   display: "swap",
 });
 
-export function generateMetadata(): Metadata {
+export async function generateMetadata(): Promise<Metadata> {
   return buildSiteMetadata();
 }
 

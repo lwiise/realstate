@@ -10,8 +10,8 @@ function normalizePathname(pathname: string) {
   return pathname;
 }
 
-export function buildSiteMetadata(): Metadata {
-  const siteSettings = getSiteSettings();
+export async function buildSiteMetadata(): Promise<Metadata> {
+  const siteSettings = await getSiteSettings();
 
   return {
     metadataBase: siteSettings.siteUrl ? new URL(siteSettings.siteUrl) : undefined,
@@ -48,9 +48,8 @@ export function buildSiteMetadata(): Metadata {
   };
 }
 
-export function buildPageMetadata(pageKey: PageKey, pathname: string): Metadata {
-  const siteSettings = getSiteSettings();
-  const page = getPageContent(pageKey);
+export async function buildPageMetadata(pageKey: PageKey, pathname: string): Promise<Metadata> {
+  const [siteSettings, page] = await Promise.all([getSiteSettings(), getPageContent(pageKey)]);
   const normalizedPathname = normalizePathname(pathname);
   const title =
     page.seoTitle ||
@@ -86,11 +85,14 @@ export function buildPageMetadata(pageKey: PageKey, pathname: string): Metadata 
   };
 }
 
-export function buildPropertyMetadata(property: Property | undefined, pathname: string): Metadata {
-  const siteSettings = getSiteSettings();
+export async function buildPropertyMetadata(
+  property: Promise<Property | undefined> | Property | undefined,
+  pathname: string
+): Promise<Metadata> {
+  const [siteSettings, resolvedProperty] = await Promise.all([getSiteSettings(), Promise.resolve(property)]);
   const normalizedPathname = normalizePathname(pathname);
 
-  if (!property) {
+  if (!resolvedProperty) {
     return {
       title: "Property not found",
       description: `${siteSettings.siteName} could not find this listing.`,
@@ -100,9 +102,13 @@ export function buildPropertyMetadata(property: Property | undefined, pathname: 
     };
   }
 
-  const title = property.seoTitle || property.title;
-  const description = property.seoDescription || property.shortDescription || siteSettings.siteDescription;
-  const image = property.ogImage || property.coverImage || siteSettings.defaultOgImage;
+  const title = resolvedProperty.seoTitle || resolvedProperty.title;
+  const description =
+    resolvedProperty.seoDescription ||
+    resolvedProperty.shortDescription ||
+    siteSettings.siteDescription;
+  const image =
+    resolvedProperty.ogImage || resolvedProperty.coverImage || siteSettings.defaultOgImage;
 
   return {
     title,
@@ -117,7 +123,7 @@ export function buildPropertyMetadata(property: Property | undefined, pathname: 
       images: [
         {
           url: image,
-          alt: property.title,
+          alt: resolvedProperty.title,
         },
       ],
     },

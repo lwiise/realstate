@@ -1,13 +1,7 @@
-import fs from "node:fs/promises";
-import path from "node:path";
-import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import { getCurrentAdminUser } from "@/lib/auth";
 import { createMediaAsset } from "@/lib/cms";
-
-function sanitizeFileName(value: string) {
-  return value.replace(/[^a-zA-Z0-9._-]/g, "-").replace(/-+/g, "-");
-}
+import { uploadCmsImage } from "@/lib/storage";
 
 export async function POST(request: Request) {
   const admin = await getCurrentAdminUser();
@@ -26,28 +20,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Only image uploads are supported" }, { status: 400 });
   }
 
-  const buffer = Buffer.from(await file.arrayBuffer());
-  const extension = path.extname(file.name) || ".jpg";
-  const fileName = `${Date.now()}-${randomUUID()}${extension}`;
-  const publicDirectory = path.join(process.cwd(), "public", "uploads");
-  const absolutePath = path.join(publicDirectory, sanitizeFileName(fileName));
-
-  await fs.mkdir(publicDirectory, { recursive: true });
-  await fs.writeFile(absolutePath, buffer);
-
-  const publicUrl = `/uploads/${path.basename(absolutePath)}`;
-
-  const assetId = createMediaAsset({
+  const uploaded = await uploadCmsImage(file);
+  const assetId = await createMediaAsset({
     title: file.name,
     originalName: file.name,
-    filename: path.basename(absolutePath),
+    filename: uploaded.filename,
     mimeType: file.type,
-    url: publicUrl,
+    url: uploaded.url,
     altText: "",
   });
 
   return NextResponse.json({
     id: assetId,
-    url: publicUrl,
+    url: uploaded.url,
   });
 }

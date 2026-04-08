@@ -2,8 +2,8 @@ import Link from "next/link";
 import { deletePropertyTypeAction } from "@/app/admin/actions";
 import { getPropertyTypes } from "@/lib/cms";
 
-export default function AdminPropertyTypesPage() {
-  const propertyTypes = getPropertyTypes({ includeInactive: true });
+export default async function AdminPropertyTypesPage() {
+  const propertyTypes = await getPropertyTypes({ includeInactive: true });
 
   return (
     <div className="space-y-6">

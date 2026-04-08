@@ -8,15 +8,17 @@ import { PropertyTypeCard } from "@/components/property-type-card";
 import { getPageContent, getProperties, getPropertyCountByType, getPropertyTypes } from "@/lib/cms";
 import { buildPageMetadata } from "@/lib/seo";
 
-export function generateMetadata(): Metadata {
+export async function generateMetadata(): Promise<Metadata> {
   return buildPageMetadata("rent", "/rent");
 }
 
-export default function RentPage() {
-  const page = getPageContent("rent");
-  const propertyTypes = getPropertyTypes();
-  const propertyCounts = getPropertyCountByType("rent");
-  const properties = getProperties({ transactionSlug: "rent", limit: 6 });
+export default async function RentPage() {
+  const [page, propertyTypes, propertyCounts, properties] = await Promise.all([
+    getPageContent("rent"),
+    getPropertyTypes(),
+    getPropertyCountByType("rent"),
+    getProperties({ transactionSlug: "rent", limit: 6 }),
+  ]);
 
   return (
     <main className="min-h-screen">

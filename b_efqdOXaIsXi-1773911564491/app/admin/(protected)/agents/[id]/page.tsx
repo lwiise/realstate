@@ -9,7 +9,7 @@ interface AdminEditAgentPageProps {
 
 export default async function AdminEditAgentPage({ params }: AdminEditAgentPageProps) {
   const { id } = await params;
-  const agent = getAgentById(Number(id));
+  const [agent, mediaAssets] = await Promise.all([getAgentById(Number(id)), getMediaAssets()]);
 
   if (!agent) {
     notFound();
@@ -30,7 +30,7 @@ export default async function AdminEditAgentPage({ params }: AdminEditAgentPageP
         </Link>
       </div>
 
-      <AgentForm agent={agent} mediaAssets={getMediaAssets()} />
+      <AgentForm agent={agent} mediaAssets={mediaAssets} />
     </div>
   );
 }

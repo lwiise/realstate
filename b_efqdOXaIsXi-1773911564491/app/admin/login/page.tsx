@@ -47,7 +47,7 @@ export default async function AdminLoginPage({ searchParams }: AdminLoginPagePro
     redirect("/admin");
   }
 
-  const hasUsers = countAdminUsers() > 0;
+  const hasUsers = (await countAdminUsers()) > 0;
   const errorParam = params.error;
   const errorKey = Array.isArray(errorParam) ? errorParam[0] : errorParam;
   const errorMessage = errorKey ? errorCopy[errorKey] : "";

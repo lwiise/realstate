@@ -8,8 +8,8 @@ interface PropertyCardProps {
   property: Property;
 }
 
-export function PropertyCard({ property }: PropertyCardProps) {
-  const siteSettings = getSiteSettings();
+export async function PropertyCard({ property }: PropertyCardProps) {
+  const siteSettings = await getSiteSettings();
 
   return (
     <Link href={`/property/${property.slug}`} className="group block">

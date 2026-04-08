@@ -27,14 +27,16 @@ export async function generateMetadata({
   searchParams,
 }: PropertiesPageProps): Promise<Metadata> {
   const params = await searchParams;
-  const transactionType = findTransactionType(toValue(params.transaction));
-  const propertyType = findPropertyType(toValue(params.type));
+  const [transactionType, propertyType, siteSettings] = await Promise.all([
+    findTransactionType(toValue(params.transaction)),
+    findPropertyType(toValue(params.type)),
+    getSiteSettings(),
+  ]);
   const city = toValue(params.city) || undefined;
   const featured = toValue(params.featured) === "1";
   const keyword = toValue(params.keyword) || undefined;
   const minPrice = toValue(params.minPrice) || undefined;
   const maxPrice = toValue(params.maxPrice) || undefined;
-  const siteSettings = getSiteSettings();
   const filters = new URLSearchParams();
 
   if (transactionType) filters.set("transaction", transactionType.slug);
@@ -89,17 +91,19 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
   const params = await searchParams;
   const transactionParam = toValue(params.transaction);
   const propertyTypeParam = toValue(params.type);
-  const transactionType = findTransactionType(transactionParam);
-  const propertyType = findPropertyType(propertyTypeParam);
   const city = toValue(params.city) || undefined;
   const keyword = toValue(params.keyword) || undefined;
   const minPrice = toValue(params.minPrice) || undefined;
   const maxPrice = toValue(params.maxPrice) || undefined;
   const featured = toValue(params.featured) === "1";
 
-  const transactionTypes = getTransactionTypes();
-  const propertyTypes = getPropertyTypes();
-  const properties = getProperties({
+  const [transactionType, propertyType, transactionTypes, propertyTypes] = await Promise.all([
+    findTransactionType(transactionParam),
+    findPropertyType(propertyTypeParam),
+    getTransactionTypes(),
+    getPropertyTypes(),
+  ]);
+  const properties = await getProperties({
     transactionSlug: transactionType?.slug,
     propertyTypeSlug: propertyType?.slug,
     city,
@@ -109,11 +113,12 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
     featuredOnly: featured,
   });
 
-  const countsByTransaction = Object.fromEntries(
-    transactionTypes.map((item) => [item.slug, getProperties({ transactionSlug: item.slug }).length])
+  const countEntries = await Promise.all(
+    transactionTypes.map(async (item) => [item.slug, (await getProperties({ transactionSlug: item.slug })).length] as const)
   );
+  const countsByTransaction = Object.fromEntries(countEntries);
 
-  const cities = getPropertyCities({
+  const cities = await getPropertyCities({
     transactionSlug: transactionType?.slug,
     propertyTypeSlug: propertyType?.slug,
   });

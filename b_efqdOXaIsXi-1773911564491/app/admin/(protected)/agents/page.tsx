@@ -2,8 +2,8 @@ import Link from "next/link";
 import { deleteAgentAction } from "@/app/admin/actions";
 import { getAgents } from "@/lib/cms";
 
-export default function AdminAgentsPage() {
-  const agents = getAgents({ includeUnpublished: true });
+export default async function AdminAgentsPage() {
+  const agents = await getAgents({ includeUnpublished: true });
 
   return (
     <div className="space-y-6">

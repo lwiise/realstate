@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const id = createInquiry({
+  const id = await createInquiry({
     propertyId: payload.propertyId ?? null,
     propertyTitle: payload.propertyTitle?.trim() ?? null,
     name: payload.name.trim(),

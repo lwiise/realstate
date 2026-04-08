@@ -2,7 +2,9 @@ import Link from "next/link";
 import { TaxonomyForm } from "@/components/admin/taxonomy-form";
 import { getMediaAssets } from "@/lib/cms";
 
-export default function AdminNewTransactionTypePage() {
+export default async function AdminNewTransactionTypePage() {
+  const mediaAssets = await getMediaAssets();
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
@@ -18,7 +20,7 @@ export default function AdminNewTransactionTypePage() {
         </Link>
       </div>
 
-      <TaxonomyForm mode="transaction" mediaAssets={getMediaAssets()} />
+      <TaxonomyForm mode="transaction" mediaAssets={mediaAssets} />
     </div>
   );
 }

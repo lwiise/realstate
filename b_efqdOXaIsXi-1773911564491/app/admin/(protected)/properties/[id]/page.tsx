@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { PropertyForm } from "@/components/admin/property-form";
 import {
-  getAgentById,
   getAgents,
   getMediaAssets,
   getPropertyById,
@@ -16,18 +15,18 @@ interface AdminEditPropertyPageProps {
 
 export default async function AdminEditPropertyPage({ params }: AdminEditPropertyPageProps) {
   const { id } = await params;
-  const property = getPropertyById(Number(id));
+  const property = await getPropertyById(Number(id));
 
   if (!property) {
     notFound();
   }
 
-  const [transactionTypes, propertyTypes, agents, mediaAssets] = [
+  const [transactionTypes, propertyTypes, agents, mediaAssets] = await Promise.all([
     getTransactionTypes({ includeInactive: true }),
     getPropertyTypes({ includeInactive: true }),
     getAgents({ includeUnpublished: true }),
     getMediaAssets(),
-  ];
+  ]);
 
   return (
     <div className="space-y-6">

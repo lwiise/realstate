@@ -7,13 +7,12 @@ import { SiteContactForm } from "@/components/site-contact-form";
 import { getPageContent, getSiteSettings } from "@/lib/cms";
 import { buildPageMetadata } from "@/lib/seo";
 
-export function generateMetadata(): Metadata {
+export async function generateMetadata(): Promise<Metadata> {
   return buildPageMetadata("contact", "/contact");
 }
 
-export default function ContactPage() {
-  const page = getPageContent("contact");
-  const siteSettings = getSiteSettings();
+export default async function ContactPage() {
+  const [page, siteSettings] = await Promise.all([getPageContent("contact"), getSiteSettings()]);
 
   return (
     <main className="min-h-screen">

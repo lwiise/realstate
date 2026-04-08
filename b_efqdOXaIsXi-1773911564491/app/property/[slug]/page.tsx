@@ -34,14 +34,13 @@ export async function generateMetadata({ params }: PropertyPageProps) {
 
 export default async function PropertyPage({ params }: PropertyPageProps) {
   const { slug } = await params;
-  const property = getPropertyBySlug(slug);
-  const siteSettings = getSiteSettings();
+  const [property, siteSettings] = await Promise.all([getPropertyBySlug(slug), getSiteSettings()]);
 
   if (!property) {
     notFound();
   }
 
-  const similarProperties = getSimilarProperties(
+  const similarProperties = await getSimilarProperties(
     property.id,
     property.transactionTypeSlug,
     property.propertyTypeSlug

@@ -2,13 +2,13 @@ import Link from "next/link";
 import { PropertyForm } from "@/components/admin/property-form";
 import { getAgents, getMediaAssets, getPropertyTypes, getTransactionTypes } from "@/lib/cms";
 
-export default function AdminNewPropertyPage() {
-  const [transactionTypes, propertyTypes, agents, mediaAssets] = [
+export default async function AdminNewPropertyPage() {
+  const [transactionTypes, propertyTypes, agents, mediaAssets] = await Promise.all([
     getTransactionTypes({ includeInactive: true }),
     getPropertyTypes({ includeInactive: true }),
     getAgents({ includeUnpublished: true }),
     getMediaAssets(),
-  ];
+  ]);
 
   return (
     <div className="space-y-6">

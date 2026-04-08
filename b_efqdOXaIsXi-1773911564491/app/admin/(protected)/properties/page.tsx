@@ -2,8 +2,8 @@ import Link from "next/link";
 import { deletePropertyAction } from "@/app/admin/actions";
 import { getProperties } from "@/lib/cms";
 
-export default function AdminPropertiesPage() {
-  const properties = getProperties({}, { includeDrafts: true });
+export default async function AdminPropertiesPage() {
+  const properties = await getProperties({}, { includeDrafts: true });
 
   return (
     <div className="space-y-6">

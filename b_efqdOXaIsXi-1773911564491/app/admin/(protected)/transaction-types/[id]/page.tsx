@@ -11,7 +11,11 @@ export default async function AdminEditTransactionTypePage({
   params,
 }: AdminEditTransactionTypePageProps) {
   const { id } = await params;
-  const transactionType = getTransactionTypes({ includeInactive: true }).find(
+  const [transactionTypes, mediaAssets] = await Promise.all([
+    getTransactionTypes({ includeInactive: true }),
+    getMediaAssets(),
+  ]);
+  const transactionType = transactionTypes.find(
     (item) => item.id === Number(id)
   );
 
@@ -37,7 +41,7 @@ export default async function AdminEditTransactionTypePage({
       <TaxonomyForm
         mode="transaction"
         item={transactionType}
-        mediaAssets={getMediaAssets()}
+        mediaAssets={mediaAssets}
       />
     </div>
   );

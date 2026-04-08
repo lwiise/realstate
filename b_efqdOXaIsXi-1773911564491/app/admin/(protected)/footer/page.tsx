@@ -1,7 +1,9 @@
 import { FooterForm } from "@/components/admin/footer-form";
 import { getFooterSettings } from "@/lib/cms";
 
-export default function AdminFooterPage() {
+export default async function AdminFooterPage() {
+  const footer = await getFooterSettings();
+
   return (
     <div className="space-y-6">
       <div>
@@ -9,7 +11,7 @@ export default function AdminFooterPage() {
         <h1 className="mt-2 font-serif text-3xl text-foreground">Footer settings</h1>
       </div>
 
-      <FooterForm footer={getFooterSettings()} />
+      <FooterForm footer={footer} />
     </div>
   );
 }

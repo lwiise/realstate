@@ -1,6 +1,6 @@
 import { getNavigationSettings } from "@/lib/cms";
 import { NavbarClient } from "@/components/navbar-client";
 
-export function Navbar() {
-  return <NavbarClient navigation={getNavigationSettings()} />;
+export async function Navbar() {
+  return <NavbarClient navigation={await getNavigationSettings()} />;
 }

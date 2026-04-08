@@ -30,7 +30,13 @@ function toJson(value: unknown) {
 
 export function getDatabaseFilePath() {
   const customPath = process.env.DATABASE_FILE;
-  if (!customPath) return DEFAULT_DATABASE_FILE;
+  if (!customPath) {
+    if (process.env.NETLIFY === "true") {
+      return "/tmp/cms.sqlite";
+    }
+
+    return DEFAULT_DATABASE_FILE;
+  }
   return path.isAbsolute(customPath)
     ? customPath
     : path.join(process.cwd(), customPath);

@@ -11,7 +11,11 @@ export default async function AdminEditPropertyTypePage({
   params,
 }: AdminEditPropertyTypePageProps) {
   const { id } = await params;
-  const propertyType = getPropertyTypes({ includeInactive: true }).find(
+  const [propertyTypes, mediaAssets] = await Promise.all([
+    getPropertyTypes({ includeInactive: true }),
+    getMediaAssets(),
+  ]);
+  const propertyType = propertyTypes.find(
     (item) => item.id === Number(id)
   );
 
@@ -34,7 +38,7 @@ export default async function AdminEditPropertyTypePage({
         </Link>
       </div>
 
-      <TaxonomyForm mode="property" item={propertyType} mediaAssets={getMediaAssets()} />
+      <TaxonomyForm mode="property" item={propertyType} mediaAssets={mediaAssets} />
     </div>
   );
 }

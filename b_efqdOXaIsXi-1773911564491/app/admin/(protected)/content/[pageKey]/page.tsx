@@ -26,6 +26,7 @@ export default async function AdminPageContentPage({
   }
 
   const key = pageKey as PageKey;
+  const [page, mediaAssets] = await Promise.all([getPageContent(key), getMediaAssets()]);
 
   return (
     <div className="space-y-6">
@@ -36,7 +37,7 @@ export default async function AdminPageContentPage({
         </h1>
       </div>
 
-      <PageContentForm page={getPageContent(key)} mediaAssets={getMediaAssets()} />
+      <PageContentForm page={page} mediaAssets={mediaAssets} />
     </div>
   );
 }

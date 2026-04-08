@@ -1,7 +1,7 @@
 import { getMediaAssets } from "@/lib/cms";
 
-export default function AdminMediaPage() {
-  const mediaAssets = getMediaAssets();
+export default async function AdminMediaPage() {
+  const mediaAssets = await getMediaAssets();
 
   return (
     <div className="space-y-6">

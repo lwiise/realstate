@@ -2,7 +2,9 @@ import Link from "next/link";
 import { AgentForm } from "@/components/admin/agent-form";
 import { getMediaAssets } from "@/lib/cms";
 
-export default function AdminNewAgentPage() {
+export default async function AdminNewAgentPage() {
+  const mediaAssets = await getMediaAssets();
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
@@ -18,7 +20,7 @@ export default function AdminNewAgentPage() {
         </Link>
       </div>
 
-      <AgentForm mediaAssets={getMediaAssets()} />
+      <AgentForm mediaAssets={mediaAssets} />
     </div>
   );
 }

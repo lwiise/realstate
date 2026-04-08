@@ -11,16 +11,18 @@ import { TestimonialsSection } from "@/components/testimonials-section";
 import { getFeaturedProperties, getPageContent, getPropertyTypes, getSiteSettings, getTransactionTypes } from "@/lib/cms";
 import { buildPageMetadata } from "@/lib/seo";
 
-export function generateMetadata(): Metadata {
+export async function generateMetadata(): Promise<Metadata> {
   return buildPageMetadata("home", "/");
 }
 
-export default function HomePage() {
-  const homePage = getPageContent("home");
-  const siteSettings = getSiteSettings();
-  const featuredProperties = getFeaturedProperties(homePage.content.featured.limit);
-  const transactionTypes = getTransactionTypes();
-  const propertyTypes = getPropertyTypes();
+export default async function HomePage() {
+  const homePage = await getPageContent("home");
+  const [siteSettings, transactionTypes, propertyTypes] = await Promise.all([
+    getSiteSettings(),
+    getTransactionTypes(),
+    getPropertyTypes(),
+  ]);
+  const featuredProperties = await getFeaturedProperties(homePage.content.featured.limit);
   const aboutImages = homePage.content.about.images;
 
   return (

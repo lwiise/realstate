@@ -6,12 +6,12 @@ import { Navbar } from "@/components/navbar";
 import { getPageContent } from "@/lib/cms";
 import { buildPageMetadata } from "@/lib/seo";
 
-export function generateMetadata(): Metadata {
+export async function generateMetadata(): Promise<Metadata> {
   return buildPageMetadata("about", "/about");
 }
 
-export default function AboutPage() {
-  const page = getPageContent("about");
+export default async function AboutPage() {
+  const page = await getPageContent("about");
 
   return (
     <main className="min-h-screen">

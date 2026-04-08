@@ -3,9 +3,8 @@ import Image from "next/image";
 import { Mail, Phone, MapPin } from "lucide-react";
 import { getFooterSettings, getSiteSettings } from "@/lib/cms";
 
-export function Footer() {
-  const footer = getFooterSettings();
-  const siteSettings = getSiteSettings();
+export async function Footer() {
+  const [footer, siteSettings] = await Promise.all([getFooterSettings(), getSiteSettings()]);
 
   return (
     <footer className="bg-black text-white">

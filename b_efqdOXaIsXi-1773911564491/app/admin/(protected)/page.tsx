@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { getDashboardStats } from "@/lib/cms";
 
-export default function AdminDashboardPage() {
-  const stats = getDashboardStats();
+export default async function AdminDashboardPage() {
+  const stats = await getDashboardStats();
 
   const cards = [
     { label: "Total properties", value: stats.propertiesCount, href: "/admin/properties" },

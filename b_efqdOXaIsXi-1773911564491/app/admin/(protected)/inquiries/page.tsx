@@ -1,7 +1,7 @@
 import { getInquiries } from "@/lib/cms";
 
-export default function AdminInquiriesPage() {
-  const inquiries = getInquiries();
+export default async function AdminInquiriesPage() {
+  const inquiries = await getInquiries();
 
   return (
     <div className="space-y-6">
