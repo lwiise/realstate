@@ -1,6 +1,7 @@
 [build]
   base = "b_efqdOXaIsXi-1773911564491"
   command = "pnpm build"
+  publish = ".next"
 
 [build.environment]
   NODE_VERSION = "22"
