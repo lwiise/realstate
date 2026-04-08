@@ -4,39 +4,13 @@ import { useEffect, useState } from "react";
 import { ArrowLeft, ArrowRight, Quote, Star } from "lucide-react";
 import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/components/ui/carousel";
 import { cn } from "@/lib/utils";
+import type { HomePageContent } from "@/lib/cms-types";
 
-const testimonials = [
-  {
-    quote:
-      "Aurum a securise un appartement waterfront avant sa mise sur le marche public. L'accompagnement a ete precis, discret et tres rassurant jusqu'a la signature.",
-    name: "Samira El Khoury",
-    role: "Investisseur prive",
-    focus: "Appartement | Acheter",
-  },
-  {
-    quote:
-      "Nous cherchions une villa familiale en location longue duree avec un niveau de finition irreprochable. L'equipe a compris le brief des le premier rendez-vous.",
-    name: "Nabil Tazi",
-    role: "Directeur general",
-    focus: "Villa | Louer",
-  },
-  {
-    quote:
-      "Pour notre retreat executif, nous avions besoin d'un lieu fort, flexible et impeccable. La recommandation d'Aurum a transforme l'experience de tout l'evenement.",
-    name: "Lea Marchand",
-    role: "Fondatrice studio evenementiel",
-    focus: "Commercial | Location journaliere",
-  },
-  {
-    quote:
-      "Leur lecture du marche local nous a fait gagner un temps considerable. Les biens proposes etaient pertinents, bien negocies et parfaitement alignes avec notre strategie.",
-    name: "Rachid Benali",
-    role: "Family office advisor",
-    focus: "Bureau | Acheter",
-  },
-];
+interface TestimonialsSectionProps {
+  content: HomePageContent["testimonials"];
+}
 
-export function TestimonialsSection() {
+export function TestimonialsSection({ content }: TestimonialsSectionProps) {
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
 
@@ -73,44 +47,31 @@ export function TestimonialsSection() {
         <div className="grid gap-12 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.2fr)] lg:items-end">
           <div className="max-w-xl">
             <p className="text-gold uppercase tracking-[0.2em] text-sm mb-4">
-              La voix de nos clients
+              {content.eyebrow}
             </p>
             <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl text-foreground mb-6">
-              Des experiences discretes,
-              <br />
-              fluides et memorables
+              {content.title}
             </h2>
             <p className="text-muted-foreground leading-relaxed mb-8">
-              Chaque transaction est accompagnee avec le meme niveau de rigueur, de clarte et
-              de sens du detail. Voici comment nos clients decrivent l'experience Aurum.
+              {content.description}
             </p>
 
             <div className="grid grid-cols-3 gap-4">
-              <div className="border border-border bg-secondary p-4">
-                <p className="font-serif text-3xl text-gold mb-1">98%</p>
-                <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                  Repeat clients
-                </p>
-              </div>
-              <div className="border border-border bg-secondary p-4">
-                <p className="font-serif text-3xl text-gold mb-1">24h</p>
-                <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                  First shortlist
-                </p>
-              </div>
-              <div className="border border-border bg-secondary p-4">
-                <p className="font-serif text-3xl text-gold mb-1">5.0</p>
-                <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                  Client rating
-                </p>
-              </div>
+              {content.stats.map((stat) => (
+                <div key={`${stat.label}-${stat.value}`} className="border border-border bg-secondary p-4">
+                  <p className="font-serif text-3xl text-gold mb-1">{stat.value}</p>
+                  <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+                    {stat.label}
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
 
           <div className="min-w-0">
             <Carousel setApi={setApi} opts={{ align: "start", loop: true }} className="w-full">
               <CarouselContent className="ml-0">
-                {testimonials.map((testimonial, index) => (
+                {content.items.map((testimonial, index) => (
                   <CarouselItem key={testimonial.name} className="pl-0 pr-4 md:basis-[78%] xl:basis-[68%]">
                     <article
                       className={cn(
@@ -155,7 +116,7 @@ export function TestimonialsSection() {
 
             <div className="mt-8 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-2">
-                {testimonials.map((testimonial, index) => (
+                {content.items.map((testimonial, index) => (
                   <button
                     key={testimonial.name}
                     type="button"

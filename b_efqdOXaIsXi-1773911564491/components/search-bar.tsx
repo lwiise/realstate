@@ -3,35 +3,39 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
-import { TRANSACTION_TYPES, PROPERTY_TYPES, TransactionType, PropertyType } from "@/lib/data";
+import type { PropertyType, TransactionType } from "@/lib/cms-types";
 
 interface SearchBarProps {
   variant?: "hero" | "compact";
-  defaultTransaction?: TransactionType;
-  defaultPropertyType?: PropertyType;
+  transactionTypes: TransactionType[];
+  propertyTypes: PropertyType[];
+  defaultTransactionSlug?: string;
+  defaultPropertyTypeSlug?: string;
 }
 
-export function SearchBar({ 
-  variant = "hero", 
-  defaultTransaction,
-  defaultPropertyType 
+export function SearchBar({
+  variant = "hero",
+  transactionTypes,
+  propertyTypes,
+  defaultTransactionSlug,
+  defaultPropertyTypeSlug,
 }: SearchBarProps) {
   const router = useRouter();
-  const [transactionType, setTransactionType] = useState<TransactionType | "">(defaultTransaction || "");
-  const [propertyType, setPropertyType] = useState<PropertyType | "">(defaultPropertyType || "");
+  const [transactionSlug, setTransactionSlug] = useState(defaultTransactionSlug ?? "");
+  const [propertyTypeSlug, setPropertyTypeSlug] = useState(defaultPropertyTypeSlug ?? "");
 
   useEffect(() => {
-    setTransactionType(defaultTransaction || "");
-  }, [defaultTransaction]);
+    setTransactionSlug(defaultTransactionSlug ?? "");
+  }, [defaultTransactionSlug]);
 
   useEffect(() => {
-    setPropertyType(defaultPropertyType || "");
-  }, [defaultPropertyType]);
+    setPropertyTypeSlug(defaultPropertyTypeSlug ?? "");
+  }, [defaultPropertyTypeSlug]);
 
   const handleSearch = () => {
     const params = new URLSearchParams();
-    if (transactionType) params.set("transaction", transactionType);
-    if (propertyType) params.set("type", propertyType);
+    if (transactionSlug) params.set("transaction", transactionSlug);
+    if (propertyTypeSlug) params.set("type", propertyTypeSlug);
     router.push(`/properties?${params.toString()}`);
   };
 
@@ -41,40 +45,41 @@ export function SearchBar({
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1">
             <label className="block text-xs text-muted-foreground mb-1.5 uppercase tracking-wide">
-              Type de Transaction
+              Type de transaction
             </label>
             <select
-              value={transactionType}
-              onChange={(e) => setTransactionType(e.target.value as TransactionType | "")}
+              value={transactionSlug}
+              onChange={(event) => setTransactionSlug(event.target.value)}
               className="w-full h-10 px-3 border border-border bg-background text-sm focus:outline-none focus:border-gold"
             >
-              <option value="">All Types</option>
-              {TRANSACTION_TYPES.map((type) => (
-                <option key={type} value={type}>
-                  {type}
+              <option value="">All types</option>
+              {transactionTypes.map((type) => (
+                <option key={type.id} value={type.slug}>
+                  {type.label}
                 </option>
               ))}
             </select>
           </div>
           <div className="flex-1">
             <label className="block text-xs text-muted-foreground mb-1.5 uppercase tracking-wide">
-              Property Type
+              Property type
             </label>
             <select
-              value={propertyType}
-              onChange={(e) => setPropertyType(e.target.value as PropertyType | "")}
+              value={propertyTypeSlug}
+              onChange={(event) => setPropertyTypeSlug(event.target.value)}
               className="w-full h-10 px-3 border border-border bg-background text-sm focus:outline-none focus:border-gold"
             >
-              <option value="">All Properties</option>
-              {PROPERTY_TYPES.map((type) => (
-                <option key={type} value={type}>
-                  {type}
+              <option value="">All properties</option>
+              {propertyTypes.map((type) => (
+                <option key={type.id} value={type.slug}>
+                  {type.label}
                 </option>
               ))}
             </select>
           </div>
           <div className="flex items-end">
             <button
+              type="button"
               onClick={handleSearch}
               className="w-full md:w-auto h-10 px-6 bg-gold text-black font-medium text-sm tracking-wide uppercase hover:bg-gold/90 transition-colors flex items-center justify-center gap-2"
             >
@@ -91,52 +96,50 @@ export function SearchBar({
     <div className="bg-white/95 backdrop-blur-sm shadow-2xl border border-white/20">
       <div className="p-6 md:p-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Transaction Type */}
           <div>
             <label className="block text-xs text-muted-foreground mb-2 uppercase tracking-wide font-medium">
-              Transaction Type
+              Transaction type
             </label>
             <select
-              value={transactionType}
-              onChange={(e) => setTransactionType(e.target.value as TransactionType | "")}
+              value={transactionSlug}
+              onChange={(event) => setTransactionSlug(event.target.value)}
               className="w-full h-12 px-4 border border-border bg-background text-foreground focus:outline-none focus:border-gold transition-colors"
             >
-              <option value="">Select Type</option>
-              {TRANSACTION_TYPES.map((type) => (
-                <option key={type} value={type}>
-                  {type}
+              <option value="">Select type</option>
+              {transactionTypes.map((type) => (
+                <option key={type.id} value={type.slug}>
+                  {type.label}
                 </option>
               ))}
             </select>
           </div>
 
-          {/* Property Type */}
           <div>
             <label className="block text-xs text-muted-foreground mb-2 uppercase tracking-wide font-medium">
-              Property Type
+              Property type
             </label>
             <select
-              value={propertyType}
-              onChange={(e) => setPropertyType(e.target.value as PropertyType | "")}
+              value={propertyTypeSlug}
+              onChange={(event) => setPropertyTypeSlug(event.target.value)}
               className="w-full h-12 px-4 border border-border bg-background text-foreground focus:outline-none focus:border-gold transition-colors"
             >
-              <option value="">Select Property</option>
-              {PROPERTY_TYPES.map((type) => (
-                <option key={type} value={type}>
-                  {type}
+              <option value="">Select property</option>
+              {propertyTypes.map((type) => (
+                <option key={type.id} value={type.slug}>
+                  {type.label}
                 </option>
               ))}
             </select>
           </div>
 
-          {/* Search Button */}
           <div className="flex items-end">
             <button
+              type="button"
               onClick={handleSearch}
               className="cta-dark-button w-full h-12 font-medium text-sm tracking-wide uppercase flex items-center justify-center gap-3"
             >
               <Search className="w-5 h-5" />
-              Search Properties
+              Search properties
             </button>
           </div>
         </div>

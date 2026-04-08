@@ -1,37 +1,57 @@
 "use client";
 
 import { useState } from "react";
-import { Send, MessageCircle } from "lucide-react";
+import { MessageCircle, Send } from "lucide-react";
+import { buildWhatsAppLink } from "@/lib/data";
 
 interface ContactFormProps {
+  propertyId?: number;
   propertyTitle: string;
   agentPhone?: string;
 }
 
-export function ContactForm({ propertyTitle, agentPhone }: ContactFormProps) {
+export function ContactForm({ propertyId, propertyTitle, agentPhone }: ContactFormProps) {
   const [formState, setFormState] = useState({
     name: "",
+    email: "",
     phone: "",
     message: `I'm interested in "${propertyTitle}" and would like to schedule a viewing.`,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    const response = await fetch("/api/inquiries", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        propertyId: propertyId ?? null,
+        propertyTitle,
+        name: formState.name,
+        email: formState.email,
+        phone: formState.phone,
+        message: formState.message,
+        sourcePage: "property",
+      }),
+    });
 
     setIsSubmitting(false);
-    setIsSubmitted(true);
+    if (response.ok) {
+      setIsSubmitted(true);
+    }
   };
 
   const handleWhatsApp = () => {
-    const phone = agentPhone ? agentPhone.replace(/\D/g, '') : "+212612345678";
-    const message = encodeURIComponent(`Bonjour, Je suis intéressé par "${propertyTitle}". Pouvez-vous me contacter?`);
-    window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
+    const href = buildWhatsAppLink(
+      agentPhone || "+212612345678",
+      `Bonjour, je suis interesse par "${propertyTitle}". Pouvez-vous me contacter ?`
+    );
+    window.open(href, "_blank");
   };
 
   if (isSubmitted) {
@@ -40,9 +60,9 @@ export function ContactForm({ propertyTitle, agentPhone }: ContactFormProps) {
         <div className="w-16 h-16 bg-gold mx-auto flex items-center justify-center mb-4">
           <Send className="w-6 h-6 text-black" />
         </div>
-        <h3 className="font-serif text-xl mb-2">Message Envoyé</h3>
+        <h3 className="font-serif text-xl mb-2">Message sent</h3>
         <p className="text-muted-foreground text-sm">
-          Merci de votre demande. Notre équipe vous contactera bientôt.
+          Thank you. Our team will contact you shortly.
         </p>
       </div>
     );
@@ -50,34 +70,47 @@ export function ContactForm({ propertyTitle, agentPhone }: ContactFormProps) {
 
   return (
     <div className="bg-secondary p-6">
-      <h3 className="font-serif text-xl mb-6">Envoyer une Demande</h3>
+      <h3 className="font-serif text-xl mb-6">Send an inquiry</h3>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label htmlFor="name" className="block text-xs text-muted-foreground mb-2 uppercase tracking-wide">
-            Nom
+            Name
           </label>
           <input
             type="text"
             id="name"
             required
             value={formState.name}
-            onChange={(e) => setFormState({ ...formState, name: e.target.value })}
+            onChange={(event) => setFormState({ ...formState, name: event.target.value })}
             className="w-full h-11 px-4 border border-border bg-white focus:outline-none focus:border-gold transition-colors text-sm"
-            placeholder="Votre nom"
+            placeholder="Your name"
+          />
+        </div>
+        <div>
+          <label htmlFor="email" className="block text-xs text-muted-foreground mb-2 uppercase tracking-wide">
+            Email
+          </label>
+          <input
+            type="email"
+            id="email"
+            value={formState.email}
+            onChange={(event) => setFormState({ ...formState, email: event.target.value })}
+            className="w-full h-11 px-4 border border-border bg-white focus:outline-none focus:border-gold transition-colors text-sm"
+            placeholder="Your email"
           />
         </div>
         <div>
           <label htmlFor="phone" className="block text-xs text-muted-foreground mb-2 uppercase tracking-wide">
-            Téléphone
+            Phone
           </label>
           <input
             type="tel"
             id="phone"
             required
             value={formState.phone}
-            onChange={(e) => setFormState({ ...formState, phone: e.target.value })}
+            onChange={(event) => setFormState({ ...formState, phone: event.target.value })}
             className="w-full h-11 px-4 border border-border bg-white focus:outline-none focus:border-gold transition-colors text-sm"
-            placeholder="Votre téléphone"
+            placeholder="Your phone"
           />
         </div>
         <div>
@@ -89,7 +122,7 @@ export function ContactForm({ propertyTitle, agentPhone }: ContactFormProps) {
             required
             rows={4}
             value={formState.message}
-            onChange={(e) => setFormState({ ...formState, message: e.target.value })}
+            onChange={(event) => setFormState({ ...formState, message: event.target.value })}
             className="w-full px-4 py-3 border border-border bg-white focus:outline-none focus:border-gold transition-colors resize-none text-sm"
           />
         </div>
@@ -99,23 +132,22 @@ export function ContactForm({ propertyTitle, agentPhone }: ContactFormProps) {
           className="cta-dark-button w-full h-12 font-medium text-sm tracking-wide uppercase disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
           {isSubmitting ? (
-            "Envoi..."
+            "Sending..."
           ) : (
             <>
               <Send className="w-4 h-4" />
-              Envoyer la Demande
+              Send inquiry
             </>
           )}
         </button>
-        
-        {/* WhatsApp Button */}
+
         <button
           type="button"
           onClick={handleWhatsApp}
           className="w-full h-12 bg-[#25D366] text-white font-medium text-sm tracking-wide uppercase hover:bg-[#20BA5A] transition-all duration-300 flex items-center justify-center gap-2"
         >
           <MessageCircle className="w-5 h-5" />
-          Contacter sur WhatsApp
+          Contact on WhatsApp
         </button>
       </form>
     </div>

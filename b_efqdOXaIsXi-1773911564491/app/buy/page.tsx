@@ -1,162 +1,162 @@
+import type { Metadata } from "next";
 import Image from "next/image";
-import { Navbar } from "@/components/navbar";
+import Link from "next/link";
 import { Footer } from "@/components/footer";
+import { Navbar } from "@/components/navbar";
+import { PropertyCard } from "@/components/property-card";
 import { PropertyTypeCard } from "@/components/property-type-card";
-import { PROPERTY_TYPES, TRANSACTION_TYPES } from "@/lib/data";
+import { getPageContent, getProperties, getPropertyCountByType, getPropertyTypes } from "@/lib/cms";
+import { buildPageMetadata } from "@/lib/seo";
 
-export const metadata = {
-  title: "Acheter une Propriété",
-  description:
-    "Achetez des appartements, villas, bureaux, biens commerciaux et terrains avec MDK IMMOBILIER Real Estate à Tanger.",
-};
+export function generateMetadata(): Metadata {
+  return buildPageMetadata("buy", "/buy");
+}
 
 export default function BuyPage() {
+  const page = getPageContent("buy");
+  const propertyTypes = getPropertyTypes();
+  const propertyCounts = getPropertyCountByType("buy");
+  const properties = getProperties({ transactionSlug: "buy", limit: 6 });
+
   return (
     <main className="min-h-screen">
       <Navbar />
-      
-      {/* Hero Section */}
+
       <section className="relative h-[60vh] min-h-[500px] flex items-center justify-center">
         <div className="absolute inset-0">
           <Image
-            src="https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=1920&q=80"
-            alt="Luxury property for sale"
+            src={page.content.hero.backgroundImage}
+            alt={page.content.hero.title}
             fill
             className="object-cover"
             priority
           />
           <div className="absolute inset-0 bg-black/60" />
         </div>
-        
+
         <div className="relative z-10 text-center px-4">
           <p className="text-gold uppercase tracking-[0.3em] text-sm mb-4">
-            Propriétés à Vendre
+            {page.content.hero.eyebrow}
           </p>
           <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl text-white mb-6">
-            Trouvez Votre Investissement
+            {page.content.hero.title}
             <br />
-            <span className="text-gold">de Rêve</span>
+            <span className="text-gold">{page.content.hero.highlight}</span>
           </h1>
           <p className="text-white/70 text-lg max-w-2xl mx-auto">
-            Explorez notre collection curatée de propriétés exceptionnelles disponibles à l'achat,
-            chacune représentant le summum du luxe immobilier.
+            {page.content.hero.description}
           </p>
         </div>
       </section>
 
-      {/* Property Types Section */}
       <section className="py-24 lg:py-32 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <p className="text-gold uppercase tracking-[0.2em] text-sm mb-4">Choisissez Votre Style</p>
+            <p className="text-gold uppercase tracking-[0.2em] text-sm mb-4">
+              {page.content.categorySection.eyebrow}
+            </p>
             <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl text-foreground mb-4">
-              Property Types
+              {page.content.categorySection.title}
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Select a property type to explore our exclusive listings available for purchase.
+              {page.content.categorySection.description}
             </p>
           </div>
-          
+
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-            {PROPERTY_TYPES.map((type) => (
+            {propertyTypes.map((type) => (
               <PropertyTypeCard
-                key={type}
+                key={type.id}
                 propertyType={type}
-                transactionType={TRANSACTION_TYPES[0]}
+                count={propertyCounts.get(type.slug) ?? 0}
+                href={`/properties?transaction=buy&type=${type.slug}`}
               />
             ))}
           </div>
         </div>
       </section>
 
-      {/* Stats Section */}
       <section className="py-20 bg-black">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            <div>
-              <p className="font-serif text-4xl md:text-5xl text-gold mb-2">$2.5B+</p>
-              <p className="text-white/60 text-sm uppercase tracking-wide">Sales Volume</p>
-            </div>
-            <div>
-              <p className="font-serif text-4xl md:text-5xl text-gold mb-2">500+</p>
-              <p className="text-white/60 text-sm uppercase tracking-wide">Properties Sold</p>
-            </div>
-            <div>
-              <p className="font-serif text-4xl md:text-5xl text-gold mb-2">50+</p>
-              <p className="text-white/60 text-sm uppercase tracking-wide">Expert Agents</p>
-            </div>
-            <div>
-              <p className="font-serif text-4xl md:text-5xl text-gold mb-2">20+</p>
-              <p className="text-white/60 text-sm uppercase tracking-wide">Years Experience</p>
-            </div>
+            {page.content.stats.map((stat) => (
+              <div key={`${stat.label}-${stat.value}`}>
+                <p className="font-serif text-4xl md:text-5xl text-gold mb-2">{stat.value}</p>
+                <p className="text-white/60 text-sm uppercase tracking-wide">{stat.label}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Why Buy With Us */}
       <section className="py-24 lg:py-32 bg-secondary">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div>
-              <p className="text-gold uppercase tracking-[0.2em] text-sm mb-4">Why Choose Us</p>
+              <p className="text-gold uppercase tracking-[0.2em] text-sm mb-4">
+                {page.content.whyBuy.eyebrow}
+              </p>
               <h2 className="font-serif text-3xl md:text-4xl text-foreground mb-6">
-                Expert Guidance for
-                <br />
-                Your Investment
+                {page.content.whyBuy.title}
               </h2>
               <p className="text-muted-foreground leading-relaxed mb-8">
-                When you purchase through Aurum Estates, you&apos;re not just buying a property—
-                you&apos;re making a strategic investment with the support of industry-leading expertise.
+                {page.content.whyBuy.description}
               </p>
-              
+
               <div className="space-y-6">
-                <div className="flex gap-4">
-                  <div className="w-12 h-12 bg-gold flex items-center justify-center shrink-0">
-                    <span className="text-black font-serif text-xl">01</span>
+                {page.content.whyBuy.items.map((item) => (
+                  <div key={`${item.number}-${item.title}`} className="flex gap-4">
+                    <div className="w-12 h-12 bg-gold flex items-center justify-center shrink-0">
+                      <span className="text-black font-serif text-xl">{item.number}</span>
+                    </div>
+                    <div>
+                      <h3 className="font-medium mb-1">{item.title}</h3>
+                      <p className="text-muted-foreground text-sm">{item.description}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-medium mb-1">Market Analysis</h3>
-                    <p className="text-muted-foreground text-sm">
-                      Comprehensive market insights to ensure your investment decision is well-informed.
-                    </p>
-                  </div>
-                </div>
-                <div className="flex gap-4">
-                  <div className="w-12 h-12 bg-gold flex items-center justify-center shrink-0">
-                    <span className="text-black font-serif text-xl">02</span>
-                  </div>
-                  <div>
-                    <h3 className="font-medium mb-1">Legal Support</h3>
-                    <p className="text-muted-foreground text-sm">
-                      Full legal assistance throughout the purchase process for peace of mind.
-                    </p>
-                  </div>
-                </div>
-                <div className="flex gap-4">
-                  <div className="w-12 h-12 bg-gold flex items-center justify-center shrink-0">
-                    <span className="text-black font-serif text-xl">03</span>
-                  </div>
-                  <div>
-                    <h3 className="font-medium mb-1">Financing Options</h3>
-                    <p className="text-muted-foreground text-sm">
-                      Access to exclusive financing solutions tailored to your needs.
-                    </p>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
-            
+
             <div className="relative">
               <div className="aspect-[4/5] relative overflow-hidden">
                 <Image
-                  src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80"
-                  alt="Luxury home exterior"
+                  src={page.content.whyBuy.image}
+                  alt={page.content.whyBuy.title}
                   fill
                   className="object-cover"
                 />
               </div>
               <div className="absolute -bottom-6 -right-6 w-48 h-48 border-2 border-gold -z-10" />
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-24 lg:py-32 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-end justify-between gap-4 mb-12">
+            <div>
+              <p className="text-gold uppercase tracking-[0.2em] text-sm mb-4">
+                {page.content.listing.eyebrow}
+              </p>
+              <h2 className="font-serif text-3xl md:text-4xl text-foreground mb-4">
+                {page.content.listing.title}
+              </h2>
+              <p className="text-muted-foreground max-w-2xl">{page.content.listing.description}</p>
+            </div>
+            <Link
+              href="/properties?transaction=buy"
+              className="hidden md:inline-flex rounded-md border border-border px-4 py-3 text-xs uppercase tracking-wide transition-colors hover:border-gold"
+            >
+              View all
+            </Link>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {properties.map((property) => (
+              <PropertyCard key={property.id} property={property} />
+            ))}
           </div>
         </div>
       </section>

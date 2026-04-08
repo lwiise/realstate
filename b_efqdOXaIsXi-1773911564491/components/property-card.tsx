@@ -1,20 +1,23 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Bed, Bath, Square, MapPin, Heart, ArrowUpRight } from "lucide-react";
-import { Property, formatPrice } from "@/lib/data";
+import { formatArea, formatPrice, Property } from "@/lib/data";
+import { getSiteSettings } from "@/lib/cms";
 
 interface PropertyCardProps {
   property: Property;
 }
 
 export function PropertyCard({ property }: PropertyCardProps) {
+  const siteSettings = getSiteSettings();
+
   return (
     <Link href={`/property/${property.slug}`} className="group block">
       <article className="bg-white border border-border overflow-hidden transition-all duration-500 hover:shadow-xl hover:shadow-black/5 hover:border-gold/30">
         {/* Image */}
         <div className="relative aspect-[4/3] overflow-hidden">
           <Image
-            src={property.images[0]}
+            src={property.coverImage ?? property.images[0]}
             alt={property.title}
             fill
             className="object-cover transition-transform duration-700 group-hover:scale-110"
@@ -55,7 +58,12 @@ export function PropertyCard({ property }: PropertyCardProps) {
         <div className="p-6">
           {/* Price */}
           <p className="text-gold font-serif text-2xl mb-2">
-            {formatPrice(property.price, property.priceUnit)}
+            {formatPrice(
+              property.price,
+              property.priceSuffix,
+              siteSettings.currencyLocale,
+              siteSettings.currencyCode
+            )}
           </p>
           
           {/* Title */}
@@ -75,20 +83,22 @@ export function PropertyCard({ property }: PropertyCardProps) {
           <div className="flex items-center gap-6 pt-4 border-t border-border">
             {property.bedrooms && (
               <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
-                <Bed className="w-4 h-4" />
+              <Bed className="w-4 h-4" />
                 <span>{property.bedrooms} Beds</span>
               </div>
             )}
             {property.bathrooms && (
               <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
-                <Bath className="w-4 h-4" />
+              <Bath className="w-4 h-4" />
                 <span>{property.bathrooms} Baths</span>
               </div>
             )}
-            <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
-              <Square className="w-4 h-4" />
-              <span>{property.area.toLocaleString()} sqft</span>
-            </div>
+            {property.area ? (
+              <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
+                <Square className="w-4 h-4" />
+                <span>{formatArea(property.area, property.areaUnit)}</span>
+              </div>
+            ) : null}
           </div>
         </div>
       </article>
