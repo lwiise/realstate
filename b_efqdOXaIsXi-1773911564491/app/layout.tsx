@@ -4,6 +4,8 @@ import { Analytics } from "@vercel/analytics/next";
 import { buildSiteMetadata } from "@/lib/seo";
 import "./globals.css";
 
+const enableVercelAnalytics = process.env.VERCEL === "1";
+
 const playfair = Playfair_Display({
   subsets: ["latin"],
   variable: "--font-serif",
@@ -33,7 +35,7 @@ export default function RootLayout({
     <html lang="fr" className={`${playfair.variable} ${inter.variable}`}>
       <body className="font-sans antialiased">
         {children}
-        <Analytics />
+        {enableVercelAnalytics ? <Analytics /> : null}
       </body>
     </html>
   );

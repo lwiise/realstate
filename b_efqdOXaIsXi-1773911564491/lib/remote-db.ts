@@ -18,6 +18,20 @@ declare global {
   var __cmsRemoteInitPromise: Promise<void> | undefined;
 }
 
+const RETRYABLE_REMOTE_ERROR_CODES = new Set([
+  "08000",
+  "08001",
+  "08003",
+  "08006",
+  "53300",
+  "57P01",
+  "57P02",
+  "57P03",
+  "ECONNRESET",
+  "ECONNREFUSED",
+  "ETIMEDOUT",
+]);
+
 function now() {
   return new Date().toISOString();
 }
@@ -28,6 +42,67 @@ function toJson(value: unknown) {
 
 export function isRemoteDatabaseConfigured() {
   return Boolean(process.env.DATABASE_URL);
+}
+
+function isServerlessRuntime() {
+  return Boolean(process.env.NETLIFY || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.VERCEL);
+}
+
+function getRemoteErrorCode(error: unknown) {
+  if (typeof error === "object" && error !== null && "code" in error) {
+    return String((error as { code?: unknown }).code ?? "");
+  }
+
+  return "";
+}
+
+function getRemoteErrorMessage(error: unknown) {
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+
+  return "";
+}
+
+function isRetryableRemoteError(error: unknown) {
+  const code = getRemoteErrorCode(error);
+
+  if (RETRYABLE_REMOTE_ERROR_CODES.has(code)) {
+    return true;
+  }
+
+  const message = getRemoteErrorMessage(error);
+  return /connection terminated unexpectedly|connection ended unexpectedly|server closed the connection unexpectedly|client has encountered a connection error and is not queryable/i.test(
+    message
+  );
+}
+
+async function resetRemotePool() {
+  const existingPool = globalThis.__cmsRemotePool;
+  globalThis.__cmsRemotePool = undefined;
+  globalThis.__cmsRemoteInitPromise = undefined;
+
+  if (existingPool) {
+    try {
+      await existingPool.end();
+    } catch {
+      // Ignore pool shutdown errors while rotating the connection.
+    }
+  }
+}
+
+async function runWithRemoteRetry<T>(operation: () => Promise<T>) {
+  try {
+    return await operation();
+  } catch (error) {
+    if (!isRetryableRemoteError(error)) {
+      throw error;
+    }
+
+    console.warn(`[cms] Remote database query failed, retrying once. ${getRemoteErrorMessage(error)}`);
+    await resetRemotePool();
+    return operation();
+  }
 }
 
 function getRemoteDatabaseUrl() {
@@ -47,13 +122,21 @@ export function getRemotePool() {
 
   const connectionString = getRemoteDatabaseUrl();
   const isLocalhost = /localhost|127\.0\.0\.1/.test(connectionString);
+  const serverlessRuntime = isServerlessRuntime();
 
   const pool = new Pool({
     connectionString,
-    max: 5,
-    idleTimeoutMillis: 30_000,
+    max: serverlessRuntime ? 1 : 5,
+    idleTimeoutMillis: serverlessRuntime ? 5_000 : 30_000,
     connectionTimeoutMillis: 10_000,
+    allowExitOnIdle: serverlessRuntime,
     ssl: isLocalhost ? false : { rejectUnauthorized: false },
+  });
+
+  pool.on("error", (error) => {
+    console.error(`[cms] Remote pool error. ${getRemoteErrorMessage(error)}`);
+    globalThis.__cmsRemotePool = undefined;
+    globalThis.__cmsRemoteInitPromise = undefined;
   });
 
   globalThis.__cmsRemotePool = pool;
@@ -540,8 +623,13 @@ export async function ensureRemoteCms() {
 
   if (!globalThis.__cmsRemoteInitPromise) {
     globalThis.__cmsRemoteInitPromise = (async () => {
-      await migrateRemoteDatabase();
-      await seedRemoteDatabase();
+      try {
+        await migrateRemoteDatabase();
+        await seedRemoteDatabase();
+      } catch (error) {
+        globalThis.__cmsRemoteInitPromise = undefined;
+        throw error;
+      }
     })();
   }
 
@@ -552,10 +640,12 @@ export async function queryRemoteRows<T extends QueryResultRow = QueryResultRow>
   text: string,
   values?: unknown[]
 ) {
-  await ensureRemoteCms();
-  const pool = getRemotePool();
-  const result = await pool.query<T>(text, values);
-  return result.rows;
+  return runWithRemoteRetry(async () => {
+    await ensureRemoteCms();
+    const pool = getRemotePool();
+    const result = await pool.query<T>(text, values);
+    return result.rows;
+  });
 }
 
 export async function queryRemoteRow<T extends QueryResultRow = QueryResultRow>(
@@ -567,7 +657,9 @@ export async function queryRemoteRow<T extends QueryResultRow = QueryResultRow>(
 }
 
 export async function executeRemote(text: string, values?: unknown[]) {
-  await ensureRemoteCms();
-  const pool = getRemotePool();
-  return pool.query(text, values);
+  return runWithRemoteRetry(async () => {
+    await ensureRemoteCms();
+    const pool = getRemotePool();
+    return pool.query(text, values);
+  });
 }
