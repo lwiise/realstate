@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { deleteAgentAction } from "@/app/admin/actions";
-import { getAgents } from "@/lib/cms";
+import { getAgents } from "@/lib/admin-cms";
 
 export default async function AdminAgentsPage() {
   const agents = await getAgents({ includeUnpublished: true });

@@ -1,5 +1,5 @@
 import { AdminShell } from "@/components/admin/admin-shell";
-import { getSiteSettings } from "@/lib/cms";
+import { getSiteSettings } from "@/lib/admin-cms";
 import { requireAdminUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";

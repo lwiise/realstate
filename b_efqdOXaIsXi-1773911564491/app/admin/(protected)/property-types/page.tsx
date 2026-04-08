@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { deletePropertyTypeAction } from "@/app/admin/actions";
-import { getPropertyTypes } from "@/lib/cms";
+import { getPropertyTypes } from "@/lib/admin-cms";
 
 export default async function AdminPropertyTypesPage() {
   const propertyTypes = await getPropertyTypes({ includeInactive: true });

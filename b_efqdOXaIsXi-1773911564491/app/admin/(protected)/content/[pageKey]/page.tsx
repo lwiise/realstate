@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { PageContentForm } from "@/components/admin/page-content-form";
-import { getMediaAssets, getPageContent } from "@/lib/cms";
+import { getMediaAssets, getPageContent } from "@/lib/admin-cms";
 import type { PageKey } from "@/lib/cms-types";
 
 interface AdminPageContentPageProps {

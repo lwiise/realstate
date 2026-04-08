@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { AgentForm } from "@/components/admin/agent-form";
-import { getMediaAssets } from "@/lib/cms";
+import { getMediaAssets } from "@/lib/admin-cms";
 
 export default async function AdminNewAgentPage() {
   const mediaAssets = await getMediaAssets();

@@ -1,5 +1,5 @@
 import { SiteSettingsForm } from "@/components/admin/site-settings-form";
-import { getMediaAssets, getSiteSettings } from "@/lib/cms";
+import { getMediaAssets, getSiteSettings } from "@/lib/admin-cms";
 
 export default async function AdminSettingsPage() {
   const [settings, mediaAssets] = await Promise.all([getSiteSettings(), getMediaAssets()]);

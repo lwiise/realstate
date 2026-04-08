@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { deletePropertyAction } from "@/app/admin/actions";
-import { getProperties } from "@/lib/cms";
+import { getProperties } from "@/lib/admin-cms";
 
 export default async function AdminPropertiesPage() {
   const properties = await getProperties({}, { includeDrafts: true });

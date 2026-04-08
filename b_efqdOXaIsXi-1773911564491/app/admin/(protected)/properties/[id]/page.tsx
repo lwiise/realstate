@@ -7,7 +7,7 @@ import {
   getPropertyById,
   getPropertyTypes,
   getTransactionTypes,
-} from "@/lib/cms";
+} from "@/lib/admin-cms";
 
 interface AdminEditPropertyPageProps {
   params: Promise<{ id: string }>;

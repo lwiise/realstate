@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { PropertyForm } from "@/components/admin/property-form";
-import { getAgents, getMediaAssets, getPropertyTypes, getTransactionTypes } from "@/lib/cms";
+import { getAgents, getMediaAssets, getPropertyTypes, getTransactionTypes } from "@/lib/admin-cms";
 
 export default async function AdminNewPropertyPage() {
   const [transactionTypes, propertyTypes, agents, mediaAssets] = await Promise.all([

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { TaxonomyForm } from "@/components/admin/taxonomy-form";
-import { getMediaAssets } from "@/lib/cms";
+import { getMediaAssets } from "@/lib/admin-cms";
 
 export default async function AdminNewTransactionTypePage() {
   const mediaAssets = await getMediaAssets();

@@ -1,4 +1,4 @@
-import { getMediaAssets } from "@/lib/cms";
+import { getMediaAssets } from "@/lib/admin-cms";
 
 export default async function AdminMediaPage() {
   const mediaAssets = await getMediaAssets();

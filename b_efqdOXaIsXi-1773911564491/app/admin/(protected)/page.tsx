@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getDashboardStats } from "@/lib/cms";
+import { getDashboardStats } from "@/lib/admin-cms";
 
 export default async function AdminDashboardPage() {
   const stats = await getDashboardStats();

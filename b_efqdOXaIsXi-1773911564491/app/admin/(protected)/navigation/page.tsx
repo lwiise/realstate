@@ -1,5 +1,5 @@
 import { NavigationForm } from "@/components/admin/navigation-form";
-import { getMediaAssets, getNavigationSettings } from "@/lib/cms";
+import { getMediaAssets, getNavigationSettings } from "@/lib/admin-cms";
 
 export default async function AdminNavigationPage() {
   const [navigation, mediaAssets] = await Promise.all([

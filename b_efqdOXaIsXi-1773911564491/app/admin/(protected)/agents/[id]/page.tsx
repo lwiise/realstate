@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AgentForm } from "@/components/admin/agent-form";
-import { getAgentById, getMediaAssets } from "@/lib/cms";
+import { getAgentById, getMediaAssets } from "@/lib/admin-cms";
 
 interface AdminEditAgentPageProps {
   params: Promise<{ id: string }>;

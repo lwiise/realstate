@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { deleteTransactionTypeAction } from "@/app/admin/actions";
-import { getTransactionTypes } from "@/lib/cms";
+import { getTransactionTypes } from "@/lib/admin-cms";
 
 export default async function AdminTransactionTypesPage() {
   const transactionTypes = await getTransactionTypes({ includeInactive: true });

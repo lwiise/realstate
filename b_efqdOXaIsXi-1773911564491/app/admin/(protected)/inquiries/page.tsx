@@ -1,4 +1,4 @@
-import { getInquiries } from "@/lib/cms";
+import { getInquiries } from "@/lib/admin-cms";
 
 export default async function AdminInquiriesPage() {
   const inquiries = await getInquiries();

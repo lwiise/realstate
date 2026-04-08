@@ -1,5 +1,5 @@
 import { FooterForm } from "@/components/admin/footer-form";
-import { getFooterSettings } from "@/lib/cms";
+import { getFooterSettings } from "@/lib/admin-cms";
 
 export default async function AdminFooterPage() {
   const footer = await getFooterSettings();

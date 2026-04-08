@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { TaxonomyForm } from "@/components/admin/taxonomy-form";
-import { getMediaAssets, getTransactionTypes } from "@/lib/cms";
+import { getMediaAssets, getTransactionTypes } from "@/lib/admin-cms";
 
 interface AdminEditTransactionTypePageProps {
   params: Promise<{ id: string }>;
