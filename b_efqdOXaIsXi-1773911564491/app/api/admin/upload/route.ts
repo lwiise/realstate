@@ -28,6 +28,10 @@ function validateMediaFile(name: string, type: string) {
   return { isImage, isVideo, isValid: isImage || isVideo };
 }
 
+function isServerlessProduction() {
+  return process.env.NETLIFY === "true" || process.env.VERCEL === "1";
+}
+
 async function saveMediaAssetRecord(input: {
   originalName: string;
   filename: string;
@@ -93,6 +97,16 @@ async function handleJsonRequest(request: Request) {
     }
 
     if (!isRemoteStorageConfigured()) {
+      if (isServerlessProduction()) {
+        return NextResponse.json(
+          {
+            error:
+              "Le stockage media distant n'est pas configure en production. Verifiez NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY et SUPABASE_STORAGE_BUCKET dans Netlify.",
+          },
+          { status: 500 }
+        );
+      }
+
       return NextResponse.json({ strategy: "direct" });
     }
 
