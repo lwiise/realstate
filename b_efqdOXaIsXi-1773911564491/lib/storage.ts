@@ -59,6 +59,10 @@ export function isRemoteStorageConfigured() {
   );
 }
 
+function getStorageFileSizeLimit() {
+  return process.env.SUPABASE_STORAGE_FILE_SIZE_LIMIT || "50MB";
+}
+
 function getStorageBucket() {
   const bucket = process.env.SUPABASE_STORAGE_BUCKET;
 
@@ -106,7 +110,7 @@ export async function ensureRemoteStorage() {
       if (error && error.message.toLowerCase().includes("not found")) {
         const createResult = await supabase.storage.createBucket(bucket, {
           public: true,
-          fileSizeLimit: "100MB",
+          fileSizeLimit: getStorageFileSizeLimit(),
         });
 
         if (createResult.error) {
@@ -122,7 +126,7 @@ export async function ensureRemoteStorage() {
 
       const updateResult = await supabase.storage.updateBucket(bucket, {
         public: true,
-        fileSizeLimit: "100MB",
+        fileSizeLimit: getStorageFileSizeLimit(),
       });
 
       if (updateResult.error) {
