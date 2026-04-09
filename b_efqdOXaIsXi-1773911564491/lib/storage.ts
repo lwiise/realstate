@@ -14,6 +14,38 @@ function sanitizeFileName(value: string) {
   return value.replace(/[^a-zA-Z0-9._-]/g, "-").replace(/-+/g, "-");
 }
 
+function resolveMimeType(file: File) {
+  if (file.type) {
+    return file.type;
+  }
+
+  const extension = path.extname(file.name).toLowerCase();
+
+  switch (extension) {
+    case ".jpg":
+    case ".jpeg":
+      return "image/jpeg";
+    case ".png":
+      return "image/png";
+    case ".webp":
+      return "image/webp";
+    case ".gif":
+      return "image/gif";
+    case ".svg":
+      return "image/svg+xml";
+    case ".mp4":
+      return "video/mp4";
+    case ".webm":
+      return "video/webm";
+    case ".mov":
+      return "video/quicktime";
+    case ".m4v":
+      return "video/x-m4v";
+    default:
+      return "application/octet-stream";
+  }
+}
+
 export function isRemoteStorageConfigured() {
   return Boolean(
     (process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL) &&
@@ -104,6 +136,7 @@ export async function uploadCmsImage(file: File) {
 export async function uploadCmsAsset(file: File) {
   const extension = path.extname(file.name) || ".jpg";
   const fileName = sanitizeFileName(`${Date.now()}-${randomUUID()}${extension}`);
+  const contentType = resolveMimeType(file);
 
   if (process.env.NETLIFY === "true" && !isRemoteStorageConfigured()) {
     throw new Error(
@@ -119,7 +152,7 @@ export async function uploadCmsAsset(file: File) {
     const supabase = getSupabaseAdmin();
     const buffer = Buffer.from(await file.arrayBuffer());
     const uploadResult = await supabase.storage.from(bucket).upload(filePath, buffer, {
-      contentType: file.type,
+      contentType,
       upsert: false,
     });
 

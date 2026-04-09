@@ -15,6 +15,8 @@ export function VideoInput({ name, label, defaultValue, helpText }: VideoInputPr
   const [value, setValue] = useState(defaultValue ?? "");
   const [previewUrl, setPreviewUrl] = useState(defaultValue ?? "");
   const [isUploading, setIsUploading] = useState(false);
+  const [message, setMessage] = useState<string>("");
+  const [messageTone, setMessageTone] = useState<"error" | "warning" | "">("");
   const inputRef = useRef<HTMLInputElement | null>(null);
   const objectUrlRef = useRef<string | null>(null);
   const { startUpload, finishUpload } = useAdminUploads();
@@ -49,6 +51,8 @@ export function VideoInput({ name, label, defaultValue, helpText }: VideoInputPr
     objectUrlRef.current = objectUrl;
     setPreviewUrl(objectUrl);
     setIsUploading(true);
+    setMessage("");
+    setMessageTone("");
     startUpload();
 
     try {
@@ -60,17 +64,28 @@ export function VideoInput({ name, label, defaultValue, helpText }: VideoInputPr
         body: formData,
       });
 
+      const payload = (await response.json()) as { url?: string; error?: string; warning?: string };
+
       if (!response.ok) {
-        throw new Error(`Upload failed with status ${response.status}`);
+        throw new Error(payload.error || `Upload failed with status ${response.status}`);
       }
 
-      const payload = (await response.json()) as { url: string };
+      if (!payload.url) {
+        throw new Error("La reponse d'upload ne contient pas d'URL.");
+      }
+
       setValue(payload.url);
       updatePreview(payload.url);
+      if (payload.warning) {
+        setMessage(payload.warning);
+        setMessageTone("warning");
+      }
     } catch (error) {
       console.error("[admin] Video upload failed", error);
       setValue(previousValue);
       updatePreview(previousPreview);
+      setMessage(error instanceof Error ? error.message : "Le televersement de la video a echoue.");
+      setMessageTone("error");
     } finally {
       setIsUploading(false);
       finishUpload();
@@ -84,6 +99,8 @@ export function VideoInput({ name, label, defaultValue, helpText }: VideoInputPr
   const handleRemove = () => {
     setValue("");
     updatePreview("");
+    setMessage("");
+    setMessageTone("");
   };
 
   return (
@@ -123,6 +140,13 @@ export function VideoInput({ name, label, defaultValue, helpText }: VideoInputPr
       />
 
       {helpText ? <p className="text-xs text-muted-foreground">{helpText}</p> : null}
+      {message ? (
+        <p
+          className={`text-xs ${messageTone === "error" ? "text-destructive" : "text-amber-600"}`}
+        >
+          {message}
+        </p>
+      ) : null}
 
       <div className="overflow-hidden rounded-md border border-border bg-secondary">
         <div className="flex aspect-video items-center justify-center bg-muted/30">

@@ -164,7 +164,6 @@ export async function getCurrentAdminUser() {
         expiresAt: session.expiresat,
       };
     } catch (error) {
-      cookieStore.delete(SESSION_COOKIE_NAME);
       logRemoteAuthFailure(error);
       return null;
     }

@@ -30,6 +30,8 @@ export function ImageInput({
   const [previewUrl, setPreviewUrl] = useState(defaultValue ?? "");
   const [isUploading, setIsUploading] = useState(false);
   const [showLibrary, setShowLibrary] = useState(false);
+  const [message, setMessage] = useState<string>("");
+  const [messageTone, setMessageTone] = useState<"error" | "warning" | "">("");
   const { startUpload, finishUpload } = useAdminUploads();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const objectUrlRef = useRef<string | null>(null);
@@ -63,6 +65,8 @@ export function ImageInput({
     objectUrlRef.current = objectUrl;
     setPreviewUrl(objectUrl);
     setIsUploading(true);
+    setMessage("");
+    setMessageTone("");
     startUpload();
 
     try {
@@ -74,16 +78,27 @@ export function ImageInput({
         body: formData,
       });
 
+      const payload = (await response.json()) as { url?: string; error?: string; warning?: string };
+
       if (!response.ok) {
-        throw new Error(`Upload failed with status ${response.status}`);
+        throw new Error(payload.error || `Upload failed with status ${response.status}`);
       }
 
-      const payload = (await response.json()) as { url: string };
+      if (!payload.url) {
+        throw new Error("La reponse d'upload ne contient pas d'URL.");
+      }
+
       setValue(payload.url);
       updatePreview(payload.url);
+      if (payload.warning) {
+        setMessage(payload.warning);
+        setMessageTone("warning");
+      }
     } catch (error) {
       console.error("[admin] Image upload failed", error);
       updatePreview(previousPreview);
+      setMessage(error instanceof Error ? error.message : "Le televersement de l'image a echoue.");
+      setMessageTone("error");
     } finally {
       setIsUploading(false);
       finishUpload();
@@ -97,6 +112,8 @@ export function ImageInput({
   const handleManualChange = (nextValue: string) => {
     setValue(nextValue);
     updatePreview(nextValue);
+    setMessage("");
+    setMessageTone("");
   };
 
   return (
@@ -143,6 +160,13 @@ export function ImageInput({
       />
 
       {helpText ? <p className="text-xs text-muted-foreground">{helpText}</p> : null}
+      {message ? (
+        <p
+          className={`text-xs ${messageTone === "error" ? "text-destructive" : "text-amber-600"}`}
+        >
+          {message}
+        </p>
+      ) : null}
 
       <div className="overflow-hidden rounded-md border border-border bg-secondary">
         <div className="flex aspect-[16/9] items-center justify-center bg-muted/30">

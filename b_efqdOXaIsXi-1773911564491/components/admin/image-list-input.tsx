@@ -42,6 +42,8 @@ export function ImageListInput({
       : [{ id: createId(), value: "", previewUrl: "" }]
   );
   const [uploadingItemId, setUploadingItemId] = useState<string | null>(null);
+  const [message, setMessage] = useState<string>("");
+  const [messageTone, setMessageTone] = useState<"error" | "warning" | "">("");
   const uploadTargetRef = useRef<string | null>(null);
   const { startUpload, finishUpload } = useAdminUploads();
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -103,6 +105,8 @@ export function ImageListInput({
     clearTemporaryPreview(itemId);
     objectUrlsRef.current.set(itemId, objectUrl);
     setPreviewOnly(itemId, objectUrl);
+    setMessage("");
+    setMessageTone("");
     startUpload();
 
     try {
@@ -114,11 +118,20 @@ export function ImageListInput({
         body: formData,
       });
 
+      const responsePayload = (await response.json()) as {
+        url?: string;
+        error?: string;
+        warning?: string;
+      };
+
       if (!response.ok) {
-        throw new Error(`Upload failed with status ${response.status}`);
+        throw new Error(responsePayload.error || `Upload failed with status ${response.status}`);
       }
 
-      const responsePayload = (await response.json()) as { url: string };
+      if (!responsePayload.url) {
+        throw new Error("La reponse d'upload ne contient pas d'URL.");
+      }
+
       clearTemporaryPreview(itemId);
       setItems((current) =>
         current.map((entry) =>
@@ -127,10 +140,18 @@ export function ImageListInput({
             : entry
         )
       );
+      if (responsePayload.warning) {
+        setMessage(responsePayload.warning);
+        setMessageTone("warning");
+      }
     } catch (error) {
       console.error("[admin] Gallery upload failed", error);
       clearTemporaryPreview(itemId);
       setPreviewOnly(itemId, previousPreview);
+      setMessage(
+        error instanceof Error ? error.message : "Le televersement de l'image a echoue."
+      );
+      setMessageTone("error");
     } finally {
       finishUpload();
       uploadTargetRef.current = null;
@@ -147,6 +168,15 @@ export function ImageListInput({
       <div>
         <label className="text-sm font-medium text-foreground">{label}</label>
         {helpText ? <p className="mt-1 text-xs text-muted-foreground">{helpText}</p> : null}
+        {message ? (
+          <p
+            className={`mt-1 text-xs ${
+              messageTone === "error" ? "text-destructive" : "text-amber-600"
+            }`}
+          >
+            {message}
+          </p>
+        ) : null}
       </div>
 
       <input type="hidden" name={name} value={payload} />
