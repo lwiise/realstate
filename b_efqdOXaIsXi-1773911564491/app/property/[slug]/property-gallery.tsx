@@ -13,10 +13,19 @@ interface PropertyGalleryProps {
 export function PropertyGallery({ images, video, title }: PropertyGalleryProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [showVideo, setShowVideo] = useState(false);
   
-  // Combine video and images into a single media array for navigation
-  const allMedia = video ? [{ type: "video", src: video }, ...images.map(img => ({ type: "image", src: img }))] : images.map(img => ({ type: "image", src: img }));
+  const allMedia = video
+    ? [{ type: "video" as const, src: video }, ...images.map((img) => ({ type: "image" as const, src: img }))]
+    : images.map((img) => ({ type: "image" as const, src: img }));
+
+  if (allMedia.length === 0) {
+    return (
+      <div className="flex aspect-[16/10] items-center justify-center bg-black text-sm text-white/60">
+        Aucun media disponible pour cette propriete.
+      </div>
+    );
+  }
+
   const currentMedia = allMedia[currentIndex];
 
   const goToNext = () => {
@@ -141,7 +150,7 @@ export function PropertyGallery({ images, video, title }: PropertyGalleryProps) 
           <div className="relative w-full h-full max-w-7xl mx-auto p-4 flex items-center justify-center">
             <div className="relative w-full h-full">
               <Image
-                src={typeof currentMedia === 'string' ? currentMedia : (currentMedia as any).src}
+                src={currentMedia.src}
                 alt={`${title} - Image ${currentIndex + 1}`}
                 fill
                 className="object-contain"

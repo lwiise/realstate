@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useRef, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ImagePlus, Loader2, Trash2 } from "lucide-react";
+import { useAdminUploads } from "@/components/admin/admin-upload-context";
 import type { MediaAsset } from "@/lib/cms-types";
 
 interface ImageListInputProps {
@@ -12,6 +13,12 @@ interface ImageListInputProps {
   helpText?: string;
 }
 
+interface ImageListItem {
+  id: string;
+  value: string;
+  previewUrl: string;
+}
+
 export function ImageListInput({
   name,
   label,
@@ -19,32 +26,86 @@ export function ImageListInput({
   library = [],
   helpText,
 }: ImageListInputProps) {
-  const [items, setItems] = useState<string[]>(defaultValue.length > 0 ? defaultValue : [""]);
-  const [uploadIndex, setUploadIndex] = useState<number | null>(null);
-  const [isPending, startTransition] = useTransition();
+  const imageLibrary = useMemo(
+    () => library.filter((asset) => asset.mimeType.startsWith("image/")),
+    [library]
+  );
+  const nextIdRef = useRef(0);
+  const createId = () => `${name}-${nextIdRef.current++}`;
+  const [items, setItems] = useState<ImageListItem[]>(
+    defaultValue.length > 0
+      ? defaultValue.map((item) => ({
+          id: createId(),
+          value: item,
+          previewUrl: item,
+        }))
+      : [{ id: createId(), value: "", previewUrl: "" }]
+  );
+  const [uploadingItemId, setUploadingItemId] = useState<string | null>(null);
+  const uploadTargetRef = useRef<string | null>(null);
+  const { startUpload, finishUpload } = useAdminUploads();
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const objectUrlsRef = useRef(new Map<string, string>());
+
+  useEffect(() => {
+    return () => {
+      objectUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+      objectUrlsRef.current.clear();
+    };
+  }, []);
 
   const payload = useMemo(
-    () => JSON.stringify(items.map((item) => item.trim()).filter(Boolean)),
+    () => JSON.stringify(items.map((item) => item.value.trim()).filter(Boolean)),
     [items]
   );
 
-  const updateItem = (index: number, nextValue: string) => {
-    setItems((current) => current.map((item, itemIndex) => (itemIndex === index ? nextValue : item)));
+  const clearTemporaryPreview = (itemId: string) => {
+    const existing = objectUrlsRef.current.get(itemId);
+    if (existing) {
+      URL.revokeObjectURL(existing);
+      objectUrlsRef.current.delete(itemId);
+    }
   };
 
-  const addItem = () => setItems((current) => [...current, ""]);
-  const removeItem = (index: number) => {
+  const updateItem = (itemId: string, nextValue: string) => {
+    clearTemporaryPreview(itemId);
+    setItems((current) =>
+      current.map((item) =>
+        item.id === itemId ? { ...item, value: nextValue, previewUrl: nextValue } : item
+      )
+    );
+  };
+
+  const setPreviewOnly = (itemId: string, previewUrl: string) => {
+    setItems((current) =>
+      current.map((item) => (item.id === itemId ? { ...item, previewUrl } : item))
+    );
+  };
+
+  const addItem = () =>
+    setItems((current) => [...current, { id: createId(), value: "", previewUrl: "" }]);
+
+  const removeItem = (itemId: string) => {
+    clearTemporaryPreview(itemId);
     setItems((current) => {
-      const next = current.filter((_, itemIndex) => itemIndex !== index);
-      return next.length > 0 ? next : [""];
+      const next = current.filter((item) => item.id !== itemId);
+      return next.length > 0 ? next : [{ id: createId(), value: "", previewUrl: "" }];
     });
   };
 
-  const handleUpload = (file: File | null) => {
-    if (!file || uploadIndex == null) return;
+  const handleUpload = async (file: File | null) => {
+    const itemId = uploadTargetRef.current;
+    if (!file || !itemId) return;
 
-    startTransition(async () => {
+    const item = items.find((entry) => entry.id === itemId);
+    const previousPreview = item?.previewUrl ?? "";
+    const objectUrl = URL.createObjectURL(file);
+    clearTemporaryPreview(itemId);
+    objectUrlsRef.current.set(itemId, objectUrl);
+    setPreviewOnly(itemId, objectUrl);
+    startUpload();
+
+    try {
       const formData = new FormData();
       formData.append("file", file);
 
@@ -54,13 +115,31 @@ export function ImageListInput({
       });
 
       if (!response.ok) {
-        return;
+        throw new Error(`Upload failed with status ${response.status}`);
       }
 
-      const payload = (await response.json()) as { url: string };
-      updateItem(uploadIndex, payload.url);
-      setUploadIndex(null);
-    });
+      const responsePayload = (await response.json()) as { url: string };
+      clearTemporaryPreview(itemId);
+      setItems((current) =>
+        current.map((entry) =>
+          entry.id === itemId
+            ? { ...entry, value: responsePayload.url, previewUrl: responsePayload.url }
+            : entry
+        )
+      );
+    } catch (error) {
+      console.error("[admin] Gallery upload failed", error);
+      clearTemporaryPreview(itemId);
+      setPreviewOnly(itemId, previousPreview);
+    } finally {
+      finishUpload();
+      uploadTargetRef.current = null;
+      setUploadingItemId(null);
+
+      if (inputRef.current) {
+        inputRef.current.value = "";
+      }
+    }
   };
 
   return (
@@ -76,17 +155,21 @@ export function ImageListInput({
         type="file"
         accept="image/*"
         className="hidden"
-        onChange={(event) => handleUpload(event.target.files?.[0] ?? null)}
+        onChange={(event) => void handleUpload(event.target.files?.[0] ?? null)}
       />
 
       <div className="space-y-3">
         {items.map((item, index) => (
-          <div key={`${name}-${index}`} className="rounded-md border border-border p-3">
+          <div key={item.id} className="rounded-md border border-border p-3">
             <div className="grid gap-3 md:grid-cols-[120px_minmax(0,1fr)]">
               <div className="overflow-hidden rounded-md border border-border bg-secondary">
                 <div className="aspect-[4/3]">
-                  {item ? (
-                    <img src={item} alt={`Galerie ${index + 1}`} className="h-full w-full object-cover" />
+                  {item.previewUrl ? (
+                    <img
+                      src={item.previewUrl}
+                      alt={`Galerie ${index + 1}`}
+                      className="h-full w-full object-cover"
+                    />
                   ) : null}
                 </div>
               </div>
@@ -94,8 +177,8 @@ export function ImageListInput({
               <div className="space-y-2">
                 <input
                   type="text"
-                  value={item}
-                  onChange={(event) => updateItem(index, event.target.value)}
+                  value={item.value}
+                  onChange={(event) => updateItem(item.id, event.target.value)}
                   placeholder="https://..."
                   className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
                 />
@@ -104,31 +187,32 @@ export function ImageListInput({
                   <button
                     type="button"
                     onClick={() => {
-                      setUploadIndex(index);
+                      uploadTargetRef.current = item.id;
+                      setUploadingItemId(item.id);
                       inputRef.current?.click();
                     }}
                     className="inline-flex items-center gap-2 border border-border px-3 py-2 text-xs uppercase tracking-wide transition-colors hover:border-gold"
                   >
-                    {isPending && uploadIndex === index ? (
+                    {uploadingItemId === item.id ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
                       <ImagePlus className="h-4 w-4" />
                     )}
-                    Téléverser
+                    Televerser
                   </button>
 
-                  {library.length > 0 ? (
+                  {imageLibrary.length > 0 ? (
                     <select
                       value=""
                       onChange={(event) => {
                         if (event.target.value) {
-                          updateItem(index, event.target.value);
+                          updateItem(item.id, event.target.value);
                         }
                       }}
                       className="rounded-md border border-border bg-background px-3 py-2 text-xs uppercase tracking-wide text-muted-foreground"
                     >
-                      <option value="">Choisir un média</option>
-                      {library.map((asset) => (
+                      <option value="">Choisir un media</option>
+                      {imageLibrary.map((asset) => (
                         <option key={asset.id} value={asset.url}>
                           {asset.title}
                         </option>
@@ -138,7 +222,7 @@ export function ImageListInput({
 
                   <button
                     type="button"
-                    onClick={() => removeItem(index)}
+                    onClick={() => removeItem(item.id)}
                     className="inline-flex items-center gap-2 border border-border px-3 py-2 text-xs uppercase tracking-wide text-muted-foreground transition-colors hover:border-destructive hover:text-destructive"
                   >
                     <Trash2 className="h-4 w-4" />

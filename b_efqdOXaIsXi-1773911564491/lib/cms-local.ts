@@ -30,6 +30,23 @@ function mapBoolean(value: number | boolean | null | undefined) {
   return Boolean(value);
 }
 
+function derivePriceModeFromTransaction(value: {
+  slug?: string | null;
+  label?: string | null;
+}): PriceMode {
+  const normalized = `${value.slug ?? ""} ${value.label ?? ""}`.toLowerCase();
+
+  if (normalized.includes("daily") || normalized.includes("journal")) {
+    return "daily";
+  }
+
+  if (normalized.includes("rent") || normalized.includes("louer") || normalized.includes("location")) {
+    return "monthly";
+  }
+
+  return "sale";
+}
+
 function mapAgent(row: Record<string, unknown>): Agent {
   return {
     id: Number(row.id),
@@ -120,11 +137,11 @@ function mapProperty(row: PropertyRow): Property {
     neighborhood: String(row.neighborhood),
     fullAddress: (row.full_address as string | null) ?? null,
     price: Number(row.price),
-    priceMode: String(row.price_mode) as PriceMode,
-    priceSuffix:
-      (row.price_suffix as string | null) ??
-      (row.transaction_price_suffix as string | null) ??
-      null,
+    priceMode: derivePriceModeFromTransaction({
+      slug: row.transaction_slug as string | null,
+      label: row.transaction_label as string | null,
+    }),
+    priceSuffix: (row.transaction_price_suffix as string | null) ?? null,
     shortDescription: String(row.short_description),
     longDescription: String(row.long_description),
     bedrooms: row.bedrooms == null ? null : Number(row.bedrooms),
@@ -135,7 +152,7 @@ function mapProperty(row: PropertyRow): Property {
     images: parseJson<string[]>(row.gallery_json as string, []),
     coverImage: (row.cover_image_url as string | null) ?? null,
     video: (row.video_url as string | null) ?? null,
-    virtualTourUrl: (row.virtual_tour_url as string | null) ?? null,
+    virtualTourUrl: null,
     agentId: row.agent_id == null ? null : Number(row.agent_id),
     agent,
     seoTitle: (row.seo_title as string | null) ?? null,
@@ -826,7 +843,7 @@ export function upsertProperty(
     fullAddress: input.fullAddress ?? null,
     price: input.price,
     priceMode: input.priceMode,
-    priceSuffix: input.priceSuffix ?? null,
+    priceSuffix: null,
     shortDescription: input.shortDescription,
     longDescription: input.longDescription,
     bedrooms: input.bedrooms ?? null,
@@ -837,7 +854,7 @@ export function upsertProperty(
     galleryJson: JSON.stringify(input.images),
     coverImageUrl: input.coverImage ?? null,
     videoUrl: input.video ?? null,
-    virtualTourUrl: input.virtualTourUrl ?? null,
+    virtualTourUrl: null,
     agentId: input.agentId ?? null,
     seoTitle: input.seoTitle ?? null,
     seoDescription: input.seoDescription ?? null,

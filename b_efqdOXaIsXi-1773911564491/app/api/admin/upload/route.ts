@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentAdminUser } from "@/lib/auth";
 import { createMediaAsset } from "@/lib/cms";
-import { uploadCmsImage } from "@/lib/storage";
+import { uploadCmsAsset } from "@/lib/storage";
 
 export async function POST(request: Request) {
   const admin = await getCurrentAdminUser();
@@ -16,11 +16,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Missing file" }, { status: 400 });
   }
 
-  if (!file.type.startsWith("image/")) {
-    return NextResponse.json({ error: "Only image uploads are supported" }, { status: 400 });
+  if (!file.type.startsWith("image/") && !file.type.startsWith("video/")) {
+    return NextResponse.json(
+      { error: "Only image and video uploads are supported" },
+      { status: 400 }
+    );
   }
 
-  const uploaded = await uploadCmsImage(file);
+  const uploaded = await uploadCmsAsset(file);
   const assetId = await createMediaAsset({
     title: file.name,
     originalName: file.name,
@@ -33,5 +36,6 @@ export async function POST(request: Request) {
   return NextResponse.json({
     id: assetId,
     url: uploaded.url,
+    mimeType: file.type,
   });
 }

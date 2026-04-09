@@ -45,6 +45,12 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
     property.transactionTypeSlug,
     property.propertyTypeSlug
   );
+  const galleryImages =
+    property.images.length > 0
+      ? property.images
+      : property.coverImage
+        ? [property.coverImage]
+        : [];
 
   const whatsappHref = buildWhatsAppLink(
     property.agent?.whatsapp || property.agent?.phone || siteSettings.whatsappNumber,
@@ -107,7 +113,11 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
 
       <section className="bg-secondary">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <PropertyGallery images={property.images} video={property.video ?? undefined} title={property.title} />
+          <PropertyGallery
+            images={galleryImages}
+            video={property.video ?? undefined}
+            title={property.title}
+          />
         </div>
       </section>
 
@@ -177,18 +187,6 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
                 {property.fullAddress ? (
                   <p className="mt-4 text-sm text-muted-foreground">
                     Address: {property.fullAddress}
-                  </p>
-                ) : null}
-                {property.virtualTourUrl ? (
-                  <p className="mt-4">
-                    <a
-                      href={property.virtualTourUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-gold font-medium"
-                    >
-                      Open virtual tour
-                    </a>
                   </p>
                 ) : null}
               </div>

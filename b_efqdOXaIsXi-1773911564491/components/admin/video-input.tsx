@@ -1,38 +1,23 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { ImageIcon, Loader2, Upload } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Film, Loader2, Trash2, Upload } from "lucide-react";
 import { useAdminUploads } from "@/components/admin/admin-upload-context";
-import type { MediaAsset } from "@/lib/cms-types";
 
-interface ImageInputProps {
+interface VideoInputProps {
   name: string;
   label: string;
   defaultValue?: string | null;
-  library?: MediaAsset[];
   helpText?: string;
-  allowLibrary?: boolean;
 }
 
-export function ImageInput({
-  name,
-  label,
-  defaultValue,
-  library = [],
-  helpText,
-  allowLibrary = true,
-}: ImageInputProps) {
-  const imageLibrary = useMemo(
-    () => library.filter((asset) => asset.mimeType.startsWith("image/")),
-    [library]
-  );
+export function VideoInput({ name, label, defaultValue, helpText }: VideoInputProps) {
   const [value, setValue] = useState(defaultValue ?? "");
   const [previewUrl, setPreviewUrl] = useState(defaultValue ?? "");
   const [isUploading, setIsUploading] = useState(false);
-  const [showLibrary, setShowLibrary] = useState(false);
-  const { startUpload, finishUpload } = useAdminUploads();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const objectUrlRef = useRef<string | null>(null);
+  const { startUpload, finishUpload } = useAdminUploads();
 
   useEffect(() => {
     return () => {
@@ -58,6 +43,7 @@ export function ImageInput({
     if (!file) return;
 
     const previousPreview = previewUrl;
+    const previousValue = value;
     const objectUrl = URL.createObjectURL(file);
     clearTemporaryPreview();
     objectUrlRef.current = objectUrl;
@@ -82,7 +68,8 @@ export function ImageInput({
       setValue(payload.url);
       updatePreview(payload.url);
     } catch (error) {
-      console.error("[admin] Image upload failed", error);
+      console.error("[admin] Video upload failed", error);
+      setValue(previousValue);
       updatePreview(previousPreview);
     } finally {
       setIsUploading(false);
@@ -94,9 +81,9 @@ export function ImageInput({
     }
   };
 
-  const handleManualChange = (nextValue: string) => {
-    setValue(nextValue);
-    updatePreview(nextValue);
+  const handleRemove = () => {
+    setValue("");
+    updatePreview("");
   };
 
   return (
@@ -108,75 +95,54 @@ export function ImageInput({
             type="button"
             onClick={() => inputRef.current?.click()}
             disabled={isUploading}
-            className="inline-flex items-center gap-2 border border-border px-3 py-2 text-xs uppercase tracking-wide text-foreground transition-colors hover:border-gold disabled:cursor-not-allowed disabled:opacity-70"
+            className="inline-flex items-center gap-2 border border-border px-3 py-2 text-xs uppercase tracking-wide transition-colors hover:border-gold disabled:cursor-not-allowed disabled:opacity-70"
           >
             {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-            Téléverser
+            Televerser
           </button>
-          {allowLibrary && imageLibrary.length > 0 ? (
+          {value ? (
             <button
               type="button"
-              onClick={() => setShowLibrary((current) => !current)}
-              className="border border-border px-3 py-2 text-xs uppercase tracking-wide text-foreground transition-colors hover:border-gold"
+              onClick={handleRemove}
+              className="inline-flex items-center gap-2 border border-border px-3 py-2 text-xs uppercase tracking-wide text-muted-foreground transition-colors hover:border-destructive hover:text-destructive"
             >
-              {showLibrary ? "Masquer les médias" : "Choisir un média"}
+              <Trash2 className="h-4 w-4" />
+              Supprimer
             </button>
           ) : null}
         </div>
       </div>
 
+      <input type="hidden" name={name} value={value} />
       <input
         ref={inputRef}
         type="file"
-        accept="image/*"
+        accept="video/*"
         className="hidden"
         onChange={(event) => void handleUpload(event.target.files?.[0] ?? null)}
-      />
-
-      <input
-        type="text"
-        name={name}
-        value={value}
-        onChange={(event) => handleManualChange(event.target.value)}
-        placeholder="https://..."
-        className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
       />
 
       {helpText ? <p className="text-xs text-muted-foreground">{helpText}</p> : null}
 
       <div className="overflow-hidden rounded-md border border-border bg-secondary">
-        <div className="flex aspect-[16/9] items-center justify-center bg-muted/30">
+        <div className="flex aspect-video items-center justify-center bg-muted/30">
           {previewUrl ? (
-            <img src={previewUrl} alt={label} className="h-full w-full object-cover" />
+            <video
+              key={previewUrl}
+              src={previewUrl}
+              className="h-full w-full object-cover"
+              controls
+              playsInline
+              preload="metadata"
+            />
           ) : (
             <div className="flex flex-col items-center gap-2 text-muted-foreground">
-              <ImageIcon className="h-6 w-6" />
-              <span className="text-xs uppercase tracking-wide">Aucune image sélectionnée</span>
+              <Film className="h-6 w-6" />
+              <span className="text-xs uppercase tracking-wide">Aucune video selectionnee</span>
             </div>
           )}
         </div>
       </div>
-
-      {allowLibrary && showLibrary ? (
-        <div className="grid max-h-64 grid-cols-2 gap-3 overflow-y-auto rounded-md border border-border p-3 md:grid-cols-3">
-          {imageLibrary.map((asset) => (
-            <button
-              key={asset.id}
-              type="button"
-              onClick={() => {
-                setValue(asset.url);
-                updatePreview(asset.url);
-              }}
-              className="overflow-hidden rounded-md border border-border bg-background text-left transition-colors hover:border-gold"
-            >
-              <div className="aspect-[4/3] bg-muted">
-                <img src={asset.url} alt={asset.title} className="h-full w-full object-cover" />
-              </div>
-              <div className="px-3 py-2 text-xs text-muted-foreground">{asset.title}</div>
-            </button>
-          ))}
-        </div>
-      ) : null}
     </div>
   );
 }

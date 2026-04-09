@@ -24,6 +24,7 @@ import {
   deleteProperty,
   deletePropertyType,
   deleteTransactionType,
+  getTransactionTypes,
   updateFooterSettings,
   updateNavigationSettings,
   updatePageContent,
@@ -98,6 +99,30 @@ function withSavedParam(path: string) {
   return `${path}${separator}saved=1`;
 }
 
+function derivePriceModeFromTransactionType(transactionType?: {
+  slug: string;
+  label: string;
+  routePath: string;
+}): Property["priceMode"] {
+  const normalized = [
+    transactionType?.slug ?? "",
+    transactionType?.label ?? "",
+    transactionType?.routePath ?? "",
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  if (normalized.includes("daily") || normalized.includes("journal")) {
+    return "daily";
+  }
+
+  if (normalized.includes("rent") || normalized.includes("louer") || normalized.includes("location")) {
+    return "monthly";
+  }
+
+  return "sale";
+}
+
 export async function setupAdminAction(formData: FormData) {
   try {
     if ((await countAdminUsers()) > 0) {
@@ -168,8 +193,17 @@ export async function savePropertyAction(formData: FormData) {
 
   const id = getNumberValue(formData, "id");
   const slug = getValue(formData, "slug");
+  const transactionTypeId = getNumberValue(formData, "transactionTypeId");
+  const propertyTypeId = getNumberValue(formData, "propertyTypeId");
 
-  if (!getValue(formData, "title") || !slug) {
+  if (!getValue(formData, "title") || !slug || !transactionTypeId || !propertyTypeId) {
+    redirect(`/admin/properties${id ? `/${id}` : "/new"}?error=missing-fields`);
+  }
+
+  const transactionTypes = await getTransactionTypes({ includeInactive: true });
+  const transactionType = transactionTypes.find((item) => item.id === transactionTypeId);
+
+  if (!transactionType) {
     redirect(`/admin/properties${id ? `/${id}` : "/new"}?error=missing-fields`);
   }
 
@@ -177,16 +211,16 @@ export async function savePropertyAction(formData: FormData) {
     id: id ?? undefined,
     title: getValue(formData, "title"),
     slug,
-    transactionTypeId: Number(getValue(formData, "transactionTypeId")),
-    propertyTypeId: Number(getValue(formData, "propertyTypeId")),
+    transactionTypeId,
+    propertyTypeId,
     status: getValue(formData, "status") as Property["status"],
     featured: getBooleanValue(formData, "featured"),
     city: getValue(formData, "city"),
     neighborhood: getValue(formData, "neighborhood"),
     fullAddress: getOptionalValue(formData, "fullAddress"),
     price: Number(getValue(formData, "price")),
-    priceMode: getValue(formData, "priceMode") as Property["priceMode"],
-    priceSuffix: getOptionalValue(formData, "priceSuffix"),
+    priceMode: derivePriceModeFromTransactionType(transactionType),
+    priceSuffix: null,
     shortDescription: getValue(formData, "shortDescription"),
     longDescription: getValue(formData, "longDescription"),
     bedrooms: getNumberValue(formData, "bedrooms"),
@@ -197,7 +231,7 @@ export async function savePropertyAction(formData: FormData) {
     images: getJsonValue<string[]>(formData, "images", []),
     coverImage: getOptionalValue(formData, "coverImage"),
     video: getOptionalValue(formData, "video"),
-    virtualTourUrl: getOptionalValue(formData, "virtualTourUrl"),
+    virtualTourUrl: null,
     agentId: getNumberValue(formData, "agentId"),
     seoTitle: getOptionalValue(formData, "seoTitle"),
     seoDescription: getOptionalValue(formData, "seoDescription"),

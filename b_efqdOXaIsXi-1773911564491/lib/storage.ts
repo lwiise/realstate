@@ -69,7 +69,7 @@ export async function ensureRemoteStorage() {
       if (error && error.message.toLowerCase().includes("not found")) {
         const createResult = await supabase.storage.createBucket(bucket, {
           public: true,
-          fileSizeLimit: "10MB",
+          fileSizeLimit: "100MB",
         });
 
         if (createResult.error) {
@@ -82,6 +82,15 @@ export async function ensureRemoteStorage() {
       if (error && !data) {
         throw error;
       }
+
+      const updateResult = await supabase.storage.updateBucket(bucket, {
+        public: true,
+        fileSizeLimit: "100MB",
+      });
+
+      if (updateResult.error) {
+        throw updateResult.error;
+      }
     })();
   }
 
@@ -89,6 +98,10 @@ export async function ensureRemoteStorage() {
 }
 
 export async function uploadCmsImage(file: File) {
+  return uploadCmsAsset(file);
+}
+
+export async function uploadCmsAsset(file: File) {
   const extension = path.extname(file.name) || ".jpg";
   const fileName = sanitizeFileName(`${Date.now()}-${randomUUID()}${extension}`);
 
