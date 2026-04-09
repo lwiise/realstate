@@ -8,7 +8,7 @@ export default async function AdminFooterPage() {
     <div className="space-y-6">
       <div>
         <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground">Site</p>
-        <h1 className="mt-2 font-serif text-3xl text-foreground">Footer settings</h1>
+        <h1 className="mt-2 font-serif text-3xl text-foreground">Paramètres du pied de page</h1>
       </div>
 
       <FooterForm footer={footer} />

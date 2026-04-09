@@ -86,7 +86,7 @@ export function ImageListInput({
               <div className="overflow-hidden rounded-md border border-border bg-secondary">
                 <div className="aspect-[4/3]">
                   {item ? (
-                    <img src={item} alt={`Gallery ${index + 1}`} className="h-full w-full object-cover" />
+                    <img src={item} alt={`Galerie ${index + 1}`} className="h-full w-full object-cover" />
                   ) : null}
                 </div>
               </div>
@@ -114,7 +114,7 @@ export function ImageListInput({
                     ) : (
                       <ImagePlus className="h-4 w-4" />
                     )}
-                    Upload
+                    Téléverser
                   </button>
 
                   {library.length > 0 ? (
@@ -127,7 +127,7 @@ export function ImageListInput({
                       }}
                       className="rounded-md border border-border bg-background px-3 py-2 text-xs uppercase tracking-wide text-muted-foreground"
                     >
-                      <option value="">Select media</option>
+                      <option value="">Choisir un média</option>
                       {library.map((asset) => (
                         <option key={asset.id} value={asset.url}>
                           {asset.title}
@@ -142,7 +142,7 @@ export function ImageListInput({
                     className="inline-flex items-center gap-2 border border-border px-3 py-2 text-xs uppercase tracking-wide text-muted-foreground transition-colors hover:border-destructive hover:text-destructive"
                   >
                     <Trash2 className="h-4 w-4" />
-                    Remove
+                    Supprimer
                   </button>
                 </div>
               </div>
@@ -157,7 +157,7 @@ export function ImageListInput({
         className="inline-flex items-center gap-2 border border-border px-3 py-2 text-xs uppercase tracking-wide transition-colors hover:border-gold"
       >
         <ImagePlus className="h-4 w-4" />
-        Add image
+        Ajouter une image
       </button>
     </div>
   );

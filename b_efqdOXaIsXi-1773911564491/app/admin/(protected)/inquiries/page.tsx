@@ -6,14 +6,14 @@ export default async function AdminInquiriesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground">Leads</p>
-        <h1 className="mt-2 font-serif text-3xl text-foreground">Inquiries</h1>
+        <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground">Prospects</p>
+        <h1 className="mt-2 font-serif text-3xl text-foreground">Demandes</h1>
       </div>
 
       <div className="space-y-4">
         {inquiries.length === 0 ? (
           <div className="rounded-xl border border-border bg-card p-6 text-sm text-muted-foreground">
-            No inquiries yet.
+            Aucune demande pour le moment.
           </div>
         ) : (
           inquiries.map((inquiry) => (
@@ -31,7 +31,7 @@ export default async function AdminInquiriesPage() {
               </div>
               {inquiry.propertyTitle ? (
                 <p className="mt-4 text-sm font-medium text-foreground">
-                  Property: {inquiry.propertyTitle}
+                  Propriété : {inquiry.propertyTitle}
                 </p>
               ) : null}
               <p className="mt-3 whitespace-pre-wrap text-sm text-muted-foreground">

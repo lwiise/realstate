@@ -10,7 +10,7 @@ interface AdminFormSubmitProps {
 
 export function AdminFormSubmit({
   label,
-  savedLabel = "Saved",
+  savedLabel = "Enregistré",
 }: AdminFormSubmitProps) {
   const searchParams = useSearchParams();
   const { pending } = useFormStatus();
@@ -23,7 +23,7 @@ export function AdminFormSubmit({
         disabled={pending}
         className="cta-dark-button rounded-md px-5 py-3 text-xs font-medium uppercase tracking-wide disabled:cursor-not-allowed disabled:opacity-70"
       >
-        {pending ? "Saving..." : label}
+        {pending ? "Enregistrement..." : label}
       </button>
 
       <span
@@ -36,7 +36,7 @@ export function AdminFormSubmit({
               : "text-transparent"
         }`}
       >
-        {pending ? "Saving changes..." : isSaved ? savedLabel : "Saved"}
+        {pending ? "Enregistrement des modifications..." : isSaved ? savedLabel : "Enregistré"}
       </span>
     </div>
   );

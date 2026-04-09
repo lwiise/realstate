@@ -29,10 +29,10 @@ export function PropertyForm({
       {property ? <input type="hidden" name="id" value={property.id} /> : null}
 
       <section className="rounded-xl border border-border bg-card p-6">
-        <h2 className="font-serif text-2xl text-foreground">Core details</h2>
+        <h2 className="font-serif text-2xl text-foreground">Informations principales</h2>
         <div className="mt-6 grid gap-4 md:grid-cols-2">
           <label className="space-y-2 md:col-span-2">
-            <span className="text-xs uppercase tracking-wide text-muted-foreground">Title</span>
+            <span className="text-xs uppercase tracking-wide text-muted-foreground">Titre</span>
             <input
               name="title"
               defaultValue={property?.title}
@@ -52,21 +52,21 @@ export function PropertyForm({
           </label>
 
           <label className="space-y-2">
-            <span className="text-xs uppercase tracking-wide text-muted-foreground">Status</span>
+            <span className="text-xs uppercase tracking-wide text-muted-foreground">Statut</span>
             <select
               name="status"
               defaultValue={property?.status ?? "draft"}
               className="h-12 w-full rounded-md border border-border bg-background px-4 text-sm"
             >
-              <option value="draft">Draft</option>
-              <option value="published">Published</option>
-              <option value="archived">Archived</option>
+              <option value="draft">Brouillon</option>
+              <option value="published">Publié</option>
+              <option value="archived">Archivé</option>
             </select>
           </label>
 
           <label className="space-y-2">
             <span className="text-xs uppercase tracking-wide text-muted-foreground">
-              Transaction type
+              Type de transaction
             </span>
             <select
               name="transactionTypeId"
@@ -74,7 +74,7 @@ export function PropertyForm({
               required
               className="h-12 w-full rounded-md border border-border bg-background px-4 text-sm"
             >
-              <option value="">Select transaction type</option>
+              <option value="">Sélectionnez un type de transaction</option>
               {transactionTypes.map((item) => (
                 <option key={item.id} value={item.id}>
                   {item.label}
@@ -85,7 +85,7 @@ export function PropertyForm({
 
           <label className="space-y-2">
             <span className="text-xs uppercase tracking-wide text-muted-foreground">
-              Property type
+              Type de propriété
             </span>
             <select
               name="propertyTypeId"
@@ -93,7 +93,7 @@ export function PropertyForm({
               required
               className="h-12 w-full rounded-md border border-border bg-background px-4 text-sm"
             >
-              <option value="">Select property type</option>
+              <option value="">Sélectionnez un type de propriété</option>
               {propertyTypes.map((item) => (
                 <option key={item.id} value={item.id}>
                   {item.label}
@@ -104,11 +104,11 @@ export function PropertyForm({
 
           <label className="flex items-center gap-3 rounded-md border border-border px-4 py-3">
             <input type="checkbox" name="featured" defaultChecked={property?.featured} />
-            <span className="text-sm text-foreground">Featured listing</span>
+            <span className="text-sm text-foreground">Annonce mise en avant</span>
           </label>
 
           <label className="space-y-2">
-            <span className="text-xs uppercase tracking-wide text-muted-foreground">Sort order</span>
+            <span className="text-xs uppercase tracking-wide text-muted-foreground">Ordre de tri</span>
             <input
               name="sortOrder"
               type="number"
@@ -120,10 +120,10 @@ export function PropertyForm({
       </section>
 
       <section className="rounded-xl border border-border bg-card p-6">
-        <h2 className="font-serif text-2xl text-foreground">Location and pricing</h2>
+        <h2 className="font-serif text-2xl text-foreground">Localisation et tarification</h2>
         <div className="mt-6 grid gap-4 md:grid-cols-2">
           <label className="space-y-2">
-            <span className="text-xs uppercase tracking-wide text-muted-foreground">City</span>
+            <span className="text-xs uppercase tracking-wide text-muted-foreground">Ville</span>
             <input
               name="city"
               defaultValue={property?.city}
@@ -134,7 +134,7 @@ export function PropertyForm({
 
           <label className="space-y-2">
             <span className="text-xs uppercase tracking-wide text-muted-foreground">
-              Neighborhood
+              Quartier
             </span>
             <input
               name="neighborhood"
@@ -146,7 +146,7 @@ export function PropertyForm({
 
           <label className="space-y-2 md:col-span-2">
             <span className="text-xs uppercase tracking-wide text-muted-foreground">
-              Full address
+              Adresse complète
             </span>
             <input
               name="fullAddress"
@@ -156,7 +156,7 @@ export function PropertyForm({
           </label>
 
           <label className="space-y-2">
-            <span className="text-xs uppercase tracking-wide text-muted-foreground">Price</span>
+            <span className="text-xs uppercase tracking-wide text-muted-foreground">Prix</span>
             <input
               name="price"
               type="number"
@@ -169,22 +169,22 @@ export function PropertyForm({
           </label>
 
           <label className="space-y-2">
-            <span className="text-xs uppercase tracking-wide text-muted-foreground">Price mode</span>
+            <span className="text-xs uppercase tracking-wide text-muted-foreground">Mode de prix</span>
             <select
               name="priceMode"
               defaultValue={property?.priceMode ?? "sale"}
               className="h-12 w-full rounded-md border border-border bg-background px-4 text-sm"
             >
-              <option value="sale">Purchase</option>
-              <option value="monthly">Monthly rent</option>
-              <option value="daily">Daily rent</option>
-              <option value="custom">Custom</option>
+              <option value="sale">Achat</option>
+              <option value="monthly">Loyer mensuel</option>
+              <option value="daily">Loyer journalier</option>
+              <option value="custom">Personnalisé</option>
             </select>
           </label>
 
           <label className="space-y-2">
             <span className="text-xs uppercase tracking-wide text-muted-foreground">
-              Price suffix
+              Suffixe du prix
             </span>
             <input
               name="priceSuffix"
@@ -195,7 +195,7 @@ export function PropertyForm({
           </label>
 
           <label className="space-y-2">
-            <span className="text-xs uppercase tracking-wide text-muted-foreground">Area</span>
+            <span className="text-xs uppercase tracking-wide text-muted-foreground">Surface</span>
             <input
               name="area"
               type="number"
@@ -207,7 +207,7 @@ export function PropertyForm({
           </label>
 
           <label className="space-y-2">
-            <span className="text-xs uppercase tracking-wide text-muted-foreground">Area unit</span>
+            <span className="text-xs uppercase tracking-wide text-muted-foreground">Unité de surface</span>
             <select
               name="areaUnit"
               defaultValue={property?.areaUnit ?? "sqft"}
@@ -219,7 +219,7 @@ export function PropertyForm({
           </label>
 
           <label className="space-y-2">
-            <span className="text-xs uppercase tracking-wide text-muted-foreground">Bedrooms</span>
+            <span className="text-xs uppercase tracking-wide text-muted-foreground">Chambres</span>
             <input
               name="bedrooms"
               type="number"
@@ -230,7 +230,7 @@ export function PropertyForm({
           </label>
 
           <label className="space-y-2">
-            <span className="text-xs uppercase tracking-wide text-muted-foreground">Bathrooms</span>
+            <span className="text-xs uppercase tracking-wide text-muted-foreground">Salles de bain</span>
             <input
               name="bathrooms"
               type="number"
@@ -247,7 +247,7 @@ export function PropertyForm({
         <div className="mt-6 grid gap-4">
           <label className="space-y-2">
             <span className="text-xs uppercase tracking-wide text-muted-foreground">
-              Short description
+              Description courte
             </span>
             <textarea
               name="shortDescription"
@@ -258,7 +258,7 @@ export function PropertyForm({
           </label>
           <label className="space-y-2">
             <span className="text-xs uppercase tracking-wide text-muted-foreground">
-              Long description
+              Description longue
             </span>
             <textarea
               name="longDescription"
@@ -271,31 +271,31 @@ export function PropertyForm({
       </section>
 
       <section className="rounded-xl border border-border bg-card p-6">
-        <h2 className="font-serif text-2xl text-foreground">Media and features</h2>
+        <h2 className="font-serif text-2xl text-foreground">Médias et caractéristiques</h2>
         <div className="mt-6 grid gap-6">
           <ImageInput
             name="coverImage"
-            label="Cover image"
+            label="Image de couverture"
             defaultValue={property?.coverImage}
             library={mediaAssets}
           />
           <ImageListInput
             name="images"
-            label="Gallery images"
+            label="Images de la galerie"
             defaultValue={property?.images}
             library={mediaAssets}
-            helpText="Add gallery images in display order."
+            helpText="Ajoutez les images de la galerie dans l’ordre d’affichage."
           />
           <StringListInput
             name="features"
-            label="Amenities and features"
+            label="Équipements et caractéristiques"
             defaultValue={property?.features}
-            itemPlaceholder="Add one amenity"
+            itemPlaceholder="Ajouter un équipement"
           />
           <div className="grid gap-4 md:grid-cols-2">
             <label className="space-y-2">
               <span className="text-xs uppercase tracking-wide text-muted-foreground">
-                Video URL
+                URL de la vidéo
               </span>
               <input
                 name="video"
@@ -305,7 +305,7 @@ export function PropertyForm({
             </label>
             <label className="space-y-2">
               <span className="text-xs uppercase tracking-wide text-muted-foreground">
-                3D or virtual tour URL
+                URL de la visite 3D ou virtuelle
               </span>
               <input
                 name="virtualTourUrl"
@@ -318,16 +318,16 @@ export function PropertyForm({
       </section>
 
       <section className="rounded-xl border border-border bg-card p-6">
-        <h2 className="font-serif text-2xl text-foreground">Agent and SEO</h2>
+        <h2 className="font-serif text-2xl text-foreground">Agent et SEO</h2>
         <div className="mt-6 grid gap-4 md:grid-cols-2">
           <label className="space-y-2">
-            <span className="text-xs uppercase tracking-wide text-muted-foreground">Assigned agent</span>
+            <span className="text-xs uppercase tracking-wide text-muted-foreground">Agent assigné</span>
             <select
               name="agentId"
               defaultValue={property?.agentId ? String(property.agentId) : ""}
               className="h-12 w-full rounded-md border border-border bg-background px-4 text-sm"
             >
-              <option value="">No agent assigned</option>
+              <option value="">Aucun agent assigné</option>
               {agents.map((agent) => (
                 <option key={agent.id} value={agent.id}>
                   {agent.name}
@@ -337,7 +337,7 @@ export function PropertyForm({
           </label>
           <div />
           <label className="space-y-2 md:col-span-2">
-            <span className="text-xs uppercase tracking-wide text-muted-foreground">SEO title</span>
+            <span className="text-xs uppercase tracking-wide text-muted-foreground">Titre SEO</span>
             <input
               name="seoTitle"
               defaultValue={property?.seoTitle ?? ""}
@@ -346,7 +346,7 @@ export function PropertyForm({
           </label>
           <label className="space-y-2 md:col-span-2">
             <span className="text-xs uppercase tracking-wide text-muted-foreground">
-              SEO description
+              Description SEO
             </span>
             <textarea
               name="seoDescription"
@@ -357,14 +357,14 @@ export function PropertyForm({
           </label>
           <ImageInput
             name="ogImage"
-            label="Open Graph image"
+            label="Image Open Graph"
             defaultValue={property?.ogImage}
             library={mediaAssets}
           />
         </div>
       </section>
 
-      <AdminFormSubmit label="Save property" />
+      <AdminFormSubmit label="Enregistrer la propriété" />
     </form>
   );
 }

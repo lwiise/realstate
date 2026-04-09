@@ -13,7 +13,7 @@ export function NavigationForm({ navigation, mediaAssets }: NavigationFormProps)
   return (
     <form action={saveNavigationAction} className="space-y-8">
       <section className="rounded-xl border border-border bg-card p-6">
-        <h2 className="font-serif text-2xl text-foreground">Branding</h2>
+        <h2 className="font-serif text-2xl text-foreground">Identité visuelle</h2>
         <div className="mt-6 grid gap-6">
           <ImageInput
             name="logoUrl"
@@ -22,7 +22,7 @@ export function NavigationForm({ navigation, mediaAssets }: NavigationFormProps)
             library={mediaAssets}
           />
           <label className="space-y-2">
-            <span className="text-xs uppercase tracking-wide text-muted-foreground">Logo alt text</span>
+            <span className="text-xs uppercase tracking-wide text-muted-foreground">Texte alternatif du logo</span>
             <input
               name="logoAlt"
               defaultValue={navigation.logoAlt}
@@ -33,27 +33,27 @@ export function NavigationForm({ navigation, mediaAssets }: NavigationFormProps)
       </section>
 
       <section className="rounded-xl border border-border bg-card p-6">
-        <h2 className="font-serif text-2xl text-foreground">Navigation links</h2>
+        <h2 className="font-serif text-2xl text-foreground">Liens de navigation</h2>
         <div className="mt-6">
           <ObjectListInput
             name="links"
-            label="Links"
-            itemLabel="Link"
+            label="Liens"
+            itemLabel="un lien"
             defaultValue={navigation.links.map((link) => ({
               label: link.label,
               href: link.href,
               isEnabled: link.isEnabled ? "true" : "false",
             }))}
             fields={[
-              { key: "label", label: "Label" },
-              { key: "href", label: "Href", type: "url", placeholder: "/buy or /#about" },
-              { key: "isEnabled", label: "Enabled", type: "checkbox" },
+              { key: "label", label: "Libellé" },
+              { key: "href", label: "Lien", type: "url", placeholder: "/buy ou /#about" },
+              { key: "isEnabled", label: "Activé", type: "checkbox" },
             ]}
           />
         </div>
       </section>
 
-      <AdminFormSubmit label="Save navigation" />
+      <AdminFormSubmit label="Enregistrer la navigation" />
     </form>
   );
 }

@@ -56,7 +56,7 @@ export function ImageInput({
             className="inline-flex items-center gap-2 border border-border px-3 py-2 text-xs uppercase tracking-wide text-foreground transition-colors hover:border-gold"
           >
             {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-            Upload
+            Téléverser
           </button>
           {library.length > 0 && (
             <button
@@ -64,7 +64,7 @@ export function ImageInput({
               onClick={() => setShowLibrary((current) => !current)}
               className="border border-border px-3 py-2 text-xs uppercase tracking-wide text-foreground transition-colors hover:border-gold"
             >
-              {showLibrary ? "Hide media" : "Select media"}
+              {showLibrary ? "Masquer les médias" : "Choisir un média"}
             </button>
           )}
         </div>
@@ -96,7 +96,7 @@ export function ImageInput({
           ) : (
             <div className="flex flex-col items-center gap-2 text-muted-foreground">
               <ImageIcon className="h-6 w-6" />
-              <span className="text-xs uppercase tracking-wide">No image selected</span>
+              <span className="text-xs uppercase tracking-wide">Aucune image sélectionnée</span>
             </div>
           )}
         </div>

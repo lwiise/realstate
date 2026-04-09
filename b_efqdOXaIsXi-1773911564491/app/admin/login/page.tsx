@@ -9,12 +9,12 @@ interface AdminLoginPageProps {
 }
 
 const errorCopy: Record<string, string> = {
-  "setup-disabled": "Initial setup has already been completed.",
-  "setup-invalid": "Name, email and a password with at least 8 characters are required.",
-  "missing-fields": "Email and password are required.",
-  "invalid-credentials": "Invalid email or password.",
+  "setup-disabled": "La configuration initiale est déjà terminée.",
+  "setup-invalid": "Le nom, l’e-mail et un mot de passe d’au moins 8 caractères sont requis.",
+  "missing-fields": "L’e-mail et le mot de passe sont requis.",
+  "invalid-credentials": "E-mail ou mot de passe invalide.",
   "auth-unavailable":
-    "The admin panel cannot connect to its database right now. Verify your Netlify and Supabase environment variables, then redeploy.",
+    "Le panneau d’administration ne peut pas se connecter à sa base de données pour le moment. Vérifiez vos variables d’environnement Netlify et Supabase, puis redéployez.",
 };
 
 function AuthShell({
@@ -64,13 +64,13 @@ export default async function AdminLoginPage({ searchParams }: AdminLoginPagePro
 
   return (
     <AuthShell
-      title={!authStatus.available ? "Admin temporarily unavailable" : hasUsers ? "Admin sign in" : "Create the first admin"}
+      title={!authStatus.available ? "Admin temporairement indisponible" : hasUsers ? "Connexion admin" : "Créer le premier compte admin"}
       description={
         !authStatus.available
-          ? "The public website is still online, but the admin area cannot reach its remote database."
+          ? "Le site public reste en ligne, mais l’espace admin ne peut pas atteindre sa base de données distante."
           : hasUsers
-            ? "Access the content management area to update pages, listings, agents, taxonomies and media."
-            : "The CMS has not been initialized yet. Create the first admin account to activate the protected management area."
+            ? "Accédez à l’espace de gestion pour mettre à jour les pages, les annonces, les agents, les taxonomies et les médias."
+            : "Le CMS n’a pas encore été initialisé. Créez le premier compte admin pour activer l’espace de gestion protégé."
       }
     >
       {errorMessage ? (
@@ -83,7 +83,7 @@ export default async function AdminLoginPage({ searchParams }: AdminLoginPagePro
         <form action={loginAdminAction} className="space-y-5">
           <div className="space-y-2">
             <label htmlFor="email" className="text-xs uppercase tracking-wide text-muted-foreground">
-              Email
+              E-mail
             </label>
             <input
               id="email"
@@ -97,7 +97,7 @@ export default async function AdminLoginPage({ searchParams }: AdminLoginPagePro
 
           <div className="space-y-2">
             <label htmlFor="password" className="text-xs uppercase tracking-wide text-muted-foreground">
-              Password
+              Mot de passe
             </label>
             <input
               id="password"
@@ -105,7 +105,7 @@ export default async function AdminLoginPage({ searchParams }: AdminLoginPagePro
               type="password"
               required
               className="h-12 w-full rounded-md border border-border bg-background px-4 text-sm"
-              placeholder="Your password"
+              placeholder="Votre mot de passe"
             />
           </div>
 
@@ -113,14 +113,14 @@ export default async function AdminLoginPage({ searchParams }: AdminLoginPagePro
             type="submit"
             className="cta-dark-button h-12 w-full rounded-md text-sm font-medium uppercase tracking-wide"
           >
-            Sign in
+            Se connecter
           </button>
         </form>
       ) : (
         <form action={setupAdminAction} className="space-y-5">
           <div className="space-y-2">
             <label htmlFor="name" className="text-xs uppercase tracking-wide text-muted-foreground">
-              Name
+              Nom
             </label>
             <input
               id="name"
@@ -128,13 +128,13 @@ export default async function AdminLoginPage({ searchParams }: AdminLoginPagePro
               type="text"
               required
               className="h-12 w-full rounded-md border border-border bg-background px-4 text-sm"
-              placeholder="Admin name"
+              placeholder="Nom de l’administrateur"
             />
           </div>
 
           <div className="space-y-2">
             <label htmlFor="email" className="text-xs uppercase tracking-wide text-muted-foreground">
-              Email
+              E-mail
             </label>
             <input
               id="email"
@@ -148,7 +148,7 @@ export default async function AdminLoginPage({ searchParams }: AdminLoginPagePro
 
           <div className="space-y-2">
             <label htmlFor="password" className="text-xs uppercase tracking-wide text-muted-foreground">
-              Password
+              Mot de passe
             </label>
             <input
               id="password"
@@ -157,7 +157,7 @@ export default async function AdminLoginPage({ searchParams }: AdminLoginPagePro
               minLength={8}
               required
               className="h-12 w-full rounded-md border border-border bg-background px-4 text-sm"
-              placeholder="At least 8 characters"
+              placeholder="Au moins 8 caractères"
             />
           </div>
 
@@ -165,7 +165,7 @@ export default async function AdminLoginPage({ searchParams }: AdminLoginPagePro
             type="submit"
             className="cta-dark-button h-12 w-full rounded-md text-sm font-medium uppercase tracking-wide"
           >
-            Create admin account
+            Créer le compte admin
           </button>
         </form>
       )}

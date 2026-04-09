@@ -38,28 +38,28 @@ interface AdminShellProps {
 }
 
 const primaryLinks = [
-  { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/properties", label: "Properties", icon: Home },
+  { href: "/admin", label: "Tableau de bord", icon: LayoutDashboard },
+  { href: "/admin/properties", label: "Propriétés", icon: Home },
   { href: "/admin/agents", label: "Agents", icon: UserRound },
-  { href: "/admin/property-types", label: "Property types", icon: Building2 },
-  { href: "/admin/transaction-types", label: "Transaction types", icon: Globe },
-  { href: "/admin/media", label: "Media", icon: ImageIcon },
-  { href: "/admin/inquiries", label: "Inquiries", icon: MessageSquareText },
+  { href: "/admin/property-types", label: "Types de propriété", icon: Building2 },
+  { href: "/admin/transaction-types", label: "Types de transaction", icon: Globe },
+  { href: "/admin/media", label: "Médias", icon: ImageIcon },
+  { href: "/admin/inquiries", label: "Demandes", icon: MessageSquareText },
 ];
 
 const contentLinks = [
-  { href: "/admin/content/home", label: "Homepage" },
+  { href: "/admin/content/home", label: "Accueil" },
   { href: "/admin/content/buy", label: "Acheter" },
   { href: "/admin/content/rent", label: "Louer" },
-  { href: "/admin/content/daily-rent", label: "Daily rent" },
-  { href: "/admin/content/about", label: "About" },
+  { href: "/admin/content/daily-rent", label: "Location journalière" },
+  { href: "/admin/content/about", label: "À propos" },
   { href: "/admin/content/contact", label: "Contact" },
 ];
 
 const settingsLinks = [
-  { href: "/admin/navigation", label: "Navbar", icon: MenuSquare },
-  { href: "/admin/footer", label: "Footer", icon: FileText },
-  { href: "/admin/settings", label: "Site settings", icon: Settings },
+  { href: "/admin/navigation", label: "Barre de navigation", icon: MenuSquare },
+  { href: "/admin/footer", label: "Pied de page", icon: FileText },
+  { href: "/admin/settings", label: "Paramètres du site", icon: Settings },
 ];
 
 export function AdminShell({ siteName, userName, children }: AdminShellProps) {
@@ -79,7 +79,7 @@ export function AdminShell({ siteName, userName, children }: AdminShellProps) {
 
         <SidebarContent>
           <SidebarGroup>
-            <SidebarGroupLabel>Management</SidebarGroupLabel>
+            <SidebarGroupLabel>Gestion</SidebarGroupLabel>
             <SidebarMenu>
               {primaryLinks.map((item) => {
                 const Icon = item.icon;
@@ -98,7 +98,7 @@ export function AdminShell({ siteName, userName, children }: AdminShellProps) {
           </SidebarGroup>
 
           <SidebarGroup>
-            <SidebarGroupLabel>Page content</SidebarGroupLabel>
+            <SidebarGroupLabel>Contenu des pages</SidebarGroupLabel>
             <SidebarMenu>
               {contentLinks.map((item) => (
                 <SidebarMenuItem key={item.href}>
@@ -135,7 +135,7 @@ export function AdminShell({ siteName, userName, children }: AdminShellProps) {
 
         <SidebarFooter className="border-t border-sidebar-border p-3">
           <div className="rounded-md border border-sidebar-border p-3">
-            <p className="text-xs uppercase tracking-wide text-sidebar-foreground/60">Signed in</p>
+            <p className="text-xs uppercase tracking-wide text-sidebar-foreground/60">Connecté</p>
             <p className="mt-1 text-sm font-medium text-sidebar-foreground">{userName}</p>
           </div>
           <form action={logoutAdminAction}>
@@ -144,7 +144,7 @@ export function AdminShell({ siteName, userName, children }: AdminShellProps) {
               className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-md border border-sidebar-border px-3 py-2 text-xs uppercase tracking-wide transition-colors hover:border-gold"
             >
               <LogOut className="h-4 w-4" />
-              Logout
+              Déconnexion
             </button>
           </form>
         </SidebarFooter>
@@ -154,8 +154,8 @@ export function AdminShell({ siteName, userName, children }: AdminShellProps) {
         <header className="sticky top-0 z-20 flex h-16 items-center gap-4 border-b border-border bg-background/95 px-4 backdrop-blur md:px-6">
           <SidebarTrigger />
           <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Admin</p>
-            <p className="text-sm font-medium text-foreground">Content management</p>
+            <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Administration</p>
+            <p className="text-sm font-medium text-foreground">Gestion du contenu</p>
           </div>
         </header>
         <div className="flex-1 p-4 md:p-6">{children}</div>

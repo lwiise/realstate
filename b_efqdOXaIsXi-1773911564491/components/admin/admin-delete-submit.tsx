@@ -8,8 +8,8 @@ interface AdminDeleteSubmitProps {
 }
 
 export function AdminDeleteSubmit({
-  idleLabel = "Delete",
-  pendingLabel = "Deleting...",
+  idleLabel = "Supprimer",
+  pendingLabel = "Suppression...",
 }: AdminDeleteSubmitProps) {
   const { pending } = useFormStatus();
 

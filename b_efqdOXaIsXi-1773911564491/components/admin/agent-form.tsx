@@ -14,10 +14,10 @@ export function AgentForm({ agent, mediaAssets }: AgentFormProps) {
       {agent ? <input type="hidden" name="id" value={agent.id} /> : null}
 
       <section className="rounded-xl border border-border bg-card p-6">
-        <h2 className="font-serif text-2xl text-foreground">Agent profile</h2>
+        <h2 className="font-serif text-2xl text-foreground">Profil de l’agent</h2>
         <div className="mt-6 grid gap-4 md:grid-cols-2">
           <label className="space-y-2">
-            <span className="text-xs uppercase tracking-wide text-muted-foreground">Name</span>
+            <span className="text-xs uppercase tracking-wide text-muted-foreground">Nom</span>
             <input
               name="name"
               defaultValue={agent?.name}
@@ -35,7 +35,7 @@ export function AgentForm({ agent, mediaAssets }: AgentFormProps) {
             />
           </label>
           <label className="space-y-2">
-            <span className="text-xs uppercase tracking-wide text-muted-foreground">Role</span>
+            <span className="text-xs uppercase tracking-wide text-muted-foreground">Rôle</span>
             <input
               name="role"
               defaultValue={agent?.role}
@@ -44,7 +44,7 @@ export function AgentForm({ agent, mediaAssets }: AgentFormProps) {
             />
           </label>
           <label className="space-y-2">
-            <span className="text-xs uppercase tracking-wide text-muted-foreground">Phone</span>
+            <span className="text-xs uppercase tracking-wide text-muted-foreground">Téléphone</span>
             <input
               name="phone"
               defaultValue={agent?.phone}
@@ -53,7 +53,7 @@ export function AgentForm({ agent, mediaAssets }: AgentFormProps) {
             />
           </label>
           <label className="space-y-2">
-            <span className="text-xs uppercase tracking-wide text-muted-foreground">Email</span>
+            <span className="text-xs uppercase tracking-wide text-muted-foreground">E-mail</span>
             <input
               name="email"
               type="email"
@@ -72,10 +72,10 @@ export function AgentForm({ agent, mediaAssets }: AgentFormProps) {
           </label>
           <label className="flex items-center gap-3 rounded-md border border-border px-4 py-3">
             <input type="checkbox" name="isPublished" defaultChecked={agent?.isPublished ?? true} />
-            <span className="text-sm text-foreground">Published</span>
+            <span className="text-sm text-foreground">Publié</span>
           </label>
           <label className="space-y-2">
-            <span className="text-xs uppercase tracking-wide text-muted-foreground">Sort order</span>
+            <span className="text-xs uppercase tracking-wide text-muted-foreground">Ordre de tri</span>
             <input
               name="sortOrder"
               type="number"
@@ -87,16 +87,16 @@ export function AgentForm({ agent, mediaAssets }: AgentFormProps) {
       </section>
 
       <section className="rounded-xl border border-border bg-card p-6">
-        <h2 className="font-serif text-2xl text-foreground">Biography and media</h2>
+        <h2 className="font-serif text-2xl text-foreground">Biographie et médias</h2>
         <div className="mt-6 grid gap-6">
           <ImageInput
             name="photoUrl"
-            label="Agent photo"
+            label="Photo de l’agent"
             defaultValue={agent?.photoUrl}
             library={mediaAssets}
           />
           <label className="space-y-2">
-            <span className="text-xs uppercase tracking-wide text-muted-foreground">Bio</span>
+            <span className="text-xs uppercase tracking-wide text-muted-foreground">Biographie</span>
             <textarea
               name="bio"
               rows={6}
@@ -105,7 +105,7 @@ export function AgentForm({ agent, mediaAssets }: AgentFormProps) {
             />
           </label>
           <label className="space-y-2">
-            <span className="text-xs uppercase tracking-wide text-muted-foreground">SEO title</span>
+            <span className="text-xs uppercase tracking-wide text-muted-foreground">Titre SEO</span>
             <input
               name="seoTitle"
               defaultValue={agent?.seoTitle ?? ""}
@@ -113,7 +113,7 @@ export function AgentForm({ agent, mediaAssets }: AgentFormProps) {
             />
           </label>
           <label className="space-y-2">
-            <span className="text-xs uppercase tracking-wide text-muted-foreground">SEO description</span>
+            <span className="text-xs uppercase tracking-wide text-muted-foreground">Description SEO</span>
             <textarea
               name="seoDescription"
               rows={4}
@@ -124,7 +124,7 @@ export function AgentForm({ agent, mediaAssets }: AgentFormProps) {
         </div>
       </section>
 
-      <AdminFormSubmit label="Save agent" />
+      <AdminFormSubmit label="Enregistrer l’agent" />
     </form>
   );
 }

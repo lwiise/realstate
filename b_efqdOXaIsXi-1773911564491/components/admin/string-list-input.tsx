@@ -15,7 +15,7 @@ export function StringListInput({
   name,
   label,
   defaultValue = [],
-  itemPlaceholder = "Add an item",
+  itemPlaceholder = "Ajouter un élément",
   helpText,
 }: StringListInputProps) {
   const [items, setItems] = useState<string[]>(defaultValue.length > 0 ? defaultValue : [""]);
@@ -60,7 +60,7 @@ export function StringListInput({
               type="button"
               onClick={() => removeItem(index)}
               className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-border text-muted-foreground transition-colors hover:border-destructive hover:text-destructive"
-              aria-label="Remove item"
+              aria-label="Supprimer l’élément"
             >
               <Trash2 className="h-4 w-4" />
             </button>
@@ -74,7 +74,7 @@ export function StringListInput({
         className="inline-flex items-center gap-2 border border-border px-3 py-2 text-xs uppercase tracking-wide transition-colors hover:border-gold"
       >
         <Plus className="h-4 w-4" />
-        Add item
+        Ajouter un élément
       </button>
     </div>
   );

@@ -26,11 +26,11 @@ export function TaxonomyForm(props: TaxonomyFormProps) {
 
       <section className="rounded-xl border border-border bg-card p-6">
         <h2 className="font-serif text-2xl text-foreground">
-          {mode === "property" ? "Property type" : "Transaction type"}
+          {mode === "property" ? "Type de propriété" : "Type de transaction"}
         </h2>
         <div className="mt-6 grid gap-4 md:grid-cols-2">
           <label className="space-y-2">
-            <span className="text-xs uppercase tracking-wide text-muted-foreground">Label</span>
+            <span className="text-xs uppercase tracking-wide text-muted-foreground">Libellé</span>
             <input
               name="label"
               defaultValue={item?.label}
@@ -59,7 +59,7 @@ export function TaxonomyForm(props: TaxonomyFormProps) {
             />
           </label>
           <label className="space-y-2">
-            <span className="text-xs uppercase tracking-wide text-muted-foreground">Sort order</span>
+            <span className="text-xs uppercase tracking-wide text-muted-foreground">Ordre de tri</span>
             <input
               name="sortOrder"
               type="number"
@@ -69,17 +69,17 @@ export function TaxonomyForm(props: TaxonomyFormProps) {
           </label>
           <label className="flex items-center gap-3 rounded-md border border-border px-4 py-3">
             <input type="checkbox" name="isActive" defaultChecked={item?.isActive ?? true} />
-            <span className="text-sm text-foreground">Active</span>
+            <span className="text-sm text-foreground">Actif</span>
           </label>
         </div>
       </section>
 
       <section className="rounded-xl border border-border bg-card p-6">
-        <h2 className="font-serif text-2xl text-foreground">Media</h2>
+        <h2 className="font-serif text-2xl text-foreground">Médias</h2>
         <div className="mt-6">
           <ImageInput
             name="imageUrl"
-            label="Card image"
+            label="Image de carte"
             defaultValue={item?.imageUrl}
             library={mediaAssets}
           />
@@ -88,11 +88,11 @@ export function TaxonomyForm(props: TaxonomyFormProps) {
 
       {mode === "transaction" ? (
         <section className="rounded-xl border border-border bg-card p-6">
-          <h2 className="font-serif text-2xl text-foreground">Routing and navigation</h2>
+          <h2 className="font-serif text-2xl text-foreground">Routage et navigation</h2>
           <div className="mt-6 grid gap-4 md:grid-cols-2">
             <label className="space-y-2">
               <span className="text-xs uppercase tracking-wide text-muted-foreground">
-                Route path
+                Chemin de l’URL
               </span>
               <input
                 name="routePath"
@@ -103,7 +103,7 @@ export function TaxonomyForm(props: TaxonomyFormProps) {
             </label>
             <label className="space-y-2">
               <span className="text-xs uppercase tracking-wide text-muted-foreground">
-                Navigation label
+                Libellé de navigation
               </span>
               <input
                 name="navLabel"
@@ -113,7 +113,7 @@ export function TaxonomyForm(props: TaxonomyFormProps) {
             </label>
             <label className="space-y-2">
               <span className="text-xs uppercase tracking-wide text-muted-foreground">
-                Price suffix
+                Suffixe du prix
               </span>
               <input
                 name="priceSuffix"
@@ -128,14 +128,14 @@ export function TaxonomyForm(props: TaxonomyFormProps) {
                 name="showInNavigation"
                 defaultChecked={item?.showInNavigation ?? true}
               />
-              <span className="text-sm text-foreground">Show in navigation</span>
+              <span className="text-sm text-foreground">Afficher dans la navigation</span>
             </label>
           </div>
         </section>
       ) : null}
 
       <AdminFormSubmit
-        label={`Save ${mode === "property" ? "property type" : "transaction type"}`}
+        label={`Enregistrer ${mode === "property" ? "le type de propriété" : "le type de transaction"}`}
       />
     </form>
   );

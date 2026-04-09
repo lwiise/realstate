@@ -6,11 +6,11 @@ export default async function AdminMediaPage() {
   return (
     <div className="space-y-6">
       <div>
-        <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground">Media</p>
-        <h1 className="mt-2 font-serif text-3xl text-foreground">Media library</h1>
+        <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground">Médias</p>
+        <h1 className="mt-2 font-serif text-3xl text-foreground">Médiathèque</h1>
         <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-          Upload media directly from image fields in the editors. Every uploaded asset appears here
-          and can be reused across pages, listings and agents.
+          Téléversez des médias directement depuis les champs image des éditeurs. Chaque ressource
+          téléversée apparaît ici et peut être réutilisée sur les pages, les annonces et les agents.
         </p>
       </div>
 

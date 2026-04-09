@@ -9,7 +9,7 @@ const SESSION_DURATION_DAYS = 14;
 let remoteAuthWarningShown = false;
 
 export class AdminAuthUnavailableError extends Error {
-  constructor(message = "Admin authentication storage is unavailable.") {
+  constructor(message = "Le stockage de l’authentification admin est indisponible.") {
     super(message);
     this.name = "AdminAuthUnavailableError";
   }
@@ -59,7 +59,7 @@ function formatErrorMessage(error: unknown) {
     return error.message;
   }
 
-  return "Unknown admin auth error";
+  return "Erreur d’authentification admin inconnue";
 }
 
 function logRemoteAuthFailure(error: unknown) {
@@ -118,7 +118,7 @@ export async function getAdminAuthStatus() {
       available: false,
       hasUsers: false,
       message:
-        "The admin panel cannot connect to its database right now. Verify DATABASE_URL and Supabase environment variables in Netlify, then redeploy.",
+        "Le panneau d’administration ne peut pas se connecter à sa base de données pour le moment. Vérifiez DATABASE_URL et les variables d’environnement Supabase dans Netlify, puis redéployez.",
     };
   }
 }
@@ -210,7 +210,7 @@ export async function createInitialAdminUser(input: {
   password: string;
 }) {
   if ((await countAdminUsers()) > 0) {
-    throw new Error("Admin user already exists.");
+    throw new Error("Un administrateur existe déjà.");
   }
 
   const timestamp = new Date().toISOString();

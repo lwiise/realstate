@@ -16,6 +16,15 @@ const validPageKeys: PageKey[] = [
   "contact",
 ];
 
+const pageLabels: Record<PageKey, string> = {
+  home: "l’accueil",
+  buy: "la page acheter",
+  rent: "la page louer",
+  "daily-rent": "la location journalière",
+  about: "la page à propos",
+  contact: "la page contact",
+};
+
 export default async function AdminPageContentPage({
   params,
 }: AdminPageContentPageProps) {
@@ -31,9 +40,9 @@ export default async function AdminPageContentPage({
   return (
     <div className="space-y-6">
       <div>
-        <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground">Page content</p>
+        <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground">Contenu des pages</p>
         <h1 className="mt-2 font-serif text-3xl text-foreground">
-          Edit {key === "daily-rent" ? "daily rent" : key}
+          Modifier {pageLabels[key]}
         </h1>
       </div>
 

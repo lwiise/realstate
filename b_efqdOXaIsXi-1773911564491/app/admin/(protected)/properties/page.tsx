@@ -5,19 +5,24 @@ import { getProperties } from "@/lib/admin-cms";
 
 export default async function AdminPropertiesPage() {
   const properties = await getProperties({}, { includeDrafts: true });
+  const statusLabels: Record<string, string> = {
+    draft: "Brouillon",
+    published: "Publié",
+    archived: "Archivé",
+  };
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground">Properties</p>
-          <h1 className="mt-2 font-serif text-3xl text-foreground">Listing management</h1>
+          <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground">Propriétés</p>
+          <h1 className="mt-2 font-serif text-3xl text-foreground">Gestion des annonces</h1>
         </div>
         <Link
           href="/admin/properties/new"
           className="cta-dark-button inline-flex w-fit rounded-md px-4 py-3 text-xs uppercase tracking-wide"
         >
-          Add property
+          Ajouter une propriété
         </Link>
       </div>
 
@@ -26,12 +31,12 @@ export default async function AdminPropertiesPage() {
           <table className="min-w-full divide-y divide-border text-sm">
             <thead className="bg-secondary">
               <tr className="text-left">
-                <th className="px-4 py-3">Title</th>
+                <th className="px-4 py-3">Titre</th>
                 <th className="px-4 py-3">Transaction</th>
                 <th className="px-4 py-3">Type</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3">Featured</th>
-                <th className="px-4 py-3">Location</th>
+                <th className="px-4 py-3">Statut</th>
+                <th className="px-4 py-3">Mise en avant</th>
+                <th className="px-4 py-3">Localisation</th>
                 <th className="px-4 py-3">Actions</th>
               </tr>
             </thead>
@@ -46,9 +51,11 @@ export default async function AdminPropertiesPage() {
                   </td>
                   <td className="px-4 py-4 text-muted-foreground">{property.transactionType}</td>
                   <td className="px-4 py-4 text-muted-foreground">{property.propertyType}</td>
-                  <td className="px-4 py-4 capitalize text-muted-foreground">{property.status}</td>
+                  <td className="px-4 py-4 capitalize text-muted-foreground">
+                    {statusLabels[property.status] ?? property.status}
+                  </td>
                   <td className="px-4 py-4 text-muted-foreground">
-                    {property.featured ? "Yes" : "No"}
+                    {property.featured ? "Oui" : "Non"}
                   </td>
                   <td className="px-4 py-4 text-muted-foreground">
                     {property.city}, {property.neighborhood}
@@ -59,7 +66,7 @@ export default async function AdminPropertiesPage() {
                         href={`/admin/properties/${property.id}`}
                         className="rounded-md border border-border px-3 py-2 text-xs uppercase tracking-wide transition-colors hover:border-gold"
                       >
-                        Edit
+                        Modifier
                       </Link>
                       <form action={deletePropertyAction}>
                         <input type="hidden" name="id" value={property.id} />

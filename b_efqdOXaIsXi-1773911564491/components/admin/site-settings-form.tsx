@@ -13,10 +13,10 @@ export function SiteSettingsForm({ settings, mediaAssets }: SiteSettingsFormProp
   return (
     <form action={saveSiteSettingsAction} className="space-y-8">
       <section className="rounded-xl border border-border bg-card p-6">
-        <h2 className="font-serif text-2xl text-foreground">Global site settings</h2>
+        <h2 className="font-serif text-2xl text-foreground">Paramètres globaux du site</h2>
         <div className="mt-6 grid gap-4 md:grid-cols-2">
           <label className="space-y-2">
-            <span className="text-xs uppercase tracking-wide text-muted-foreground">Site name</span>
+            <span className="text-xs uppercase tracking-wide text-muted-foreground">Nom du site</span>
             <input
               name="siteName"
               defaultValue={settings.siteName}
@@ -24,7 +24,7 @@ export function SiteSettingsForm({ settings, mediaAssets }: SiteSettingsFormProp
             />
           </label>
           <label className="space-y-2">
-            <span className="text-xs uppercase tracking-wide text-muted-foreground">Site URL</span>
+            <span className="text-xs uppercase tracking-wide text-muted-foreground">URL du site</span>
             <input
               name="siteUrl"
               defaultValue={settings.siteUrl}
@@ -32,7 +32,7 @@ export function SiteSettingsForm({ settings, mediaAssets }: SiteSettingsFormProp
             />
           </label>
           <label className="space-y-2 md:col-span-2">
-            <span className="text-xs uppercase tracking-wide text-muted-foreground">Site description</span>
+            <span className="text-xs uppercase tracking-wide text-muted-foreground">Description du site</span>
             <textarea
               name="siteDescription"
               rows={4}
@@ -42,9 +42,9 @@ export function SiteSettingsForm({ settings, mediaAssets }: SiteSettingsFormProp
           </label>
           <StringListInput
             name="siteKeywords"
-            label="SEO keywords"
+            label="Mots-clés SEO"
             defaultValue={settings.siteKeywords}
-            itemPlaceholder="Add one keyword"
+            itemPlaceholder="Ajouter un mot-clé"
           />
           <div />
           <ImageInput
@@ -55,12 +55,12 @@ export function SiteSettingsForm({ settings, mediaAssets }: SiteSettingsFormProp
           />
           <ImageInput
             name="defaultOgImage"
-            label="Default OG image"
+            label="Image OG par défaut"
             defaultValue={settings.defaultOgImage}
             library={mediaAssets}
           />
           <label className="space-y-2 md:col-span-2">
-            <span className="text-xs uppercase tracking-wide text-muted-foreground">Logo alt text</span>
+            <span className="text-xs uppercase tracking-wide text-muted-foreground">Texte alternatif du logo</span>
             <input
               name="logoAlt"
               defaultValue={settings.logoAlt}
@@ -71,10 +71,10 @@ export function SiteSettingsForm({ settings, mediaAssets }: SiteSettingsFormProp
       </section>
 
       <section className="rounded-xl border border-border bg-card p-6">
-        <h2 className="font-serif text-2xl text-foreground">Contact and localization</h2>
+        <h2 className="font-serif text-2xl text-foreground">Contact et localisation</h2>
         <div className="mt-6 grid gap-4 md:grid-cols-2">
           <label className="space-y-2">
-            <span className="text-xs uppercase tracking-wide text-muted-foreground">Contact email</span>
+            <span className="text-xs uppercase tracking-wide text-muted-foreground">E-mail de contact</span>
             <input
               name="contactEmail"
               type="email"
@@ -83,7 +83,7 @@ export function SiteSettingsForm({ settings, mediaAssets }: SiteSettingsFormProp
             />
           </label>
           <label className="space-y-2">
-            <span className="text-xs uppercase tracking-wide text-muted-foreground">Contact phone</span>
+            <span className="text-xs uppercase tracking-wide text-muted-foreground">Téléphone de contact</span>
             <input
               name="contactPhone"
               defaultValue={settings.contactPhone}
@@ -91,7 +91,7 @@ export function SiteSettingsForm({ settings, mediaAssets }: SiteSettingsFormProp
             />
           </label>
           <label className="space-y-2">
-            <span className="text-xs uppercase tracking-wide text-muted-foreground">WhatsApp number</span>
+            <span className="text-xs uppercase tracking-wide text-muted-foreground">Numéro WhatsApp</span>
             <input
               name="whatsappNumber"
               defaultValue={settings.whatsappNumber}
@@ -99,7 +99,7 @@ export function SiteSettingsForm({ settings, mediaAssets }: SiteSettingsFormProp
             />
           </label>
           <label className="space-y-2">
-            <span className="text-xs uppercase tracking-wide text-muted-foreground">Company address</span>
+            <span className="text-xs uppercase tracking-wide text-muted-foreground">Adresse de l’entreprise</span>
             <input
               name="companyAddress"
               defaultValue={settings.companyAddress}
@@ -107,7 +107,7 @@ export function SiteSettingsForm({ settings, mediaAssets }: SiteSettingsFormProp
             />
           </label>
           <label className="space-y-2">
-            <span className="text-xs uppercase tracking-wide text-muted-foreground">Currency code</span>
+            <span className="text-xs uppercase tracking-wide text-muted-foreground">Code devise</span>
             <input
               name="currencyCode"
               defaultValue={settings.currencyCode}
@@ -115,7 +115,7 @@ export function SiteSettingsForm({ settings, mediaAssets }: SiteSettingsFormProp
             />
           </label>
           <label className="space-y-2">
-            <span className="text-xs uppercase tracking-wide text-muted-foreground">Currency locale</span>
+            <span className="text-xs uppercase tracking-wide text-muted-foreground">Paramètre régional de la devise</span>
             <input
               name="currencyLocale"
               defaultValue={settings.currencyLocale}
@@ -123,7 +123,7 @@ export function SiteSettingsForm({ settings, mediaAssets }: SiteSettingsFormProp
             />
           </label>
           <label className="space-y-2 md:col-span-2">
-            <span className="text-xs uppercase tracking-wide text-muted-foreground">Copyright text</span>
+            <span className="text-xs uppercase tracking-wide text-muted-foreground">Texte de copyright</span>
             <input
               name="copyrightText"
               defaultValue={settings.copyrightText}
@@ -134,10 +134,10 @@ export function SiteSettingsForm({ settings, mediaAssets }: SiteSettingsFormProp
       </section>
 
       <section className="rounded-xl border border-border bg-card p-6">
-        <h2 className="font-serif text-2xl text-foreground">Default SEO</h2>
+        <h2 className="font-serif text-2xl text-foreground">SEO par défaut</h2>
         <div className="mt-6 grid gap-4">
           <label className="space-y-2">
-            <span className="text-xs uppercase tracking-wide text-muted-foreground">Default SEO title</span>
+            <span className="text-xs uppercase tracking-wide text-muted-foreground">Titre SEO par défaut</span>
             <input
               name="defaultSeoTitle"
               defaultValue={settings.defaultSeoTitle}
@@ -145,7 +145,7 @@ export function SiteSettingsForm({ settings, mediaAssets }: SiteSettingsFormProp
             />
           </label>
           <label className="space-y-2">
-            <span className="text-xs uppercase tracking-wide text-muted-foreground">Default SEO description</span>
+            <span className="text-xs uppercase tracking-wide text-muted-foreground">Description SEO par défaut</span>
             <textarea
               name="defaultSeoDescription"
               rows={4}
@@ -156,7 +156,7 @@ export function SiteSettingsForm({ settings, mediaAssets }: SiteSettingsFormProp
         </div>
       </section>
 
-      <AdminFormSubmit label="Save site settings" />
+      <AdminFormSubmit label="Enregistrer les paramètres du site" />
     </form>
   );
 }

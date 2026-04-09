@@ -11,13 +11,13 @@ export default async function AdminAgentsPage() {
       <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
           <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground">Agents</p>
-          <h1 className="mt-2 font-serif text-3xl text-foreground">Agent management</h1>
+          <h1 className="mt-2 font-serif text-3xl text-foreground">Gestion des agents</h1>
         </div>
         <Link
           href="/admin/agents/new"
           className="cta-dark-button inline-flex w-fit rounded-md px-4 py-3 text-xs uppercase tracking-wide"
         >
-          Add agent
+          Ajouter un agent
         </Link>
       </div>
 
@@ -26,10 +26,10 @@ export default async function AdminAgentsPage() {
           <table className="min-w-full divide-y divide-border text-sm">
             <thead className="bg-secondary">
               <tr className="text-left">
-                <th className="px-4 py-3">Name</th>
-                <th className="px-4 py-3">Role</th>
+                <th className="px-4 py-3">Nom</th>
+                <th className="px-4 py-3">Rôle</th>
                 <th className="px-4 py-3">Contact</th>
-                <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3">Statut</th>
                 <th className="px-4 py-3">Actions</th>
               </tr>
             </thead>
@@ -48,7 +48,7 @@ export default async function AdminAgentsPage() {
                     <div className="text-xs">{agent.email}</div>
                   </td>
                   <td className="px-4 py-4 text-muted-foreground">
-                    {agent.isPublished ? "Published" : "Hidden"}
+                    {agent.isPublished ? "Publié" : "Masqué"}
                   </td>
                   <td className="px-4 py-4">
                     <div className="flex flex-wrap gap-2">
@@ -56,7 +56,7 @@ export default async function AdminAgentsPage() {
                         href={`/admin/agents/${agent.id}`}
                         className="rounded-md border border-border px-3 py-2 text-xs uppercase tracking-wide transition-colors hover:border-gold"
                       >
-                        Edit
+                        Modifier
                       </Link>
                       <form action={deleteAgentAction}>
                         <input type="hidden" name="id" value={agent.id} />
