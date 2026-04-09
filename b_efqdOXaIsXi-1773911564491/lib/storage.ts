@@ -14,7 +14,12 @@ function sanitizeFileName(value: string) {
   return value.replace(/[^a-zA-Z0-9._-]/g, "-").replace(/-+/g, "-");
 }
 
-function resolveMimeType(file: File) {
+function buildAssetFilename(originalName: string) {
+  const extension = path.extname(originalName) || ".jpg";
+  return sanitizeFileName(`${Date.now()}-${randomUUID()}${extension}`);
+}
+
+function resolveMimeType(file: { name: string; type?: string | null }) {
   if (file.type) {
     return file.type;
   }
@@ -133,9 +138,43 @@ export async function uploadCmsImage(file: File) {
   return uploadCmsAsset(file);
 }
 
+export async function createSignedCmsAssetUpload(input: {
+  originalName: string;
+  contentType?: string | null;
+}) {
+  if (!isRemoteStorageConfigured()) {
+    throw new Error("Le stockage distant n'est pas configure pour les uploads signes.");
+  }
+
+  await ensureRemoteStorage();
+
+  const bucket = getStorageBucket();
+  const filename = buildAssetFilename(input.originalName);
+  const mimeType = resolveMimeType(
+    { name: input.originalName, type: input.contentType ?? undefined }
+  );
+  const filePath = `cms/${new Date().toISOString().slice(0, 10)}/${filename}`;
+  const supabase = getSupabaseAdmin();
+  const signed = await supabase.storage.from(bucket).createSignedUploadUrl(filePath);
+
+  if (signed.error) {
+    throw signed.error;
+  }
+
+  const { data } = supabase.storage.from(bucket).getPublicUrl(filePath);
+
+  return {
+    signedUrl: signed.data.signedUrl,
+    token: signed.data.token,
+    path: signed.data.path,
+    filename,
+    url: data.publicUrl,
+    mimeType,
+  };
+}
+
 export async function uploadCmsAsset(file: File) {
-  const extension = path.extname(file.name) || ".jpg";
-  const fileName = sanitizeFileName(`${Date.now()}-${randomUUID()}${extension}`);
+  const fileName = buildAssetFilename(file.name);
   const contentType = resolveMimeType(file);
 
   if (process.env.NETLIFY === "true" && !isRemoteStorageConfigured()) {

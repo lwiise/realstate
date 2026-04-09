@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ImagePlus, Loader2, Trash2 } from "lucide-react";
+import { uploadAdminAsset } from "@/components/admin/admin-asset-upload";
 import { useAdminUploads } from "@/components/admin/admin-upload-context";
 import type { MediaAsset } from "@/lib/cms-types";
 
@@ -110,27 +111,7 @@ export function ImageListInput({
     startUpload();
 
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const response = await fetch("/api/admin/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      const responsePayload = (await response.json()) as {
-        url?: string;
-        error?: string;
-        warning?: string;
-      };
-
-      if (!response.ok) {
-        throw new Error(responsePayload.error || `Upload failed with status ${response.status}`);
-      }
-
-      if (!responsePayload.url) {
-        throw new Error("La reponse d'upload ne contient pas d'URL.");
-      }
+      const responsePayload = await uploadAdminAsset(file);
 
       clearTemporaryPreview(itemId);
       setItems((current) =>
