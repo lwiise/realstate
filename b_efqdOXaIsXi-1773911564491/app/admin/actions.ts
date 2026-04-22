@@ -18,12 +18,15 @@ import type {
   PageRecord,
   Property,
   SiteSettings,
+  TransactionType,
 } from "@/lib/cms-types";
 import {
   deleteAgent,
   deleteProperty,
   deletePropertyType,
   deleteTransactionType,
+  getProperties,
+  getPropertyById,
   getTransactionTypes,
   updateFooterSettings,
   updateNavigationSettings,
@@ -35,6 +38,7 @@ import {
   upsertTransactionType,
 } from "@/lib/cms";
 import { getSeedPage } from "@/lib/seed-data";
+import { slugify } from "@/lib/slug";
 
 function getValue(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim();
@@ -123,6 +127,26 @@ function derivePriceModeFromTransactionType(transactionType?: {
   return "sale";
 }
 
+async function buildUniquePropertySlug(rawSlug: string, title: string, currentId: number | null) {
+  const baseSlug = slugify(rawSlug || title);
+  const properties = (await getProperties({}, { includeDrafts: true })) as Property[];
+  const usedSlugs = new Set(
+    properties
+      .filter((property) => property.id !== currentId)
+      .map((property) => property.slug.toLowerCase())
+  );
+
+  let nextSlug = baseSlug;
+  let suffix = 2;
+
+  while (usedSlugs.has(nextSlug.toLowerCase())) {
+    nextSlug = `${baseSlug}-${suffix}`;
+    suffix += 1;
+  }
+
+  return nextSlug;
+}
+
 export async function setupAdminAction(formData: FormData) {
   try {
     if ((await countAdminUsers()) > 0) {
@@ -192,24 +216,30 @@ export async function savePropertyAction(formData: FormData) {
   await requireAdminUser();
 
   const id = getNumberValue(formData, "id");
-  const slug = getValue(formData, "slug");
+  const title = getValue(formData, "title");
+  const rawSlug = getValue(formData, "slug");
   const transactionTypeId = getNumberValue(formData, "transactionTypeId");
   const propertyTypeId = getNumberValue(formData, "propertyTypeId");
 
-  if (!getValue(formData, "title") || !slug || !transactionTypeId || !propertyTypeId) {
+  if (!title || !transactionTypeId || !propertyTypeId) {
     redirect(`/admin/properties${id ? `/${id}` : "/new"}?error=missing-fields`);
   }
 
-  const transactionTypes = await getTransactionTypes({ includeInactive: true });
+  const [transactionTypes, existingProperty]: [TransactionType[], Property | undefined] = await Promise.all([
+    getTransactionTypes({ includeInactive: true }),
+    id ? getPropertyById(id) : Promise.resolve(undefined),
+  ]);
   const transactionType = transactionTypes.find((item) => item.id === transactionTypeId);
 
   if (!transactionType) {
     redirect(`/admin/properties${id ? `/${id}` : "/new"}?error=missing-fields`);
   }
 
+  const slug = await buildUniquePropertySlug(rawSlug, title, id);
+
   const savedId = await upsertProperty({
     id: id ?? undefined,
-    title: getValue(formData, "title"),
+    title,
     slug,
     transactionTypeId,
     propertyTypeId,
@@ -241,6 +271,9 @@ export async function savePropertyAction(formData: FormData) {
   });
 
   revalidateSite(slug);
+  if (existingProperty?.slug && existingProperty.slug !== slug) {
+    revalidateSite(existingProperty.slug);
+  }
   redirect(withSavedParam(`/admin/properties/${savedId}`));
 }
 

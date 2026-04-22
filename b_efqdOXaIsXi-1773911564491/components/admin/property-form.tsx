@@ -49,7 +49,7 @@ export function PropertyForm({
               <input
                 name="slug"
                 defaultValue={property?.slug}
-                required
+                placeholder="genere automatiquement si vide"
                 className="h-12 w-full rounded-md border border-border bg-background px-4 text-sm"
               />
             </label>

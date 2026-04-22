@@ -16,7 +16,6 @@ import * as localCms from "@/lib/cms-local";
 import * as remoteCms from "@/lib/cms-remote";
 import { isRemoteDatabaseConfigured } from "@/lib/remote-db";
 
-let remoteReadFailed = false;
 let remoteReadWarningShown = false;
 
 function useRemoteCms() {
@@ -24,7 +23,7 @@ function useRemoteCms() {
 }
 
 function canUseRemoteReads() {
-  return useRemoteCms() && !remoteReadFailed;
+  return useRemoteCms();
 }
 
 function formatErrorMessage(error: unknown) {
@@ -57,7 +56,6 @@ async function readWithFallback<T>(
   try {
     return await remoteReader();
   } catch (error) {
-    remoteReadFailed = true;
     warnRemoteReadFallback(error);
     return Promise.resolve(localReader());
   }

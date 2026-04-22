@@ -16,6 +16,7 @@ import type {
 } from "@/lib/cms-types";
 import { executeRemote, queryRemoteRow, queryRemoteRows } from "@/lib/remote-db";
 import { getSeedPage, seedFooter, seedNavigation, seedSiteSettings } from "@/lib/seed-data";
+import { getSlugLookupCandidates, getTitleLookupCandidates } from "@/lib/slug";
 
 function parseJson<T>(value: unknown, fallback: T): T {
   if (value == null) return fallback;
@@ -759,13 +760,21 @@ export async function getPropertiesRemote(
 }
 
 export async function getPropertyBySlugRemote(slug: string) {
+  const slugCandidates = getSlugLookupCandidates(slug);
+  const titleCandidates = getTitleLookupCandidates(slug).map((candidate) => candidate.toLowerCase());
+  const values = [...slugCandidates, ...titleCandidates];
+  const slugPlaceholders = slugCandidates.map((_, index) => `$${index + 1}`).join(", ");
+  const titlePlaceholders = titleCandidates
+    .map((_, index) => `$${slugCandidates.length + index + 1}`)
+    .join(", ");
   const row = await queryRemoteRow<RemotePropertyRow>(
     `
       ${propertySelectSql()}
-      WHERE properties.slug = $1
+      WHERE properties.slug IN (${slugPlaceholders})
+        OR LOWER(properties.title) IN (${titlePlaceholders})
       LIMIT 1
     `,
-    [slug]
+    values
   );
 
   return row ? mapProperty(row) : undefined;

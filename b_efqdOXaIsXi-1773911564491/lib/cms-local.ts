@@ -16,6 +16,7 @@ import type {
 } from "@/lib/cms-types";
 import { getDb } from "@/lib/db";
 import { getSeedPage, seedFooter, seedNavigation, seedSiteSettings } from "@/lib/seed-data";
+import { getSlugLookupCandidates, getTitleLookupCandidates } from "@/lib/slug";
 
 function parseJson<T>(value: string | null | undefined, fallback: T): T {
   if (!value) return fallback;
@@ -707,15 +708,20 @@ export function getProperties(filters: PropertyFilters = {}, options?: { include
 
 export function getPropertyBySlug(slug: string) {
   const db = getDb();
+  const slugCandidates = getSlugLookupCandidates(slug);
+  const titleCandidates = getTitleLookupCandidates(slug).map((candidate) => candidate.toLowerCase());
+  const slugPlaceholders = slugCandidates.map(() => "?").join(", ");
+  const titlePlaceholders = titleCandidates.map(() => "?").join(", ");
   const row = db
     .prepare(
       `
         ${propertySelectSql()}
-        WHERE properties.slug = ?
+        WHERE properties.slug IN (${slugPlaceholders})
+          OR LOWER(properties.title) IN (${titlePlaceholders})
         LIMIT 1
       `
     )
-    .get(slug) as PropertyRow | undefined;
+    .get(...slugCandidates, ...titleCandidates) as PropertyRow | undefined;
 
   return row ? mapProperty(row) : undefined;
 }

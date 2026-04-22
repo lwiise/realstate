@@ -10,9 +10,10 @@ interface PropertyCardProps {
 
 export async function PropertyCard({ property }: PropertyCardProps) {
   const siteSettings = await getSiteSettings();
+  const propertyHref = `/property/${encodeURIComponent(property.slug)}`;
 
   return (
-    <Link href={`/property/${property.slug}`} className="group block">
+    <Link href={propertyHref} className="group block">
       <article className="bg-white border border-border overflow-hidden transition-all duration-500 hover:shadow-xl hover:shadow-black/5 hover:border-gold/30">
         {/* Image */}
         <div className="relative aspect-[4/3] overflow-hidden">
