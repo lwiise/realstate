@@ -31,10 +31,10 @@ export function NavbarClient({ navigation }: NavbarClientProps) {
             <Image
               src={navigation.logoUrl}
               alt={navigation.logoAlt}
-              width={80}
-              height={60}
+              width={96}
+              height={72}
               priority
-              className="h-12 w-auto"
+              className="h-[3.6rem] w-auto"
             />
           </Link>
 
