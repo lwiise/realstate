@@ -40,6 +40,7 @@
   
   /* Custom luxury colors */
   --gold: oklch(0.78 0.12 85);
+  --gold-solid: #b8860b;
   --gold-light: oklch(0.88 0.08 85);
   --gold-dark: oklch(0.65 0.14 85);
 }
@@ -135,6 +136,9 @@
 @layer components {
   .text-gold {
     color: var(--gold);
+  }
+  .text-gold.uppercase {
+    color: var(--gold-solid);
   }
   .bg-gold {
     background-color: var(--gold);
