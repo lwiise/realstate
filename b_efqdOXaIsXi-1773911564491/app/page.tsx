@@ -33,8 +33,8 @@ export default async function HomePage() {
   return (
     <main className="min-h-screen">
       <section className="fixed inset-x-0 top-0 z-[60] bg-black shadow-[0_16px_40px_-28px_rgba(0,0,0,0.95)]">
-        <div className="flex h-14 items-center gap-3 overflow-x-auto px-4 sm:px-6 lg:px-8 md:h-16 md:gap-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-          <p className="min-w-fit text-xs font-semibold uppercase tracking-[0.08em] text-white sm:text-sm md:flex-1 md:text-base lg:text-lg">
+        <div className="mx-auto flex h-14 w-full max-w-7xl items-center justify-center gap-3 overflow-x-auto px-4 sm:px-6 lg:px-8 md:h-16 md:gap-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+          <p className="min-w-fit text-center text-xs font-semibold uppercase tracking-[0.08em] text-white sm:text-sm md:text-base lg:text-lg">
             Proprietaires ? Louez et vendez sans perte de temps.
           </p>
 
@@ -72,7 +72,7 @@ export default async function HomePage() {
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-          <div className="text-center mb-12">
+          <div className="pt-6 text-center mb-12 md:pt-8">
             <p className="text-gold uppercase tracking-[0.3em] text-sm mb-4">
               {homePage.content.hero.eyebrow}
             </p>
