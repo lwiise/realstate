@@ -32,38 +32,32 @@ export default async function HomePage() {
 
   return (
     <main className="min-h-screen">
-      <Navbar />
+      <section className="fixed inset-x-0 top-0 z-[60] bg-black shadow-[0_16px_40px_-28px_rgba(0,0,0,0.95)]">
+        <div className="flex h-14 items-center gap-3 overflow-x-auto px-4 sm:px-6 lg:px-8 md:h-16 md:gap-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+          <p className="min-w-fit text-xs font-semibold uppercase tracking-[0.08em] text-white sm:text-sm md:flex-1 md:text-base lg:text-lg">
+            Proprietaires ? Louez et vendez sans perte de temps.
+          </p>
 
-      <section className="bg-white pt-28 pb-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="rounded-lg bg-black px-6 py-6 shadow-[0_24px_60px_-36px_rgba(0,0,0,0.95)] md:px-8 md:py-7">
-            <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
-              <p className="text-pretty text-xl font-semibold uppercase leading-tight text-white md:text-[1.9rem]">
-                Proprietaires ? Louez et vendez sans perte de temps.
-              </p>
-
-              <div className="flex flex-col gap-3 sm:flex-row xl:shrink-0">
-                <Link
-                  href="/#contact"
-                  className="inline-flex min-h-14 items-center justify-center gap-3 rounded-lg border border-white/70 px-6 py-3 text-base font-medium text-white transition-colors hover:border-white hover:bg-white/6"
-                >
-                  <FileText className="h-5 w-5" />
-                  Remplir le formulaire
-                </Link>
-                <a
-                  href={ownerWhatsappHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex min-h-14 items-center justify-center gap-3 rounded-lg bg-white px-6 py-3 text-base font-semibold text-black transition-colors hover:bg-gold"
-                >
-                  <MessageCircle className="h-5 w-5" />
-                  WhatsApp
-                </a>
-              </div>
-            </div>
-          </div>
+          <Link
+            href="/#contact"
+            className="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-md border border-white/70 px-3.5 text-xs font-medium text-white transition-colors hover:border-white hover:bg-white/6 md:h-10 md:px-4 md:text-sm"
+          >
+            <FileText className="h-4 w-4" />
+            Remplir le formulaire
+          </Link>
+          <a
+            href={ownerWhatsappHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-md bg-white px-3.5 text-xs font-semibold text-black transition-colors hover:bg-gold md:h-10 md:px-4 md:text-sm"
+          >
+            <MessageCircle className="h-4 w-4" />
+            WhatsApp
+          </a>
         </div>
       </section>
+
+      <Navbar topOffsetClassName="top-14 md:top-16" />
 
       <section className="relative h-screen min-h-[700px] flex items-center justify-center">
         <div className="absolute inset-0">
@@ -103,7 +97,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section id="about" className="py-24 lg:py-32 bg-white scroll-mt-20">
+      <section id="about" className="scroll-mt-36 bg-white py-24 lg:py-32 md:scroll-mt-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="relative">
@@ -232,7 +226,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section id="contact" className="py-24 lg:py-32 bg-white scroll-mt-20">
+      <section id="contact" className="scroll-mt-36 bg-white py-24 lg:py-32 md:scroll-mt-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-16">
             <div>
