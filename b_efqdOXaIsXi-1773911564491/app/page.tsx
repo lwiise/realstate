@@ -60,7 +60,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <Navbar topOffsetClassName="top-20 sm:top-14 md:top-16" />
+      <Navbar topOffsetClassName="top-16 sm:top-14 md:top-16" />
 
       <section className="relative flex min-h-screen items-center justify-center pt-40 sm:pt-36 md:h-screen md:min-h-[700px] md:pt-36">
         <div className="absolute inset-0">
