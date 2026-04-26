@@ -24,9 +24,14 @@ export default async function AdminInquiriesPage() {
                   <p className="text-sm text-muted-foreground">{inquiry.phone}</p>
                   {inquiry.email ? <p className="text-sm text-muted-foreground">{inquiry.email}</p> : null}
                 </div>
-                <div className="text-sm text-muted-foreground">
-                  <div>{inquiry.sourcePage}</div>
-                  <div>{new Date(inquiry.createdAt).toLocaleString()}</div>
+                <div className="space-y-1 text-sm text-muted-foreground">
+                  <div>
+                    <span className="font-medium text-foreground">Source:</span> {inquiry.sourcePage}
+                  </div>
+                  <div>
+                    <span className="font-medium text-foreground">Date:</span>{" "}
+                    {new Date(inquiry.createdAt).toLocaleString()}
+                  </div>
                 </div>
               </div>
               {inquiry.propertyTitle ? (

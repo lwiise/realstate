@@ -29,7 +29,7 @@ export default async function ContactPage() {
           <div className="grid gap-16 lg:grid-cols-[1.02fr_0.98fr] xl:gap-24">
             <div className="space-y-10">
               <div>
-                <p className="font-serif text-3xl italic text-[#ff5a36] md:text-5xl">
+                <p className="font-serif text-3xl italic text-[var(--gold-solid)] md:text-5xl">
                   Votre projet immobilier
                 </p>
                 <h1 className="mt-6 max-w-2xl text-4xl font-semibold tracking-tight text-slate-800 md:text-6xl md:leading-[1.08]">
@@ -109,7 +109,7 @@ export default async function ContactPage() {
             </div>
 
             <div className="pt-3">
-              <ContactProjectForm sourcePage="contact" />
+              <ContactProjectForm sourcePage="Formulaire contact" />
             </div>
           </div>
         </div>
