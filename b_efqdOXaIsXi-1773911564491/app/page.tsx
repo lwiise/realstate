@@ -34,7 +34,7 @@ export default async function HomePage() {
     <main className="min-h-screen">
       <section className="fixed inset-x-0 top-0 z-[60] bg-black shadow-[0_16px_40px_-28px_rgba(0,0,0,0.95)]">
         <div className="mx-auto flex w-full max-w-7xl flex-col items-center justify-center gap-2 px-3 py-2 sm:h-14 sm:flex-row sm:gap-3 sm:px-6 sm:py-0 md:h-16 md:gap-4 lg:px-8">
-          <p className="max-w-[18rem] text-center text-[10px] font-semibold uppercase leading-tight tracking-[0.06em] text-white sm:max-w-none sm:text-xs md:text-sm lg:text-base">
+          <p className="whitespace-nowrap text-center text-[8px] font-semibold uppercase leading-none tracking-[0.03em] text-white sm:text-xs md:text-sm lg:text-base">
             Proprietaires ? Louez et vendez sans perte de temps.
           </p>
 
@@ -62,7 +62,7 @@ export default async function HomePage() {
 
       <Navbar topOffsetClassName="top-20 sm:top-14 md:top-16" />
 
-      <section className="relative h-screen min-h-[700px] flex items-center justify-center">
+      <section className="relative flex min-h-screen items-center justify-center pt-40 sm:pt-36 md:h-screen md:min-h-[700px] md:pt-36">
         <div className="absolute inset-0">
           <Image
             src={homePage.content.hero.backgroundImage}
@@ -75,7 +75,7 @@ export default async function HomePage() {
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-          <div className="pt-6 text-center mb-12 md:pt-8">
+          <div className="mb-12 text-center">
             <p className="text-gold uppercase tracking-[0.3em] text-sm mb-4">
               {homePage.content.hero.eyebrow}
             </p>
