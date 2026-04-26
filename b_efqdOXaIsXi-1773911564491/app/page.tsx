@@ -39,7 +39,7 @@ export default async function HomePage() {
           </p>
 
           <Link
-            href="/#contact"
+            href="/contact"
             className="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-md border border-white/70 px-3.5 text-xs font-medium text-white transition-colors hover:border-white hover:bg-white/6 md:h-10 md:px-4 md:text-sm"
           >
             <FileText className="h-4 w-4" />
