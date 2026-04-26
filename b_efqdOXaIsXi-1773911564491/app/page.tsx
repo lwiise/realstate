@@ -33,31 +33,34 @@ export default async function HomePage() {
   return (
     <main className="min-h-screen">
       <section className="fixed inset-x-0 top-0 z-[60] bg-black shadow-[0_16px_40px_-28px_rgba(0,0,0,0.95)]">
-        <div className="mx-auto flex h-14 w-full max-w-7xl items-center justify-center gap-3 overflow-x-auto px-4 sm:px-6 lg:px-8 md:h-16 md:gap-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-          <p className="min-w-fit text-center text-xs font-semibold uppercase tracking-[0.08em] text-white sm:text-sm md:text-base lg:text-lg">
+        <div className="mx-auto flex w-full max-w-7xl flex-col items-center justify-center gap-2 px-3 py-2 sm:h-14 sm:flex-row sm:gap-3 sm:px-6 sm:py-0 md:h-16 md:gap-4 lg:px-8">
+          <p className="max-w-[18rem] text-center text-[10px] font-semibold uppercase leading-tight tracking-[0.06em] text-white sm:max-w-none sm:text-xs md:text-sm lg:text-base">
             Proprietaires ? Louez et vendez sans perte de temps.
           </p>
 
-          <Link
-            href="/contact"
-            className="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-md border border-white/70 px-3.5 text-xs font-medium text-white transition-colors hover:border-white hover:bg-white/6 md:h-10 md:px-4 md:text-sm"
-          >
-            <FileText className="h-4 w-4" />
-            Remplir le formulaire
-          </Link>
-          <a
-            href={ownerWhatsappHref}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-md bg-white px-3.5 text-xs font-semibold text-black transition-colors hover:bg-gold md:h-10 md:px-4 md:text-sm"
-          >
-            <MessageCircle className="h-4 w-4" />
-            WhatsApp
-          </a>
+          <div className="flex w-full items-center justify-center gap-2 sm:w-auto">
+            <Link
+              href="/contact"
+              className="inline-flex h-8 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-md border border-white/70 px-2 text-[10px] font-medium text-white transition-colors hover:border-white hover:bg-white/6 sm:h-9 sm:flex-none sm:gap-2 sm:px-3.5 sm:text-xs md:h-10 md:px-4 md:text-sm"
+            >
+              <FileText className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
+              <span className="truncate sm:hidden">Formulaire</span>
+              <span className="hidden sm:inline">Remplir le formulaire</span>
+            </Link>
+            <a
+              href={ownerWhatsappHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex h-8 shrink-0 items-center justify-center gap-1.5 rounded-md bg-white px-3 text-[10px] font-semibold text-black transition-colors hover:bg-gold sm:h-9 sm:gap-2 sm:px-3.5 sm:text-xs md:h-10 md:px-4 md:text-sm"
+            >
+              <MessageCircle className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
+              WhatsApp
+            </a>
+          </div>
         </div>
       </section>
 
-      <Navbar topOffsetClassName="top-14 md:top-16" />
+      <Navbar topOffsetClassName="top-20 sm:top-14 md:top-16" />
 
       <section className="relative h-screen min-h-[700px] flex items-center justify-center">
         <div className="absolute inset-0">
