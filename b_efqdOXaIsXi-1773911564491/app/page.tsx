@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Check, Mail, MapPin, Phone } from "lucide-react";
+import { ArrowRight, Check, FileText, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 import { Footer } from "@/components/footer";
 import { Navbar } from "@/components/navbar";
 import { PropertyCard } from "@/components/property-card";
@@ -9,6 +9,7 @@ import { SearchBar } from "@/components/search-bar";
 import { SiteContactForm } from "@/components/site-contact-form";
 import { TestimonialsSection } from "@/components/testimonials-section";
 import { getFeaturedProperties, getPageContent, getPropertyTypes, getSiteSettings, getTransactionTypes } from "@/lib/cms";
+import { buildWhatsAppLink } from "@/lib/data";
 import { buildPageMetadata } from "@/lib/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -24,10 +25,45 @@ export default async function HomePage() {
   ]);
   const featuredProperties = await getFeaturedProperties(homePage.content.featured.limit);
   const aboutImages = homePage.content.about.images;
+  const ownerWhatsappHref = buildWhatsAppLink(
+    siteSettings.whatsappNumber,
+    "Bonjour, je souhaite louer ou vendre mon bien avec MDK IMMOBILIER. Merci de me contacter."
+  );
 
   return (
     <main className="min-h-screen">
       <Navbar />
+
+      <section className="bg-white pt-28 pb-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="rounded-lg bg-black px-6 py-6 shadow-[0_24px_60px_-36px_rgba(0,0,0,0.95)] md:px-8 md:py-7">
+            <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
+              <p className="text-pretty text-xl font-semibold uppercase leading-tight text-white md:text-[1.9rem]">
+                Proprietaires ? Louez et vendez sans perte de temps.
+              </p>
+
+              <div className="flex flex-col gap-3 sm:flex-row xl:shrink-0">
+                <Link
+                  href="/#contact"
+                  className="inline-flex min-h-14 items-center justify-center gap-3 rounded-lg border border-white/70 px-6 py-3 text-base font-medium text-white transition-colors hover:border-white hover:bg-white/6"
+                >
+                  <FileText className="h-5 w-5" />
+                  Remplir le formulaire
+                </Link>
+                <a
+                  href={ownerWhatsappHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex min-h-14 items-center justify-center gap-3 rounded-lg bg-white px-6 py-3 text-base font-semibold text-black transition-colors hover:bg-gold"
+                >
+                  <MessageCircle className="h-5 w-5" />
+                  WhatsApp
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <section className="relative h-screen min-h-[700px] flex items-center justify-center">
         <div className="absolute inset-0">
