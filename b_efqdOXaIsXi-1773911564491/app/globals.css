@@ -133,6 +133,40 @@
   }
 }
 
+@keyframes premiumBarGlow {
+  0%,
+  100% {
+    box-shadow:
+      0 22px 44px -28px rgba(0, 0, 0, 0.96),
+      0 0 0 1px rgba(184, 134, 11, 0.2),
+      0 0 28px rgba(212, 175, 55, 0.12);
+  }
+  50% {
+    box-shadow:
+      0 24px 52px -26px rgba(0, 0, 0, 0.98),
+      0 0 0 1px rgba(184, 134, 11, 0.4),
+      0 0 44px rgba(212, 175, 55, 0.2);
+  }
+}
+
+@keyframes premiumBarSheen {
+  0% {
+    transform: translateX(-180%) skewX(-24deg);
+  }
+  100% {
+    transform: translateX(430%) skewX(-24deg);
+  }
+}
+
+@keyframes premiumButtonSheen {
+  0% {
+    transform: translateX(-170%) skewX(-24deg);
+  }
+  100% {
+    transform: translateX(310%) skewX(-24deg);
+  }
+}
+
 @layer components {
   .text-gold {
     color: var(--gold);
@@ -154,6 +188,89 @@
   }
   .hover\:border-gold:hover {
     border-color: var(--gold);
+  }
+  .premium-top-bar {
+    @apply relative isolate overflow-hidden bg-black text-white;
+    box-shadow: 0 16px 40px -28px rgba(0, 0, 0, 0.95);
+  }
+  .premium-top-bar::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at center, rgba(212, 175, 55, 0.14), transparent 52%),
+      linear-gradient(90deg, rgba(184, 134, 11, 0.16) 0%, transparent 18%, transparent 82%, rgba(184, 134, 11, 0.16) 100%);
+    pointer-events: none;
+  }
+  .premium-top-bar-shell {
+    @apply relative isolate overflow-hidden;
+    animation: premiumBarGlow 3.8s ease-in-out infinite;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.035) 0%, rgba(255, 255, 255, 0.012) 100%);
+  }
+  .premium-top-bar-shell::before {
+    content: "";
+    position: absolute;
+    inset: -38% auto -38% -18%;
+    width: 16%;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.03) 18%,
+      rgba(241, 212, 142, 0.9) 48%,
+      rgba(255, 255, 255, 0.03) 82%,
+      transparent 100%
+    );
+    pointer-events: none;
+    transform: translateX(-180%) skewX(-24deg);
+    animation: premiumBarSheen 6.5s ease-in-out infinite;
+  }
+  .premium-top-bar-shell::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid rgba(184, 134, 11, 0.28);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+    pointer-events: none;
+  }
+  .premium-top-bar-button {
+    @apply relative isolate overflow-hidden transition-all duration-300 ease-out;
+    background: linear-gradient(135deg, #f3dfb4 0%, #dbbc72 48%, #b8860b 100%);
+    box-shadow:
+      0 12px 26px -16px rgba(212, 175, 55, 0.92),
+      inset 0 1px 0 rgba(255, 255, 255, 0.38);
+  }
+  .premium-top-bar-button::before {
+    content: "";
+    position: absolute;
+    inset: -26% auto -26% -22%;
+    width: 26%;
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.7) 48%, transparent 100%);
+    transform: translateX(-170%) skewX(-24deg);
+    pointer-events: none;
+    opacity: 0;
+  }
+  .premium-top-bar-button::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    pointer-events: none;
+  }
+  .premium-top-bar-button:hover,
+  .premium-top-bar-button:focus-visible {
+    color: #111111;
+    transform: translateY(-1px);
+    box-shadow:
+      0 18px 32px -16px rgba(212, 175, 55, 0.78),
+      0 10px 20px -16px rgba(0, 0, 0, 0.85),
+      inset 0 1px 0 rgba(255, 255, 255, 0.48);
+    filter: brightness(1.04);
+  }
+  .premium-top-bar-button:hover::before,
+  .premium-top-bar-button:focus-visible::before {
+    opacity: 1;
+    animation: premiumButtonSheen 0.9s ease-out forwards;
   }
   .cta-dark-button {
     @apply relative isolate overflow-hidden bg-black text-white transition-all duration-500 ease-out;
@@ -194,5 +311,17 @@
   .cta-dark-button > * {
     position: relative;
     z-index: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .premium-top-bar-shell,
+  .premium-top-bar-shell::before,
+  .premium-top-bar-button,
+  .premium-top-bar-button::before,
+  .cta-dark-button,
+  .cta-dark-button::before {
+    animation: none !important;
+    transition: none !important;
   }
 }
