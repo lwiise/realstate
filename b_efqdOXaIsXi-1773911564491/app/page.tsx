@@ -33,8 +33,8 @@ export default async function HomePage() {
   return (
     <main className="min-h-screen">
       <section className="premium-top-bar fixed inset-x-0 top-0 z-[60]">
-        <div className="premium-top-bar-shell mx-auto flex w-full max-w-7xl flex-col items-center justify-center gap-2 px-3 py-2 sm:h-14 sm:flex-row sm:gap-3 sm:px-6 sm:py-0 md:h-16 md:gap-5 lg:px-8">
-          <p className="whitespace-nowrap text-center text-[8px] font-semibold uppercase leading-none tracking-[0.03em] text-white [text-shadow:0_0_18px_rgba(212,175,55,0.18)] sm:text-[13px] md:text-base lg:text-[1.15rem] xl:text-[1.3rem]">
+        <div className="premium-top-bar-shell mx-auto flex w-full max-w-7xl flex-col items-center justify-center gap-2 px-2 py-2 sm:h-14 sm:flex-row sm:gap-3 sm:px-6 sm:py-0 md:h-16 md:gap-5 lg:px-8">
+          <p className="whitespace-nowrap text-center text-[9px] font-semibold uppercase leading-none tracking-[0.015em] text-white [text-shadow:0_0_18px_rgba(212,175,55,0.18)] min-[360px]:text-[10px] sm:text-[13px] md:text-base lg:text-[1.15rem] xl:text-[1.3rem]">
             Proprietaires ? Louez et vendez sans perte de temps.
           </p>
 
@@ -51,7 +51,7 @@ export default async function HomePage() {
               href={ownerWhatsappHref}
               target="_blank"
               rel="noopener noreferrer"
-              className="premium-top-bar-button inline-flex h-8 shrink-0 items-center justify-center gap-1.5 rounded-md px-3 text-[10px] font-semibold text-black sm:h-9 sm:gap-2 sm:px-3.5 sm:text-xs md:h-10 md:px-4 md:text-sm"
+              className="premium-top-bar-button premium-top-bar-button-alt inline-flex h-8 shrink-0 items-center justify-center gap-1.5 rounded-md px-3 text-[10px] font-semibold text-black sm:h-9 sm:gap-2 sm:px-3.5 sm:text-xs md:h-10 md:px-4 md:text-sm"
             >
               <MessageCircle className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
               WhatsApp

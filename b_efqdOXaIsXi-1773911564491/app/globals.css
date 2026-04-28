@@ -159,11 +159,19 @@
 }
 
 @keyframes premiumButtonSheen {
-  0% {
+  0%,
+  12% {
     transform: translateX(-170%) skewX(-24deg);
+    opacity: 0;
   }
+  18%,
+  32% {
+    opacity: 0.92;
+  }
+  44%,
   100% {
     transform: translateX(310%) skewX(-24deg);
+    opacity: 0;
   }
 }
 
@@ -249,6 +257,10 @@
     transform: translateX(-170%) skewX(-24deg);
     pointer-events: none;
     opacity: 0;
+    animation: premiumButtonSheen 5.8s ease-in-out 0.75s infinite;
+  }
+  .premium-top-bar-button-alt::before {
+    animation-delay: 1.8s;
   }
   .premium-top-bar-button::after {
     content: "";
@@ -266,11 +278,6 @@
       0 10px 20px -16px rgba(0, 0, 0, 0.85),
       inset 0 1px 0 rgba(255, 255, 255, 0.48);
     filter: brightness(1.04);
-  }
-  .premium-top-bar-button:hover::before,
-  .premium-top-bar-button:focus-visible::before {
-    opacity: 1;
-    animation: premiumButtonSheen 0.9s ease-out forwards;
   }
   .cta-dark-button {
     @apply relative isolate overflow-hidden bg-black text-white transition-all duration-500 ease-out;
