@@ -89,7 +89,7 @@ export default async function HomePage() {
             </p>
           </div>
 
-          <div className="max-w-4xl mx-auto">
+          <div className="mx-auto max-w-4xl pb-10 sm:pb-0">
             <SearchBar transactionTypes={transactionTypes} propertyTypes={propertyTypes} />
           </div>
         </div>
