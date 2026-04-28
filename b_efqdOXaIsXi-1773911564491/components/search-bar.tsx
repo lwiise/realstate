@@ -94,7 +94,7 @@ export function SearchBar({
 
   return (
     <div className="bg-white/95 backdrop-blur-sm shadow-2xl border border-white/20">
-      <div className="p-6 md:p-8">
+      <div className="px-6 pb-8 pt-6 md:p-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
             <label className="block text-xs text-muted-foreground mb-2 uppercase tracking-wide font-medium">
