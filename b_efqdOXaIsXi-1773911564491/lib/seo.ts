@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import type { PageKey, Property } from "@/lib/cms-types";
 import { getPageContent, getSiteSettings } from "@/lib/cms";
+import { getRequestLocale } from "@/lib/i18n-server";
+import { localizePageRecord, localizeProperty, localizeSiteSettings } from "@/lib/i18n-content";
+import { localizePath } from "@/lib/i18n";
 
 function normalizePathname(pathname: string) {
   if (!pathname.startsWith("/")) {
@@ -11,7 +14,8 @@ function normalizePathname(pathname: string) {
 }
 
 export async function buildSiteMetadata(): Promise<Metadata> {
-  const siteSettings = await getSiteSettings();
+  const locale = await getRequestLocale();
+  const siteSettings = localizeSiteSettings(await getSiteSettings(), locale);
 
   return {
     metadataBase: siteSettings.siteUrl ? new URL(siteSettings.siteUrl) : undefined,
@@ -26,7 +30,7 @@ export async function buildSiteMetadata(): Promise<Metadata> {
       title: siteSettings.defaultSeoTitle || siteSettings.siteName,
       description: siteSettings.defaultSeoDescription || siteSettings.siteDescription,
       siteName: siteSettings.siteName,
-      locale: "fr_MA",
+      locale: locale === "en" ? "en_US" : "fr_MA",
       type: "website",
       images: [
         {
@@ -49,8 +53,12 @@ export async function buildSiteMetadata(): Promise<Metadata> {
 }
 
 export async function buildPageMetadata(pageKey: PageKey, pathname: string): Promise<Metadata> {
-  const [siteSettings, page] = await Promise.all([getSiteSettings(), getPageContent(pageKey)]);
-  const normalizedPathname = normalizePathname(pathname);
+  const locale = await getRequestLocale();
+  const [rawSiteSettings, rawPage] = await Promise.all([getSiteSettings(), getPageContent(pageKey)]);
+  const siteSettings = localizeSiteSettings(rawSiteSettings, locale);
+  const page = localizePageRecord(rawPage, locale);
+  const frenchPathname = normalizePathname(pathname);
+  const normalizedPathname = localizePath(frenchPathname, locale);
   const title =
     page.seoTitle ||
     (pageKey === "home"
@@ -64,6 +72,10 @@ export async function buildPageMetadata(pageKey: PageKey, pathname: string): Pro
     description,
     alternates: {
       canonical: normalizedPathname,
+      languages: {
+        fr: frenchPathname,
+        en: localizePath(frenchPathname, "en"),
+      },
     },
     openGraph: {
       title,
@@ -89,15 +101,25 @@ export async function buildPropertyMetadata(
   property: Promise<Property | undefined> | Property | undefined,
   pathname: string
 ): Promise<Metadata> {
-  const [siteSettings, resolvedProperty] = await Promise.all([getSiteSettings(), Promise.resolve(property)]);
-  const normalizedPathname = normalizePathname(pathname);
+  const locale = await getRequestLocale();
+  const [rawSiteSettings, rawResolvedProperty] = await Promise.all([getSiteSettings(), Promise.resolve(property)]);
+  const siteSettings = localizeSiteSettings(rawSiteSettings, locale);
+  const resolvedProperty = rawResolvedProperty ? localizeProperty(rawResolvedProperty, locale) : undefined;
+  const frenchPathname = normalizePathname(pathname);
+  const normalizedPathname = localizePath(frenchPathname, locale);
 
   if (!resolvedProperty) {
     return {
-      title: "Bien introuvable",
-      description: `${siteSettings.siteName} n'a pas trouve cette annonce.`,
+      title: locale === "en" ? "Property not found" : "Bien introuvable",
+      description: locale === "en"
+        ? `${siteSettings.siteName} could not find this listing.`
+        : `${siteSettings.siteName} n'a pas trouve cette annonce.`,
       alternates: {
         canonical: normalizedPathname,
+        languages: {
+          fr: frenchPathname,
+          en: localizePath(frenchPathname, "en"),
+        },
       },
     };
   }
@@ -115,6 +137,10 @@ export async function buildPropertyMetadata(
     description,
     alternates: {
       canonical: normalizedPathname,
+      languages: {
+        fr: frenchPathname,
+        en: localizePath(frenchPathname, "en"),
+      },
     },
     openGraph: {
       title,

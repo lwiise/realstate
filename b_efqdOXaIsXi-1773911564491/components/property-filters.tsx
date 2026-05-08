@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import type { PropertyType, TransactionType } from "@/lib/cms-types";
+import type { Locale, PropertyType, TransactionType } from "@/lib/cms-types";
 import { cn } from "@/lib/utils";
 
 interface PropertyFiltersProps {
@@ -10,6 +10,7 @@ interface PropertyFiltersProps {
   propertyTypes: PropertyType[];
   cities: string[];
   countsByTransaction: Record<string, number>;
+  locale?: Locale;
   value: {
     transaction?: string;
     type?: string;
@@ -26,6 +27,7 @@ export function PropertyFilters({
   propertyTypes,
   cities,
   countsByTransaction,
+  locale = "fr",
   value,
 }: PropertyFiltersProps) {
   const pathname = usePathname();
@@ -81,6 +83,16 @@ export function PropertyFilters({
 
     return () => window.clearTimeout(timeout);
   }, [keyword, minPrice, maxPrice]);
+  const text = {
+    all: locale === "en" ? "All" : "Tous",
+    keyword: locale === "en" ? "Search by keyword" : "Recherche par mot-cle",
+    allPropertyTypes: locale === "en" ? "All property types" : "Tous les types de biens",
+    allCities: locale === "en" ? "All cities" : "Toutes les villes",
+    minPrice: locale === "en" ? "Min price" : "Prix min",
+    maxPrice: locale === "en" ? "Max price" : "Prix max",
+    featuredOnly: locale === "en" ? "Featured properties only" : "Biens en vedette seulement",
+    clear: locale === "en" ? "Clear filters" : "Effacer les filtres",
+  };
 
   return (
     <div className="space-y-5">
@@ -93,7 +105,7 @@ export function PropertyFilters({
             !value.transaction ? "bg-black text-white border-black" : "border-border text-foreground hover:border-gold"
           )}
         >
-          Tous ({Object.values(countsByTransaction).reduce((total, count) => total + count, 0)})
+          {text.all} ({Object.values(countsByTransaction).reduce((total, count) => total + count, 0)})
         </button>
         {transactionTypes.map((type) => (
           <button
@@ -117,7 +129,7 @@ export function PropertyFilters({
           type="search"
           value={keyword}
           onChange={(event) => setKeyword(event.target.value)}
-          placeholder="Recherche par mot-cle"
+          placeholder={text.keyword}
           className="h-11 rounded-md border border-border bg-background px-3 text-sm xl:col-span-2"
         />
         <select
@@ -125,7 +137,7 @@ export function PropertyFilters({
           onChange={(event) => updateQuery({ type: event.target.value })}
           className="h-11 rounded-md border border-border bg-background px-3 text-sm"
         >
-          <option value="">Tous les types de biens</option>
+          <option value="">{text.allPropertyTypes}</option>
           {propertyTypes.map((type) => (
             <option key={type.id} value={type.slug}>
               {type.label}
@@ -137,7 +149,7 @@ export function PropertyFilters({
           onChange={(event) => updateQuery({ city: event.target.value })}
           className="h-11 rounded-md border border-border bg-background px-3 text-sm"
         >
-          <option value="">Toutes les villes</option>
+          <option value="">{text.allCities}</option>
           {cities.map((city) => (
             <option key={city} value={city}>
               {city}
@@ -149,7 +161,7 @@ export function PropertyFilters({
           min="0"
           value={minPrice}
           onChange={(event) => setMinPrice(event.target.value)}
-          placeholder="Prix min"
+          placeholder={text.minPrice}
           className="h-11 rounded-md border border-border bg-background px-3 text-sm"
         />
         <input
@@ -157,7 +169,7 @@ export function PropertyFilters({
           min="0"
           value={maxPrice}
           onChange={(event) => setMaxPrice(event.target.value)}
-          placeholder="Prix max"
+          placeholder={text.maxPrice}
           className="h-11 rounded-md border border-border bg-background px-3 text-sm"
         />
       </div>
@@ -169,7 +181,7 @@ export function PropertyFilters({
             checked={Boolean(value.featured)}
             onChange={(event) => updateQuery({ featured: event.target.checked })}
           />
-          Biens en vedette seulement
+          {text.featuredOnly}
         </label>
         <button
           type="button"
@@ -181,7 +193,7 @@ export function PropertyFilters({
           }}
           className="rounded-md border border-border px-4 py-2 text-xs uppercase tracking-wide transition-colors hover:border-gold"
         >
-          Effacer les filtres
+          {text.clear}
         </button>
       </div>
     </div>

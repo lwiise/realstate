@@ -5,6 +5,8 @@ import { ContactProjectForm } from "@/components/contact-project-form";
 import { Footer } from "@/components/footer";
 import { Navbar } from "@/components/navbar";
 import { getFooterSettings, getSiteSettings } from "@/lib/cms";
+import { getRequestLocale } from "@/lib/i18n-server";
+import { localizeFooter, localizeSiteSettings } from "@/lib/i18n-content";
 import { buildPageMetadata } from "@/lib/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -12,7 +14,27 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ContactPage() {
-  const [siteSettings, footer] = await Promise.all([getSiteSettings(), getFooterSettings()]);
+  const locale = await getRequestLocale();
+  const [rawSiteSettings, rawFooter] = await Promise.all([getSiteSettings(), getFooterSettings()]);
+  const siteSettings = localizeSiteSettings(rawSiteSettings, locale);
+  const footer = localizeFooter(rawFooter, locale);
+  const text = {
+    eyebrow: locale === "en" ? "Your real estate project" : "Votre projet immobilier",
+    title: locale === "en"
+      ? "Our local agency is here to support every real estate project."
+      : "Notre agence locale est a votre ecoute pour vous accompagner dans tous vos projets immobiliers.",
+    paragraph: locale === "en"
+      ? "At MDK IMMOBILIER, our mission is to combine the performance of our technology solutions with the expertise of our advisors to offer a unique and personalized client experience."
+      : "Chez MDK IMMOBILIER, notre mission est d'allier la performance de nos solutions technologiques a l'expertise de nos conseillers, afin de vous offrir une experience client unique et personnalisee.",
+    closing: locale === "en"
+      ? "Together, let us reinvent your real estate experience."
+      : "Reinventons ensemble votre experience immobiliere.",
+    directTitle: locale === "en" ? "Want a direct conversation with our team?" : "Un echange direct avec notre equipe ?",
+    directBody: locale === "en"
+      ? "We are available by phone or email to understand your project quickly."
+      : "Nous sommes a votre ecoute par telephone ou par e-mail pour cadrer rapidement votre projet.",
+    phone: locale === "en" ? "Phone" : "Telephone",
+  };
 
   const socialIcons = {
     facebook: Facebook,
@@ -30,39 +52,35 @@ export default async function ContactPage() {
             <div className="space-y-10">
               <div>
                 <p className="font-serif text-3xl italic text-[var(--gold-solid)] md:text-5xl">
-                  Votre projet immobilier
+                  {text.eyebrow}
                 </p>
                 <h1 className="mt-6 max-w-2xl text-4xl font-semibold tracking-tight text-slate-800 md:text-6xl md:leading-[1.08]">
-                  Notre agence locale est a votre ecoute pour vous accompagner dans tous vos
-                  projets immobiliers.
+                  {text.title}
                 </h1>
               </div>
 
               <div className="max-w-3xl space-y-6 text-xl leading-relaxed text-slate-700">
                 <p>
-                  Chez MDK IMMOBILIER, notre mission est d&apos;allier la performance de nos
-                  solutions technologiques a l&apos;expertise de nos conseillers, afin de vous
-                  offrir une experience client unique et personnalisee.
+                  {text.paragraph}
                 </p>
                 <p className="font-medium text-slate-800">
-                  Reinventons ensemble votre experience immobiliere.
+                  {text.closing}
                 </p>
               </div>
 
               <div className="space-y-8 pt-8">
                 <div>
                   <h2 className="text-2xl font-semibold text-slate-800">
-                    Un echange direct avec notre equipe ?
+                    {text.directTitle}
                   </h2>
                   <p className="mt-3 text-lg text-slate-600">
-                    Nous sommes a votre ecoute par telephone ou par e-mail pour cadrer rapidement
-                    votre projet.
+                    {text.directBody}
                   </p>
                 </div>
 
                 <div className="grid gap-6 sm:grid-cols-2">
                   <div className="space-y-3">
-                    <p className="text-2xl font-semibold text-slate-700">Telephone</p>
+                    <p className="text-2xl font-semibold text-slate-700">{text.phone}</p>
                     <a
                       href={`tel:${siteSettings.contactPhone}`}
                       className="inline-flex items-center gap-3 text-2xl font-semibold text-slate-700 transition-colors hover:text-[#ff5a36]"
@@ -109,7 +127,10 @@ export default async function ContactPage() {
             </div>
 
             <div className="pt-3">
-              <ContactProjectForm sourcePage="Formulaire contact" />
+              <ContactProjectForm
+                sourcePage={locale === "en" ? "Contact form" : "Formulaire contact"}
+                locale={locale}
+              />
             </div>
           </div>
         </div>

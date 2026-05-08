@@ -2,16 +2,27 @@ import Link from "next/link";
 import Image from "next/image";
 import { Mail, Phone, MapPin } from "lucide-react";
 import { getFooterSettings, getSiteSettings } from "@/lib/cms";
+import { getRequestLocale } from "@/lib/i18n-server";
+import { localizeFooter, localizeSiteSettings } from "@/lib/i18n-content";
+import { localizePath } from "@/lib/i18n";
 
 export async function Footer() {
-  const [footer, siteSettings] = await Promise.all([getFooterSettings(), getSiteSettings()]);
+  const locale = await getRequestLocale();
+  const [rawFooter, rawSiteSettings] = await Promise.all([getFooterSettings(), getSiteSettings()]);
+  const footer = localizeFooter(rawFooter, locale);
+  const siteSettings = localizeSiteSettings(rawSiteSettings, locale);
+  const labels = {
+    quickLinks: locale === "en" ? "Quick links" : "Liens rapides",
+    propertyTypes: locale === "en" ? "Property types" : "Types de proprietes",
+    contact: "Contact",
+  };
 
   return (
     <footer className="bg-black text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           <div className="space-y-6">
-            <Link href="/" className="flex items-center bg-white p-2 rounded-[10px] overflow-hidden w-fit">
+            <Link href={localizePath("/", locale)} className="flex items-center bg-white p-2 rounded-[10px] overflow-hidden w-fit">
               <Image
                 src={siteSettings.logoUrl}
                 alt={siteSettings.logoAlt}
@@ -38,13 +49,13 @@ export async function Footer() {
           </div>
 
           <div>
-            <h4 className="text-gold font-serif text-lg mb-6">Liens rapides</h4>
+            <h4 className="text-gold font-serif text-lg mb-6">{labels.quickLinks}</h4>
             <ul className="space-y-3">
               {footer.quickLinks
                 .filter((link) => link.isEnabled)
                 .map((link) => (
                   <li key={`${link.label}-${link.href}`}>
-                    <Link href={link.href} className="text-white/60 hover:text-gold transition-colors text-sm">
+                    <Link href={localizePath(link.href, locale)} className="text-white/60 hover:text-gold transition-colors text-sm">
                       {link.label}
                     </Link>
                   </li>
@@ -53,13 +64,13 @@ export async function Footer() {
           </div>
 
           <div>
-            <h4 className="text-gold font-serif text-lg mb-6">Types de proprietes</h4>
+            <h4 className="text-gold font-serif text-lg mb-6">{labels.propertyTypes}</h4>
             <ul className="space-y-3">
               {footer.propertyLinks
                 .filter((link) => link.isEnabled)
                 .map((link) => (
                   <li key={`${link.label}-${link.href}`}>
-                    <Link href={link.href} className="text-white/60 hover:text-gold transition-colors text-sm">
+                    <Link href={localizePath(link.href, locale)} className="text-white/60 hover:text-gold transition-colors text-sm">
                       {link.label}
                     </Link>
                   </li>
@@ -68,7 +79,7 @@ export async function Footer() {
           </div>
 
           <div>
-            <h4 className="text-gold font-serif text-lg mb-6">Contact</h4>
+            <h4 className="text-gold font-serif text-lg mb-6">{labels.contact}</h4>
             <ul className="space-y-4">
               <li className="flex items-start gap-3">
                 <MapPin className="w-5 h-5 text-gold shrink-0 mt-0.5" />
@@ -104,7 +115,7 @@ export async function Footer() {
               .map((link) => (
                 <Link
                   key={`${link.label}-${link.href}`}
-                  href={link.href}
+                  href={localizePath(link.href, locale)}
                   className="text-white/40 hover:text-gold transition-colors text-sm"
                 >
                   {link.label}

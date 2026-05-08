@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
+import type { Locale } from "@/lib/cms-types";
 
 interface PropertyTypeCardProps {
   propertyType: {
@@ -10,9 +11,14 @@ interface PropertyTypeCardProps {
   };
   count: number;
   href: string;
+  locale?: Locale;
 }
 
-export function PropertyTypeCard({ propertyType, count, href }: PropertyTypeCardProps) {
+export function PropertyTypeCard({ propertyType, count, href, locale = "fr" }: PropertyTypeCardProps) {
+  const propertyLabel = locale === "en"
+    ? count === 1 ? "property" : "properties"
+    : count === 1 ? "bien" : "biens";
+
   return (
     <Link href={href} className="group relative block aspect-[3/4] overflow-hidden">
       <Image
@@ -29,11 +35,13 @@ export function PropertyTypeCard({ propertyType, count, href }: PropertyTypeCard
         <div className="transform transition-transform duration-500 group-hover:-translate-y-2">
           <h3 className="font-serif text-2xl text-white mb-1">{propertyType.label}</h3>
           <p className="text-white/60 text-sm mb-4">
-            {count} {count === 1 ? "bien" : "biens"}
+            {count} {propertyLabel}
           </p>
 
           <div className="flex items-center gap-2 text-gold opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <span className="text-sm font-medium tracking-wide uppercase">Explorer</span>
+            <span className="text-sm font-medium tracking-wide uppercase">
+              {locale === "en" ? "Explore" : "Explorer"}
+            </span>
             <ArrowRight className="w-4 h-4" />
           </div>
         </div>

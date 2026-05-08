@@ -4,13 +4,14 @@ import { useEffect, useState } from "react";
 import { ArrowLeft, ArrowRight, Quote, Star } from "lucide-react";
 import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/components/ui/carousel";
 import { cn } from "@/lib/utils";
-import type { HomePageContent } from "@/lib/cms-types";
+import type { HomePageContent, Locale } from "@/lib/cms-types";
 
 interface TestimonialsSectionProps {
   content: HomePageContent["testimonials"];
+  locale?: Locale;
 }
 
-export function TestimonialsSection({ content }: TestimonialsSectionProps) {
+export function TestimonialsSection({ content, locale = "fr" }: TestimonialsSectionProps) {
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
 
@@ -125,7 +126,7 @@ export function TestimonialsSection({ content }: TestimonialsSectionProps) {
                       "h-1.5 rounded-full transition-all duration-300",
                       current === index ? "w-12 bg-gold" : "w-6 bg-black/15 hover:bg-black/30"
                     )}
-                    aria-label={`Aller au temoignage ${index + 1}`}
+                    aria-label={locale === "en" ? `Go to testimonial ${index + 1}` : `Aller au temoignage ${index + 1}`}
                   />
                 ))}
               </div>
@@ -135,7 +136,7 @@ export function TestimonialsSection({ content }: TestimonialsSectionProps) {
                   type="button"
                   onClick={() => api?.scrollPrev()}
                   className="flex h-12 w-12 items-center justify-center border border-border text-foreground transition-colors hover:border-gold hover:text-gold"
-                  aria-label="Temoignage precedent"
+                  aria-label={locale === "en" ? "Previous testimonial" : "Temoignage precedent"}
                 >
                   <ArrowLeft className="w-4 h-4" />
                 </button>
@@ -143,7 +144,7 @@ export function TestimonialsSection({ content }: TestimonialsSectionProps) {
                   type="button"
                   onClick={() => api?.scrollNext()}
                   className="flex h-12 w-12 items-center justify-center bg-black text-white transition-colors hover:bg-gold hover:text-black"
-                  aria-label="Temoignage suivant"
+                  aria-label={locale === "en" ? "Next testimonial" : "Temoignage suivant"}
                 >
                   <ArrowRight className="w-4 h-4" />
                 </button>

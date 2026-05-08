@@ -1,13 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import type { Locale } from "@/lib/cms-types";
 
 interface SiteContactFormProps {
   sourcePage: string;
   submitLabel: string;
+  locale?: Locale;
 }
 
-export function SiteContactForm({ sourcePage, submitLabel }: SiteContactFormProps) {
+export function SiteContactForm({ sourcePage, submitLabel, locale = "fr" }: SiteContactFormProps) {
   const [formState, setFormState] = useState({
     firstName: "",
     lastName: "",
@@ -50,13 +52,26 @@ export function SiteContactForm({ sourcePage, submitLabel }: SiteContactFormProp
 
     setIsSubmitted(true);
   };
+  const text = {
+    sentTitle: locale === "en" ? "Message sent" : "Message envoye",
+    sentBody: locale === "en"
+      ? "Thank you. Our team will contact you shortly."
+      : "Merci. Notre equipe vous recontactera rapidement.",
+    firstName: locale === "en" ? "First name" : "Prenom",
+    lastName: locale === "en" ? "Last name" : "Nom",
+    email: "Email",
+    phone: locale === "en" ? "Phone" : "Telephone",
+    message: "Message",
+    messagePlaceholder: locale === "en" ? "Describe your request..." : "Decrivez votre demande...",
+    sending: locale === "en" ? "Sending..." : "Envoi...",
+  };
 
   if (isSubmitted) {
     return (
       <div className="rounded-md border border-border bg-secondary px-6 py-8 text-center">
-        <h3 className="font-serif text-2xl text-foreground">Message envoye</h3>
+        <h3 className="font-serif text-2xl text-foreground">{text.sentTitle}</h3>
         <p className="mt-3 text-sm text-muted-foreground">
-          Merci. Notre equipe vous recontactera rapidement.
+          {text.sentBody}
         </p>
       </div>
     );
@@ -70,7 +85,7 @@ export function SiteContactForm({ sourcePage, submitLabel }: SiteContactFormProp
             htmlFor="firstName"
             className="block text-xs text-muted-foreground mb-2 uppercase tracking-wide"
           >
-            Prenom
+            {text.firstName}
           </label>
           <input
             type="text"
@@ -87,7 +102,7 @@ export function SiteContactForm({ sourcePage, submitLabel }: SiteContactFormProp
             htmlFor="lastName"
             className="block text-xs text-muted-foreground mb-2 uppercase tracking-wide"
           >
-            Nom
+            {text.lastName}
           </label>
           <input
             type="text"
@@ -106,7 +121,7 @@ export function SiteContactForm({ sourcePage, submitLabel }: SiteContactFormProp
           htmlFor="email"
           className="block text-xs text-muted-foreground mb-2 uppercase tracking-wide"
         >
-          Email
+          {text.email}
         </label>
         <input
           type="email"
@@ -123,7 +138,7 @@ export function SiteContactForm({ sourcePage, submitLabel }: SiteContactFormProp
           htmlFor="phone"
           className="block text-xs text-muted-foreground mb-2 uppercase tracking-wide"
           >
-          Telephone
+          {text.phone}
         </label>
         <input
           type="tel"
@@ -141,7 +156,7 @@ export function SiteContactForm({ sourcePage, submitLabel }: SiteContactFormProp
           htmlFor="message"
           className="block text-xs text-muted-foreground mb-2 uppercase tracking-wide"
         >
-          Message
+          {text.message}
         </label>
         <textarea
           id="message"
@@ -150,7 +165,7 @@ export function SiteContactForm({ sourcePage, submitLabel }: SiteContactFormProp
           value={formState.message}
           onChange={handleChange("message")}
           className="w-full px-4 py-3 border border-border bg-background focus:outline-none focus:border-gold transition-colors resize-none"
-          placeholder="Decrivez votre demande..."
+          placeholder={text.messagePlaceholder}
         />
       </div>
 
@@ -159,7 +174,7 @@ export function SiteContactForm({ sourcePage, submitLabel }: SiteContactFormProp
         disabled={isSubmitting}
         className="cta-dark-button w-full h-14 font-medium text-sm tracking-wide uppercase disabled:opacity-60"
       >
-        {isSubmitting ? "Envoi..." : submitLabel}
+        {isSubmitting ? text.sending : submitLabel}
       </button>
     </form>
   );

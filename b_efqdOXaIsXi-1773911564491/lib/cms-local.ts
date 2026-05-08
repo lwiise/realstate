@@ -13,6 +13,7 @@ import type {
   PropertyType,
   SiteSettings,
   TransactionType,
+  TranslationPayload,
 } from "@/lib/cms-types";
 import { getDb } from "@/lib/db";
 import { getSeedPage, seedFooter, seedNavigation, seedSiteSettings } from "@/lib/seed-data";
@@ -25,6 +26,74 @@ function parseJson<T>(value: string | null | undefined, fallback: T): T {
   } catch {
     return fallback;
   }
+}
+
+function getContentTranslation(entityType: string, entityId: string | number): TranslationPayload | null {
+  const db = getDb();
+  const row = db
+    .prepare(
+      "SELECT data_json FROM content_translations WHERE entity_type = ? AND entity_id = ? AND locale = 'en'"
+    )
+    .get(entityType, String(entityId)) as { data_json?: string } | undefined;
+
+  return parseJson<TranslationPayload | null>(row?.data_json, null);
+}
+
+function withTranslation<T extends object>(entityType: string, entityId: string | number, value: T) {
+  return {
+    ...value,
+    translationEn: getContentTranslation(entityType, entityId),
+  };
+}
+
+function withPropertyTranslation(property: Property): Property {
+  const transactionTranslation = getContentTranslation("transaction-type", property.transactionTypeId) ?? {};
+  const propertyTypeTranslation = getContentTranslation("property-type", property.propertyTypeId) ?? {};
+  const translatedProperty = withTranslation("property", property.id, property);
+  const propertyPayload = translatedProperty.translationEn ?? {};
+
+  return {
+    ...translatedProperty,
+    translationEn: {
+      ...propertyPayload,
+      transactionType: typeof transactionTranslation.label === "string"
+        ? transactionTranslation.label
+        : property.transactionType,
+      propertyType: typeof propertyTypeTranslation.label === "string"
+        ? propertyTypeTranslation.label
+        : property.propertyType,
+      priceSuffix: typeof transactionTranslation.priceSuffix === "string"
+        ? transactionTranslation.priceSuffix
+        : property.priceSuffix,
+    },
+    agent: translatedProperty.agent
+      ? withTranslation("agent", translatedProperty.agent.id, translatedProperty.agent)
+      : translatedProperty.agent,
+  };
+}
+
+export function upsertContentTranslation(
+  entityType: string,
+  entityId: string | number,
+  locale: "en",
+  payload: TranslationPayload
+) {
+  const db = getDb();
+  db.prepare(
+    `
+      INSERT OR REPLACE INTO content_translations (
+        entity_type, entity_id, locale, data_json, updated_at
+      ) VALUES (
+        @entityType, @entityId, @locale, @dataJson, @updatedAt
+      )
+    `
+  ).run({
+    entityType,
+    entityId: String(entityId),
+    locale,
+    dataJson: JSON.stringify(payload),
+    updatedAt: new Date().toISOString(),
+  });
 }
 
 function mapBoolean(value: number | boolean | null | undefined) {
@@ -202,10 +271,10 @@ export function getSiteSettings(): SiteSettings {
   const row = db.prepare("SELECT * FROM site_settings WHERE id = 1").get() as Record<string, unknown> | undefined;
 
   if (!row) {
-    return seedSiteSettings;
+    return withTranslation("site-settings", "1", seedSiteSettings);
   }
 
-  return {
+  return withTranslation("site-settings", "1", {
     siteName: String(row.site_name),
     siteUrl: String(row.site_url),
     siteDescription: String(row.site_description),
@@ -222,7 +291,7 @@ export function getSiteSettings(): SiteSettings {
     copyrightText: String(row.copyright_text),
     defaultSeoTitle: String(row.default_seo_title),
     defaultSeoDescription: String(row.default_seo_description),
-  };
+  });
 }
 
 export function updateSiteSettings(input: SiteSettings) {
@@ -264,14 +333,14 @@ export function getNavigationSettings(): NavigationSettings {
     .get() as Record<string, unknown> | undefined;
 
   if (!row) {
-    return seedNavigation;
+    return withTranslation("navigation-settings", "1", seedNavigation);
   }
 
-  return {
+  return withTranslation("navigation-settings", "1", {
     logoUrl: String(row.logo_url),
     logoAlt: String(row.logo_alt),
     links: parseJson<NavigationSettings["links"]>(row.links_json as string, []),
-  };
+  });
 }
 
 export function updateNavigationSettings(input: NavigationSettings) {
@@ -297,16 +366,16 @@ export function getFooterSettings(): FooterSettings {
     .get() as Record<string, unknown> | undefined;
 
   if (!row) {
-    return seedFooter;
+    return withTranslation("footer-settings", "1", seedFooter);
   }
 
-  return {
+  return withTranslation("footer-settings", "1", {
     brandText: String(row.brand_text),
     quickLinks: parseJson<FooterSettings["quickLinks"]>(row.quick_links_json as string, []),
     propertyLinks: parseJson<FooterSettings["propertyLinks"]>(row.property_links_json as string, []),
     socialLinks: parseJson<FooterSettings["socialLinks"]>(row.social_links_json as string, []),
     legalLinks: parseJson<FooterSettings["legalLinks"]>(row.legal_links_json as string, []),
-  };
+  });
 }
 
 export function updateFooterSettings(input: FooterSettings) {
@@ -340,7 +409,7 @@ export function getPageContent<TPageKey extends PageKey>(pageKey: TPageKey): Pag
     .get(pageKey) as Record<string, unknown> | undefined;
 
   if (!row) {
-    return {
+    return withTranslation("page-content", pageKey, {
       pageKey,
       title: pageKey,
       seoTitle: seedSiteSettings.defaultSeoTitle,
@@ -348,10 +417,10 @@ export function getPageContent<TPageKey extends PageKey>(pageKey: TPageKey): Pag
       ogImageUrl: seedSiteSettings.defaultOgImage,
       content: getSeedPage(pageKey),
       updatedAt: new Date().toISOString(),
-    };
+    });
   }
 
-  return {
+  return withTranslation("page-content", pageKey, {
     pageKey,
     title: String(row.title),
     seoTitle: (row.seo_title as string | null) ?? null,
@@ -359,7 +428,7 @@ export function getPageContent<TPageKey extends PageKey>(pageKey: TPageKey): Pag
     ogImageUrl: (row.og_image_url as string | null) ?? null,
     content: parseJson<PageContentMap[TPageKey]>(row.content_json as string, getSeedPage(pageKey)),
     updatedAt: String(row.updated_at),
-  };
+  });
 }
 
 export function updatePageContent<TPageKey extends PageKey>(input: PageRecord<TPageKey>) {
@@ -393,7 +462,7 @@ export function getTransactionTypes(options?: { includeInactive?: boolean }) {
     )
     .all() as Array<Record<string, unknown>>;
 
-  return rows.map(mapTransactionType);
+  return rows.map((row) => withTranslation("transaction-type", Number(row.id), mapTransactionType(row)));
 }
 
 export function findTransactionType(value?: string | null) {
@@ -485,7 +554,7 @@ export function getPropertyTypes(options?: { includeInactive?: boolean }) {
     )
     .all() as Array<Record<string, unknown>>;
 
-  return rows.map(mapPropertyType);
+  return rows.map((row) => withTranslation("property-type", Number(row.id), mapPropertyType(row)));
 }
 
 export function findPropertyType(value?: string | null) {
@@ -562,13 +631,13 @@ export function getAgents(options?: { includeUnpublished?: boolean }) {
       `
     )
     .all() as Array<Record<string, unknown>>;
-  return rows.map(mapAgent);
+  return rows.map((row) => withTranslation("agent", Number(row.id), mapAgent(row)));
 }
 
 export function getAgentById(id: number) {
   const db = getDb();
   const row = db.prepare("SELECT * FROM agents WHERE id = ?").get(id) as Record<string, unknown> | undefined;
-  return row ? mapAgent(row) : undefined;
+  return row ? withTranslation("agent", Number(row.id), mapAgent(row)) : undefined;
 }
 
 export function upsertAgent(input: Omit<Agent, "id" | "createdAt" | "updatedAt"> & { id?: number }) {
@@ -703,7 +772,7 @@ export function getProperties(filters: PropertyFilters = {}, options?: { include
     )
     .all(params) as PropertyRow[];
 
-  return rows.map(mapProperty);
+  return rows.map((row) => withPropertyTranslation(mapProperty(row)));
 }
 
 export function getPropertyBySlug(slug: string) {
@@ -723,7 +792,7 @@ export function getPropertyBySlug(slug: string) {
     )
     .get(...slugCandidates, ...titleCandidates) as PropertyRow | undefined;
 
-  return row ? mapProperty(row) : undefined;
+  return row ? withPropertyTranslation(mapProperty(row)) : undefined;
 }
 
 export function getPropertyById(id: number) {
@@ -738,7 +807,7 @@ export function getPropertyById(id: number) {
     )
     .get(id) as PropertyRow | undefined;
 
-  return row ? mapProperty(row) : undefined;
+  return row ? withPropertyTranslation(mapProperty(row)) : undefined;
 }
 
 export function getFeaturedProperties(limit = 6) {
@@ -772,7 +841,7 @@ export function getSimilarProperties(
       propertyTypeSlug,
     }) as PropertyRow[];
 
-  return rows.map(mapProperty);
+  return rows.map((row) => withPropertyTranslation(mapProperty(row)));
 }
 
 export function getPropertyCities(filters?: Pick<PropertyFilters, "transactionSlug" | "propertyTypeSlug">) {

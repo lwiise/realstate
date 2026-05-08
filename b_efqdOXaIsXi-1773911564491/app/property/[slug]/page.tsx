@@ -21,6 +21,9 @@ import { Navbar } from "@/components/navbar";
 import { PropertyCard } from "@/components/property-card";
 import { buildWhatsAppLink, formatArea, formatPrice } from "@/lib/data";
 import { getPropertyBySlug, getSimilarProperties, getSiteSettings } from "@/lib/cms";
+import { getRequestLocale } from "@/lib/i18n-server";
+import { localizeProperties, localizeProperty, localizeSiteSettings } from "@/lib/i18n-content";
+import { localizePath } from "@/lib/i18n";
 import { buildPropertyMetadata } from "@/lib/seo";
 
 interface PropertyPageProps {
@@ -34,16 +37,22 @@ export async function generateMetadata({ params }: PropertyPageProps) {
 
 export default async function PropertyPage({ params }: PropertyPageProps) {
   const { slug } = await params;
-  const [property, siteSettings] = await Promise.all([getPropertyBySlug(slug), getSiteSettings()]);
+  const locale = await getRequestLocale();
+  const [rawProperty, rawSiteSettings] = await Promise.all([getPropertyBySlug(slug), getSiteSettings()]);
 
-  if (!property) {
+  if (!rawProperty) {
     notFound();
   }
 
-  const similarProperties = await getSimilarProperties(
-    property.id,
-    property.transactionTypeSlug,
-    property.propertyTypeSlug
+  const property = localizeProperty(rawProperty, locale);
+  const siteSettings = localizeSiteSettings(rawSiteSettings, locale);
+  const similarProperties = localizeProperties(
+    await getSimilarProperties(
+      rawProperty.id,
+      rawProperty.transactionTypeSlug,
+      rawProperty.propertyTypeSlug
+    ),
+    locale
   );
   const galleryImages =
     property.images.length > 0
@@ -54,8 +63,28 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
 
   const whatsappHref = buildWhatsAppLink(
     property.agent?.whatsapp || property.agent?.phone || siteSettings.whatsappNumber,
-    `Bonjour, je suis interesse par "${property.title}". Pouvez-vous me contacter ?`
+    locale === "en"
+      ? `Hello, I am interested in "${property.title}". Can you contact me?`
+      : `Bonjour, je suis interesse par "${property.title}". Pouvez-vous me contacter ?`
   );
+  const text = {
+    home: locale === "en" ? "Home" : "Accueil",
+    properties: locale === "en" ? "Properties" : "Biens",
+    bedrooms: locale === "en" ? "Bedrooms" : "Chambres",
+    bathrooms: locale === "en" ? "Bathrooms" : "Salles de bain",
+    area: locale === "en" ? "Area" : "Surface",
+    location: locale === "en" ? "Location" : "Localisation",
+    description: "Description",
+    address: locale === "en" ? "Address" : "Adresse",
+    features: locale === "en" ? "Features and amenities" : "Caracteristiques et prestations",
+    save: locale === "en" ? "Save" : "Enregistrer",
+    share: locale === "en" ? "Share" : "Partager",
+    call: locale === "en" ? "Call" : "Appeler",
+    exploreMore: locale === "en" ? "Explore more" : "Explorer plus",
+    similar: locale === "en" ? "Similar properties" : "Biens similaires",
+    viewAll: locale === "en" ? "View all" : "Voir tout",
+    back: locale === "en" ? "Back to properties" : "Retour aux biens",
+  };
 
   return (
     <main className="min-h-screen pt-20">
@@ -64,16 +93,16 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
       <section className="bg-black py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="flex items-center gap-2 text-sm mb-6">
-            <Link href="/" className="text-white/60 hover:text-gold transition-colors">
-              Accueil
+            <Link href={localizePath("/", locale)} className="text-white/60 hover:text-gold transition-colors">
+              {text.home}
             </Link>
             <ChevronRight className="w-4 h-4 text-white/40" />
-            <Link href="/properties" className="text-white/60 hover:text-gold transition-colors">
-              Biens
+            <Link href={localizePath("/properties", locale)} className="text-white/60 hover:text-gold transition-colors">
+              {text.properties}
             </Link>
             <ChevronRight className="w-4 h-4 text-white/40" />
             <Link
-              href={`/properties?transaction=${property.transactionTypeSlug}`}
+              href={localizePath(`/properties?transaction=${property.transactionTypeSlug}`, locale)}
               className="text-white/60 hover:text-gold transition-colors"
             >
               {property.transactionType}
@@ -117,6 +146,7 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
             images={galleryImages}
             video={property.video ?? undefined}
             title={property.title}
+            locale={locale}
           />
         </div>
       </section>
@@ -142,7 +172,7 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
                     </div>
                     <div>
                       <p className="text-2xl font-serif">{property.bedrooms}</p>
-                      <p className="text-sm text-muted-foreground">Chambres</p>
+                      <p className="text-sm text-muted-foreground">{text.bedrooms}</p>
                     </div>
                   </div>
                 ) : null}
@@ -153,7 +183,7 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
                     </div>
                     <div>
                       <p className="text-2xl font-serif">{property.bathrooms}</p>
-                      <p className="text-sm text-muted-foreground">Salles de bain</p>
+                      <p className="text-sm text-muted-foreground">{text.bathrooms}</p>
                     </div>
                   </div>
                 ) : null}
@@ -164,7 +194,7 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
                     </div>
                     <div>
                       <p className="text-xl font-serif">{formatArea(property.area, property.areaUnit)}</p>
-                      <p className="text-sm text-muted-foreground">Surface</p>
+                      <p className="text-sm text-muted-foreground">{text.area}</p>
                     </div>
                   </div>
                 ) : null}
@@ -174,25 +204,25 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
                   </div>
                   <div>
                     <p className="text-lg font-serif truncate">{property.city}</p>
-                    <p className="text-sm text-muted-foreground">Localisation</p>
+                    <p className="text-sm text-muted-foreground">{text.location}</p>
                   </div>
                 </div>
               </div>
 
               <div>
-                <h2 className="font-serif text-2xl mb-4">Description</h2>
+                <h2 className="font-serif text-2xl mb-4">{text.description}</h2>
                 <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">
                   {property.longDescription}
                 </p>
                 {property.fullAddress ? (
                   <p className="mt-4 text-sm text-muted-foreground">
-                    Adresse : {property.fullAddress}
+                    {text.address} : {property.fullAddress}
                   </p>
                 ) : null}
               </div>
 
               <div>
-                <h2 className="font-serif text-2xl mb-6">Caracteristiques et prestations</h2>
+                <h2 className="font-serif text-2xl mb-6">{text.features}</h2>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   {property.features.map((feature) => (
                     <div key={feature} className="flex items-center gap-3">
@@ -208,11 +238,11 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
               <div className="flex gap-4 pt-6 border-t border-border">
                 <button className="flex items-center gap-2 px-6 py-3 border border-border hover:border-gold transition-colors">
                   <Heart className="w-4 h-4" />
-                  <span className="text-sm">Enregistrer</span>
+                  <span className="text-sm">{text.save}</span>
                 </button>
                 <button className="flex items-center gap-2 px-6 py-3 border border-border hover:border-gold transition-colors">
                   <Share2 className="w-4 h-4" />
-                  <span className="text-sm">Partager</span>
+                  <span className="text-sm">{text.share}</span>
                 </button>
               </div>
             </div>
@@ -252,7 +282,7 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
                         className="flex items-center justify-center gap-2 bg-gold text-black py-3 text-sm font-medium hover:bg-white transition-colors"
                       >
                         <Phone className="w-4 h-4" />
-                        Appeler
+                        {text.call}
                       </a>
                       <a
                         href={whatsappHref}
@@ -271,6 +301,7 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
                   propertyId={property.id}
                   propertyTitle={property.title}
                   agentPhone={property.agent?.phone}
+                  locale={locale}
                 />
               </div>
             </div>
@@ -283,16 +314,16 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between mb-12">
               <div>
-                <p className="text-gold uppercase tracking-[0.2em] text-sm mb-2">Explorer plus</p>
+                <p className="text-gold uppercase tracking-[0.2em] text-sm mb-2">{text.exploreMore}</p>
                 <h2 className="font-serif text-3xl md:text-4xl text-foreground">
-                  Biens similaires
+                  {text.similar}
                 </h2>
               </div>
               <Link
-                href={`/properties?transaction=${property.transactionTypeSlug}&type=${property.propertyTypeSlug}`}
+                href={localizePath(`/properties?transaction=${property.transactionTypeSlug}&type=${property.propertyTypeSlug}`, locale)}
                 className="hidden md:inline-flex items-center gap-2 text-gold hover:gap-4 transition-all duration-300 text-sm font-medium"
               >
-                Voir tout
+                {text.viewAll}
                 <ChevronRight className="w-4 h-4" />
               </Link>
             </div>
@@ -309,11 +340,11 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
       <section className="py-8 bg-white border-t border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Link
-            href="/properties"
+            href={localizePath("/properties", locale)}
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-gold transition-colors"
           >
             <ChevronLeft className="w-4 h-4" />
-            Retour aux biens
+            {text.back}
           </Link>
         </div>
       </section>

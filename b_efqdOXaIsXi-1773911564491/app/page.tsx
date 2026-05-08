@@ -10,6 +10,15 @@ import { SiteContactForm } from "@/components/site-contact-form";
 import { TestimonialsSection } from "@/components/testimonials-section";
 import { getFeaturedProperties, getPageContent, getPropertyTypes, getSiteSettings, getTransactionTypes } from "@/lib/cms";
 import { buildWhatsAppLink } from "@/lib/data";
+import { getRequestLocale } from "@/lib/i18n-server";
+import {
+  localizePageRecord,
+  localizeProperties,
+  localizePropertyTypes,
+  localizeSiteSettings,
+  localizeTransactionTypes,
+} from "@/lib/i18n-content";
+import { localizePath } from "@/lib/i18n";
 import { buildPageMetadata } from "@/lib/seo";
 
 function WhatsAppIcon({ className }: { className?: string }) {
@@ -30,22 +39,45 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function HomePage() {
-  const homePage = await getPageContent("home");
-  const [siteSettings, transactionTypes, propertyTypes] = await Promise.all([
+  const locale = await getRequestLocale();
+  const rawHomePage = await getPageContent("home");
+  const [rawSiteSettings, rawTransactionTypes, rawPropertyTypes] = await Promise.all([
     getSiteSettings(),
     getTransactionTypes(),
     getPropertyTypes(),
   ]);
-  const featuredProperties = await getFeaturedProperties(homePage.content.featured.limit);
+  const homePage = localizePageRecord(rawHomePage, locale);
+  const siteSettings = localizeSiteSettings(rawSiteSettings, locale);
+  const transactionTypes = localizeTransactionTypes(rawTransactionTypes, locale);
+  const propertyTypes = localizePropertyTypes(rawPropertyTypes, locale);
+  const featuredProperties = localizeProperties(
+    await getFeaturedProperties(homePage.content.featured.limit),
+    locale
+  );
   const aboutImages = homePage.content.about.images;
   const ownerWhatsappHref = buildWhatsAppLink(
     siteSettings.whatsappNumber,
-    "Bonjour, je souhaite louer ou vendre mon bien avec MDK IMMOBILIER. Merci de me contacter."
+    locale === "en"
+      ? "Hello, I would like to rent or sell my property with MDK IMMOBILIER. Please contact me."
+      : "Bonjour, je souhaite louer ou vendre mon bien avec MDK IMMOBILIER. Merci de me contacter."
   );
   const floatingWhatsappHref = buildWhatsAppLink(
     siteSettings.whatsappNumber,
-    "Bonjour, je souhaite obtenir plus d'informations sur vos biens. Merci de me contacter."
+    locale === "en"
+      ? "Hello, I would like more information about your properties. Please contact me."
+      : "Bonjour, je souhaite obtenir plus d'informations sur vos biens. Merci de me contacter."
   );
+  const text = {
+    whatsappAria: locale === "en" ? "Contact MDK IMMOBILIER on WhatsApp" : "Contacter MDK IMMOBILIER sur WhatsApp",
+    ownerTopBar: locale === "en"
+      ? "Owners? Rent and sell without wasting time."
+      : "Proprietaires ? Louez et vendez sans perte de temps.",
+    form: locale === "en" ? "Form" : "Formulaire",
+    fillForm: locale === "en" ? "Fill out the form" : "Remplir le formulaire",
+    scroll: locale === "en" ? "Scroll" : "Defiler",
+    offices: locale === "en" ? "Our offices" : "Nos bureaux",
+    aboutImage: locale === "en" ? "About image" : "Image a propos",
+  };
 
   return (
     <main className="min-h-screen">
@@ -53,7 +85,7 @@ export default async function HomePage() {
         href={floatingWhatsappHref}
         target="_blank"
         rel="noopener noreferrer"
-        aria-label="Contacter MDK IMMOBILIER sur WhatsApp"
+        aria-label={text.whatsappAria}
         className="fixed bottom-5 right-5 z-[80] inline-flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-[0_12px_30px_rgba(0,0,0,0.28)] transition-all duration-300 hover:-translate-y-1 hover:bg-[#1ebe5d] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#25D366] sm:bottom-6 sm:right-6 sm:h-16 sm:w-16"
       >
         <WhatsAppIcon className="h-8 w-8 sm:h-9 sm:w-9" />
@@ -62,17 +94,17 @@ export default async function HomePage() {
       <section className="premium-top-bar fixed inset-x-0 top-0 z-[60]">
         <div className="premium-top-bar-shell mx-auto flex w-full max-w-7xl flex-col items-center justify-center gap-2 px-2 py-2 sm:h-14 sm:flex-row sm:gap-3 sm:px-6 sm:py-0 md:h-16 md:gap-5 lg:px-8">
           <p className="whitespace-nowrap text-center text-[9px] font-semibold uppercase leading-none tracking-[0.015em] text-white [text-shadow:0_0_18px_rgba(212,175,55,0.18)] min-[360px]:text-[10px] sm:text-[13px] md:text-base lg:text-[1.15rem] xl:text-[1.3rem]">
-            Proprietaires ? Louez et vendez sans perte de temps.
+            {text.ownerTopBar}
           </p>
 
           <div className="flex w-full items-center justify-center gap-2 sm:w-auto">
             <Link
-              href="/contact"
+              href={localizePath("/contact", locale)}
               className="premium-top-bar-button inline-flex h-8 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-md px-2 text-[10px] font-semibold text-black sm:h-9 sm:flex-none sm:gap-2 sm:px-3.5 sm:text-xs md:h-10 md:px-5 md:text-sm"
             >
               <FileText className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
-              <span className="truncate sm:hidden">Formulaire</span>
-              <span className="hidden sm:inline">Remplir le formulaire</span>
+              <span className="truncate sm:hidden">{text.form}</span>
+              <span className="hidden sm:inline">{text.fillForm}</span>
             </Link>
             <a
               href={ownerWhatsappHref}
@@ -117,12 +149,12 @@ export default async function HomePage() {
           </div>
 
           <div className="mx-auto max-w-4xl pb-10 sm:pb-0">
-            <SearchBar transactionTypes={transactionTypes} propertyTypes={propertyTypes} />
+            <SearchBar transactionTypes={transactionTypes} propertyTypes={propertyTypes} locale={locale} />
           </div>
         </div>
 
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
-          <span className="text-white/50 text-xs uppercase tracking-widest">Defiler</span>
+          <span className="text-white/50 text-xs uppercase tracking-widest">{text.scroll}</span>
           <div className="w-px h-12 bg-gradient-to-b from-white/50 to-transparent" />
         </div>
       </section>
@@ -134,15 +166,15 @@ export default async function HomePage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-4">
                   <div className="aspect-[3/4] relative overflow-hidden">
-                    <Image src={aboutImages[0] ?? "/placeholder.jpg"} alt="About image 1" fill className="object-cover" />
+                    <Image src={aboutImages[0] ?? "/placeholder.jpg"} alt={`${text.aboutImage} 1`} fill className="object-cover" />
                   </div>
                   <div className="aspect-square relative overflow-hidden">
-                    <Image src={aboutImages[1] ?? aboutImages[0] ?? "/placeholder.jpg"} alt="About image 2" fill className="object-cover" />
+                    <Image src={aboutImages[1] ?? aboutImages[0] ?? "/placeholder.jpg"} alt={`${text.aboutImage} 2`} fill className="object-cover" />
                   </div>
                 </div>
                 <div className="space-y-4 pt-8">
                   <div className="aspect-[3/4] relative overflow-hidden">
-                    <Image src={aboutImages[2] ?? aboutImages[0] ?? "/placeholder.jpg"} alt="About image 3" fill className="object-cover" />
+                    <Image src={aboutImages[2] ?? aboutImages[0] ?? "/placeholder.jpg"} alt={`${text.aboutImage} 3`} fill className="object-cover" />
                   </div>
                 </div>
               </div>
@@ -175,7 +207,7 @@ export default async function HomePage() {
               </div>
 
               <Link
-                href={homePage.content.about.ctaHref}
+                href={localizePath(homePage.content.about.ctaHref, locale)}
                 className="inline-flex items-center gap-2 text-gold hover:gap-4 transition-all duration-300 font-medium"
               >
                 {homePage.content.about.ctaLabel}
@@ -205,7 +237,7 @@ export default async function HomePage() {
 
           <div className="text-center mt-12">
             <Link
-              href={homePage.content.featured.ctaHref}
+              href={localizePath(homePage.content.featured.ctaHref, locale)}
               className="cta-dark-button inline-flex items-center gap-3 px-8 py-4 font-medium text-sm tracking-wide uppercase"
             >
               {homePage.content.featured.ctaLabel}
@@ -215,7 +247,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <TestimonialsSection content={homePage.content.testimonials} />
+      <TestimonialsSection content={homePage.content.testimonials} locale={locale} />
 
       <section className="relative py-24 lg:py-32 overflow-hidden">
         <div className="absolute inset-0 bg-black">
@@ -240,14 +272,14 @@ export default async function HomePage() {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href={homePage.content.cta.primaryHref}
+              href={localizePath(homePage.content.cta.primaryHref, locale)}
               className="inline-flex items-center justify-center gap-2 bg-gold text-black px-8 py-4 font-medium text-sm tracking-wide uppercase hover:bg-white transition-colors"
             >
               {homePage.content.cta.primaryLabel}
               <ArrowRight className="w-4 h-4" />
             </Link>
             <Link
-              href={homePage.content.cta.secondaryHref}
+              href={localizePath(homePage.content.cta.secondaryHref, locale)}
               className="inline-flex items-center justify-center gap-2 border border-white text-white px-8 py-4 font-medium text-sm tracking-wide uppercase hover:bg-white hover:text-black transition-colors"
             >
               {homePage.content.cta.secondaryLabel}
@@ -267,12 +299,12 @@ export default async function HomePage() {
                 {homePage.content.contact.title}
               </h2>
 
-              <SiteContactForm sourcePage="home" submitLabel={homePage.content.contact.formTitle} />
+              <SiteContactForm sourcePage="home" submitLabel={homePage.content.contact.formTitle} locale={locale} />
             </div>
 
             <div className="lg:pl-16">
               <div className="bg-black text-white p-8 md:p-12 h-full">
-                <h3 className="font-serif text-2xl text-gold mb-8">Nos bureaux</h3>
+                <h3 className="font-serif text-2xl text-gold mb-8">{text.offices}</h3>
 
                 <div className="space-y-8">
                   {homePage.content.contact.offices.map((office) => (

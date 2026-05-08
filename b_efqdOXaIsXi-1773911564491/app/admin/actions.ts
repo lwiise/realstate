@@ -32,11 +32,22 @@ import {
   updateNavigationSettings,
   updatePageContent,
   updateSiteSettings,
+  upsertContentTranslation,
   upsertAgent,
   upsertProperty,
   upsertPropertyType,
   upsertTransactionType,
 } from "@/lib/cms";
+import {
+  translateAgentToEnglish,
+  translateFooterToEnglish,
+  translateNavigationToEnglish,
+  translatePageRecordToEnglish,
+  translatePropertyToEnglish,
+  translatePropertyTypeToEnglish,
+  translateSiteSettingsToEnglish,
+  translateTransactionTypeToEnglish,
+} from "@/lib/auto-translate";
 import { getSeedPage } from "@/lib/seed-data";
 import { slugify } from "@/lib/slug";
 
@@ -94,6 +105,12 @@ function revalidateSite(propertySlug?: string) {
   if (propertySlug) {
     paths.push(`/property/${propertySlug}`);
   }
+
+  const publicPaths = paths.filter((path) => !path.startsWith("/admin"));
+  publicPaths.forEach((path) => {
+    const englishPath = path === "/" ? "/en" : `/en${path}`;
+    paths.push(englishPath);
+  });
 
   paths.forEach((path) => revalidatePath(path));
 }
@@ -237,7 +254,7 @@ export async function savePropertyAction(formData: FormData) {
 
   const slug = await buildUniquePropertySlug(rawSlug, title, id);
 
-  const savedId = await upsertProperty({
+  const propertyInput = {
     id: id ?? undefined,
     title,
     slug,
@@ -268,7 +285,10 @@ export async function savePropertyAction(formData: FormData) {
     ogImage: getOptionalValue(formData, "ogImage"),
     sortOrder: getNumberValue(formData, "sortOrder") ?? 0,
     publishedAt: null,
-  });
+  };
+
+  const savedId = await upsertProperty(propertyInput);
+  await upsertContentTranslation("property", savedId, "en", translatePropertyToEnglish(propertyInput));
 
   revalidateSite(slug);
   if (existingProperty?.slug && existingProperty.slug !== slug) {
@@ -290,7 +310,7 @@ export async function saveAgentAction(formData: FormData) {
   await requireAdminUser();
   const id = getNumberValue(formData, "id");
 
-  const savedId = await upsertAgent({
+  const agentInput = {
     id: id ?? undefined,
     name: getValue(formData, "name"),
     slug: getValue(formData, "slug"),
@@ -304,7 +324,10 @@ export async function saveAgentAction(formData: FormData) {
     sortOrder: getNumberValue(formData, "sortOrder") ?? 0,
     seoTitle: getOptionalValue(formData, "seoTitle"),
     seoDescription: getOptionalValue(formData, "seoDescription"),
-  });
+  };
+
+  const savedId = await upsertAgent(agentInput);
+  await upsertContentTranslation("agent", savedId, "en", translateAgentToEnglish(agentInput));
 
   revalidateSite();
   redirect(withSavedParam(`/admin/agents/${savedId}`));
@@ -321,7 +344,7 @@ export async function savePropertyTypeAction(formData: FormData) {
   await requireAdminUser();
   const id = getNumberValue(formData, "id");
 
-  const savedId = await upsertPropertyType({
+  const propertyTypeInput = {
     id: id ?? undefined,
     label: getValue(formData, "label"),
     slug: getValue(formData, "slug"),
@@ -329,7 +352,10 @@ export async function savePropertyTypeAction(formData: FormData) {
     imageUrl: getOptionalValue(formData, "imageUrl"),
     isActive: getBooleanValue(formData, "isActive"),
     sortOrder: getNumberValue(formData, "sortOrder") ?? 0,
-  });
+  };
+
+  const savedId = await upsertPropertyType(propertyTypeInput);
+  await upsertContentTranslation("property-type", savedId, "en", translatePropertyTypeToEnglish(propertyTypeInput));
 
   revalidateSite();
   redirect(withSavedParam(`/admin/property-types/${savedId}`));
@@ -346,7 +372,7 @@ export async function saveTransactionTypeAction(formData: FormData) {
   await requireAdminUser();
   const id = getNumberValue(formData, "id");
 
-  const savedId = await upsertTransactionType({
+  const transactionTypeInput = {
     id: id ?? undefined,
     label: getValue(formData, "label"),
     slug: getValue(formData, "slug"),
@@ -358,7 +384,15 @@ export async function saveTransactionTypeAction(formData: FormData) {
     navLabel: getOptionalValue(formData, "navLabel"),
     priceSuffix: getOptionalValue(formData, "priceSuffix"),
     showInNavigation: getBooleanValue(formData, "showInNavigation"),
-  });
+  };
+
+  const savedId = await upsertTransactionType(transactionTypeInput);
+  await upsertContentTranslation(
+    "transaction-type",
+    savedId,
+    "en",
+    translateTransactionTypeToEnglish(transactionTypeInput)
+  );
 
   revalidateSite();
   redirect(withSavedParam(`/admin/transaction-types/${savedId}`));
@@ -391,6 +425,7 @@ export async function saveNavigationAction(formData: FormData) {
   };
 
   await updateNavigationSettings(input);
+  await upsertContentTranslation("navigation-settings", "1", "en", translateNavigationToEnglish(input));
   revalidateSite();
   redirect(withSavedParam("/admin/navigation"));
 }
@@ -416,6 +451,7 @@ export async function saveFooterAction(formData: FormData) {
   };
 
   await updateFooterSettings(input);
+  await upsertContentTranslation("footer-settings", "1", "en", translateFooterToEnglish(input));
   revalidateSite();
   redirect(withSavedParam("/admin/footer"));
 }
@@ -443,6 +479,7 @@ export async function saveSiteSettingsAction(formData: FormData) {
   };
 
   await updateSiteSettings(input);
+  await upsertContentTranslation("site-settings", "1", "en", translateSiteSettingsToEnglish(input));
   revalidateSite();
   redirect(withSavedParam("/admin/settings"));
 }
@@ -464,6 +501,7 @@ export async function savePageContentAction(formData: FormData) {
   };
 
   await updatePageContent(record);
+  await upsertContentTranslation("page-content", pageKey, "en", translatePageRecordToEnglish(record));
   revalidateSite();
   redirect(withSavedParam(`/admin/content/${pageKey}`));
 }

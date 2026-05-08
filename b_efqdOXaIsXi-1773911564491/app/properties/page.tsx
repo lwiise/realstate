@@ -14,6 +14,16 @@ import {
   getSiteSettings,
   getTransactionTypes,
 } from "@/lib/cms";
+import { getRequestLocale } from "@/lib/i18n-server";
+import {
+  localizeProperties,
+  localizePropertyType,
+  localizePropertyTypes,
+  localizeSiteSettings,
+  localizeTransactionType,
+  localizeTransactionTypes,
+} from "@/lib/i18n-content";
+import { localizePath } from "@/lib/i18n";
 
 interface PropertiesPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -27,11 +37,15 @@ export async function generateMetadata({
   searchParams,
 }: PropertiesPageProps): Promise<Metadata> {
   const params = await searchParams;
-  const [transactionType, propertyType, siteSettings] = await Promise.all([
+  const locale = await getRequestLocale();
+  const [rawTransactionType, rawPropertyType, rawSiteSettings] = await Promise.all([
     findTransactionType(toValue(params.transaction)),
     findPropertyType(toValue(params.type)),
     getSiteSettings(),
   ]);
+  const transactionType = rawTransactionType ? localizeTransactionType(rawTransactionType, locale) : undefined;
+  const propertyType = rawPropertyType ? localizePropertyType(rawPropertyType, locale) : undefined;
+  const siteSettings = localizeSiteSettings(rawSiteSettings, locale);
   const city = toValue(params.city) || undefined;
   const featured = toValue(params.featured) === "1";
   const keyword = toValue(params.keyword) || undefined;
@@ -47,25 +61,34 @@ export async function generateMetadata({
   if (maxPrice) filters.set("maxPrice", maxPrice);
   if (featured) filters.set("featured", "1");
 
-  const canonical = filters.size > 0 ? `/properties?${filters.toString()}` : "/properties";
+  const frenchCanonical = filters.size > 0 ? `/properties?${filters.toString()}` : "/properties";
+  const canonical = localizePath(frenchCanonical, locale);
   const title = transactionType
     ? propertyType
       ? `${propertyType.label} - ${transactionType.label}`
-      : `Proprietes - ${transactionType.label}`
+      : `${locale === "en" ? "Properties" : "Proprietes"} - ${transactionType.label}`
     : propertyType
       ? propertyType.label
-      : "Toutes les proprietes";
-  const locationSuffix = city ? ` a ${city}` : "";
+      : locale === "en" ? "All properties" : "Toutes les proprietes";
+  const locationSuffix = city ? (locale === "en" ? ` in ${city}` : ` a ${city}`) : "";
   const description =
     keyword || minPrice || maxPrice || featured
-      ? `Parcourez les annonces immobilieres filtrees${locationSuffix} sur ${siteSettings.siteName}.`
-      : `Parcourez ${title.toLowerCase()}${locationSuffix} sur ${siteSettings.siteName}.`;
+      ? locale === "en"
+        ? `Browse filtered real estate listings${locationSuffix} on ${siteSettings.siteName}.`
+        : `Parcourez les annonces immobilieres filtrees${locationSuffix} sur ${siteSettings.siteName}.`
+      : locale === "en"
+        ? `Browse ${title.toLowerCase()}${locationSuffix} on ${siteSettings.siteName}.`
+        : `Parcourez ${title.toLowerCase()}${locationSuffix} sur ${siteSettings.siteName}.`;
 
   return {
     title,
     description,
     alternates: {
       canonical,
+      languages: {
+        fr: frenchCanonical,
+        en: localizePath(frenchCanonical, "en"),
+      },
     },
     openGraph: {
       title,
@@ -89,6 +112,7 @@ export async function generateMetadata({
 
 export default async function PropertiesPage({ searchParams }: PropertiesPageProps) {
   const params = await searchParams;
+  const locale = await getRequestLocale();
   const transactionParam = toValue(params.transaction);
   const propertyTypeParam = toValue(params.type);
   const city = toValue(params.city) || undefined;
@@ -97,13 +121,17 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
   const maxPrice = toValue(params.maxPrice) || undefined;
   const featured = toValue(params.featured) === "1";
 
-  const [transactionType, propertyType, transactionTypes, propertyTypes] = await Promise.all([
+  const [rawTransactionType, rawPropertyType, rawTransactionTypes, rawPropertyTypes] = await Promise.all([
     findTransactionType(transactionParam),
     findPropertyType(propertyTypeParam),
     getTransactionTypes(),
     getPropertyTypes(),
   ]);
-  const properties = await getProperties({
+  const transactionType = rawTransactionType ? localizeTransactionType(rawTransactionType, locale) : undefined;
+  const propertyType = rawPropertyType ? localizePropertyType(rawPropertyType, locale) : undefined;
+  const transactionTypes = localizeTransactionTypes(rawTransactionTypes, locale);
+  const propertyTypes = localizePropertyTypes(rawPropertyTypes, locale);
+  const properties = localizeProperties(await getProperties({
     transactionSlug: transactionType?.slug,
     propertyTypeSlug: propertyType?.slug,
     city,
@@ -111,7 +139,7 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
     minPrice: minPrice ? Number(minPrice) : undefined,
     maxPrice: maxPrice ? Number(maxPrice) : undefined,
     featuredOnly: featured,
-  });
+  }), locale);
 
   const countEntries = await Promise.all(
     transactionTypes.map(async (item) => [item.slug, (await getProperties({ transactionSlug: item.slug })).length] as const)
@@ -126,10 +154,22 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
   const pageTitle = transactionType
     ? propertyType
       ? `${propertyType.label} - ${transactionType.label}`
-      : `Proprietes - ${transactionType.label}`
+      : `${locale === "en" ? "Properties" : "Proprietes"} - ${transactionType.label}`
     : propertyType
       ? propertyType.label
-      : "Toutes les proprietes";
+      : locale === "en" ? "All properties" : "Toutes les proprietes";
+  const text = {
+    home: locale === "en" ? "Home" : "Accueil",
+    properties: locale === "en" ? "Properties" : "Biens",
+    found: locale === "en"
+      ? properties.length === 1 ? "property found" : "properties found"
+      : properties.length === 1 ? "bien trouve" : "biens trouves",
+    noResult: locale === "en" ? "No property found" : "Aucun bien trouve",
+    noResultBody: locale === "en"
+      ? "Adjust your filters to find available listings."
+      : "Modifiez vos filtres pour trouver les annonces disponibles.",
+    clear: locale === "en" ? "Clear filters" : "Effacer les filtres",
+  };
 
   return (
     <main className="min-h-screen pt-20">
@@ -138,11 +178,11 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
       <section className="bg-black py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="flex items-center gap-2 text-sm mb-6">
-            <Link href="/" className="text-white/60 hover:text-gold transition-colors">
-              Accueil
+            <Link href={localizePath("/", locale)} className="text-white/60 hover:text-gold transition-colors">
+              {text.home}
             </Link>
             <ChevronRight className="w-4 h-4 text-white/40" />
-            <span className="text-gold">Biens</span>
+            <span className="text-gold">{text.properties}</span>
             {transactionType ? (
               <>
                 <ChevronRight className="w-4 h-4 text-white/40" />
@@ -161,7 +201,7 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
             {pageTitle}
           </h1>
           <p className="text-white/60">
-            {properties.length} {properties.length === 1 ? "bien trouve" : "biens trouves"}
+            {properties.length} {text.found}
           </p>
         </div>
       </section>
@@ -173,6 +213,7 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
             propertyTypes={propertyTypes}
             cities={cities}
             countsByTransaction={countsByTransaction}
+            locale={locale}
             value={{
               transaction: transactionType?.slug,
               type: propertyType?.slug,
@@ -199,15 +240,15 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
               <div className="w-20 h-20 bg-secondary mx-auto flex items-center justify-center mb-6">
                 <SlidersHorizontal className="w-8 h-8 text-muted-foreground" />
               </div>
-              <h3 className="font-serif text-2xl text-foreground mb-2">Aucun bien trouve</h3>
+              <h3 className="font-serif text-2xl text-foreground mb-2">{text.noResult}</h3>
               <p className="text-muted-foreground mb-6">
-                Modifiez vos filtres pour trouver les annonces disponibles.
+                {text.noResultBody}
               </p>
               <Link
-                href="/properties"
+                href={localizePath("/properties", locale)}
                 className="cta-dark-button inline-flex items-center gap-2 px-6 py-3 text-sm tracking-wide uppercase"
               >
-                Effacer les filtres
+                {text.clear}
               </Link>
             </div>
           )}

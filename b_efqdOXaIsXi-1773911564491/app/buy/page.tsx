@@ -6,6 +6,10 @@ import { Navbar } from "@/components/navbar";
 import { PropertyCard } from "@/components/property-card";
 import { PropertyTypeCard } from "@/components/property-type-card";
 import { getPageContent, getProperties, getPropertyCountByType, getPropertyTypes } from "@/lib/cms";
+import type { PageRecord } from "@/lib/cms-types";
+import { getRequestLocale } from "@/lib/i18n-server";
+import { localizePageRecord, localizeProperties, localizePropertyTypes } from "@/lib/i18n-content";
+import { localizePath } from "@/lib/i18n";
 import { buildPageMetadata } from "@/lib/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -13,12 +17,16 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function BuyPage() {
-  const [page, propertyTypes, propertyCounts, properties] = await Promise.all([
+  const locale = await getRequestLocale();
+  const [rawPage, rawPropertyTypes, propertyCounts, rawProperties] = await Promise.all([
     getPageContent("buy"),
     getPropertyTypes(),
     getPropertyCountByType("buy"),
     getProperties({ transactionSlug: "buy", limit: 6 }),
   ]);
+  const page = localizePageRecord(rawPage as PageRecord<"buy">, locale);
+  const propertyTypes = localizePropertyTypes(rawPropertyTypes, locale);
+  const properties = localizeProperties(rawProperties, locale);
 
   return (
     <main className="min-h-screen">
@@ -71,7 +79,8 @@ export default async function BuyPage() {
                 key={type.id}
                 propertyType={type}
                 count={propertyCounts.get(type.slug) ?? 0}
-                href={`/properties?transaction=buy&type=${type.slug}`}
+                href={localizePath(`/properties?transaction=buy&type=${type.slug}`, locale)}
+                locale={locale}
               />
             ))}
           </div>
@@ -148,10 +157,10 @@ export default async function BuyPage() {
               <p className="text-muted-foreground max-w-2xl">{page.content.listing.description}</p>
             </div>
             <Link
-              href="/properties?transaction=buy"
+              href={localizePath("/properties?transaction=buy", locale)}
               className="hidden md:inline-flex rounded-md border border-border px-4 py-3 text-xs uppercase tracking-wide transition-colors hover:border-gold"
             >
-              Voir tout
+              {locale === "en" ? "View all" : "Voir tout"}
             </Link>
           </div>
 

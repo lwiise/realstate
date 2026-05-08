@@ -1,5 +1,12 @@
 export type ListingStatus = "draft" | "published" | "archived";
 export type PriceMode = "sale" | "monthly" | "daily" | "custom";
+export type Locale = "fr" | "en";
+
+export type TranslationPayload = Record<string, unknown>;
+
+export interface TranslatableRecord {
+  translationEn?: TranslationPayload | null;
+}
 
 export type PageKey =
   | "home"
@@ -9,7 +16,7 @@ export type PageKey =
   | "about"
   | "contact";
 
-export interface SelectOption {
+export interface SelectOption extends TranslatableRecord {
   id: number;
   label: string;
   slug: string;
@@ -28,7 +35,7 @@ export interface TransactionType extends SelectOption {
 
 export interface PropertyType extends SelectOption {}
 
-export interface Agent {
+export interface Agent extends TranslatableRecord {
   id: number;
   name: string;
   slug: string;
@@ -46,7 +53,7 @@ export interface Agent {
   updatedAt: string;
 }
 
-export interface Property {
+export interface Property extends TranslatableRecord {
   id: number;
   title: string;
   slug: string;
@@ -86,7 +93,7 @@ export interface Property {
   publishedAt?: string | null;
 }
 
-export interface SiteSettings {
+export interface SiteSettings extends TranslatableRecord {
   siteName: string;
   siteUrl: string;
   siteDescription: string;
@@ -117,7 +124,7 @@ export interface SocialLink {
   isEnabled: boolean;
 }
 
-export interface NavigationSettings {
+export interface NavigationSettings extends TranslatableRecord {
   logoUrl: string;
   logoAlt: string;
   links: NavLink[];
@@ -128,7 +135,7 @@ export interface FooterLinkGroup {
   links: NavLink[];
 }
 
-export interface FooterSettings {
+export interface FooterSettings extends TranslatableRecord {
   brandText: string;
   quickLinks: NavLink[];
   propertyLinks: NavLink[];
@@ -363,7 +370,7 @@ export interface PropertyFilters {
   limit?: number;
 }
 
-export interface PageRecord<TPageKey extends PageKey = PageKey> {
+export interface PageRecord<TPageKey extends PageKey = PageKey> extends TranslatableRecord {
   pageKey: TPageKey;
   title: string;
   seoTitle?: string | null;

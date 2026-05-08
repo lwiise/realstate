@@ -12,6 +12,17 @@ import {
   seedSiteSettings,
   seedTransactionTypes,
 } from "@/lib/seed-data";
+import {
+  translateAgentToEnglish,
+  translateFooterToEnglish,
+  translateNavigationToEnglish,
+  translatePageRecordToEnglish,
+  translatePropertyToEnglish,
+  translatePropertyTypeToEnglish,
+  translateSiteSettingsToEnglish,
+  translateTransactionTypeToEnglish,
+} from "@/lib/auto-translate";
+import type { PageKey, PageRecord, Property } from "@/lib/cms-types";
 
 declare global {
   // eslint-disable-next-line no-var
@@ -218,7 +229,39 @@ export function migrateDatabase(db: DatabaseSync) {
       source_page TEXT NOT NULL,
       created_at TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS content_translations (
+      entity_type TEXT NOT NULL,
+      entity_id TEXT NOT NULL,
+      locale TEXT NOT NULL,
+      data_json TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      PRIMARY KEY (entity_type, entity_id, locale)
+    );
   `);
+}
+
+function insertContentTranslation(
+  db: DatabaseSync,
+  entityType: string,
+  entityId: string | number,
+  payload: Record<string, unknown>,
+  timestamp: string
+) {
+  db.prepare(
+    `
+      INSERT OR REPLACE INTO content_translations (
+        entity_type, entity_id, locale, data_json, updated_at
+      ) VALUES (
+        @entityType, @entityId, 'en', @dataJson, @updatedAt
+      )
+    `
+  ).run({
+    entityType,
+    entityId: String(entityId),
+    dataJson: toJson(payload),
+    updatedAt: timestamp,
+  });
 }
 
 function seedDatabase(db: DatabaseSync) {
@@ -268,6 +311,7 @@ function seedDatabase(db: DatabaseSync) {
       defaultSeoDescription: seedSiteSettings.defaultSeoDescription,
       updatedAt: timestamp,
     });
+    insertContentTranslation(db, "site-settings", "1", translateSiteSettingsToEnglish(seedSiteSettings), timestamp);
 
     db.prepare(
       `
@@ -280,6 +324,7 @@ function seedDatabase(db: DatabaseSync) {
       links: toJson(seedNavigation.links),
       updatedAt: timestamp,
     });
+    insertContentTranslation(db, "navigation-settings", "1", translateNavigationToEnglish(seedNavigation), timestamp);
 
     db.prepare(
       `
@@ -297,6 +342,7 @@ function seedDatabase(db: DatabaseSync) {
       legalLinks: toJson(seedFooter.legalLinks),
       updatedAt: timestamp,
     });
+    insertContentTranslation(db, "footer-settings", "1", translateFooterToEnglish(seedFooter), timestamp);
 
     const insertTransactionType = db.prepare(
       `
@@ -313,7 +359,7 @@ function seedDatabase(db: DatabaseSync) {
     );
 
     seedTransactionTypes.forEach((item) => {
-      insertTransactionType.run({
+      const result = insertTransactionType.run({
         label: item.label,
         slug: item.slug,
         description: item.description ?? null,
@@ -329,6 +375,13 @@ function seedDatabase(db: DatabaseSync) {
         createdAt: timestamp,
         updatedAt: timestamp,
       });
+      insertContentTranslation(
+        db,
+        "transaction-type",
+        Number(result.lastInsertRowid),
+        translateTransactionTypeToEnglish(item),
+        timestamp
+      );
     });
 
     const insertPropertyType = db.prepare(
@@ -342,7 +395,7 @@ function seedDatabase(db: DatabaseSync) {
     );
 
     seedPropertyTypes.forEach((item) => {
-      insertPropertyType.run({
+      const result = insertPropertyType.run({
         label: item.label,
         slug: item.slug,
         description: item.description ?? null,
@@ -354,6 +407,13 @@ function seedDatabase(db: DatabaseSync) {
         createdAt: timestamp,
         updatedAt: timestamp,
       });
+      insertContentTranslation(
+        db,
+        "property-type",
+        Number(result.lastInsertRowid),
+        translatePropertyTypeToEnglish(item),
+        timestamp
+      );
     });
 
     const insertAgent = db.prepare(
@@ -369,7 +429,7 @@ function seedDatabase(db: DatabaseSync) {
     );
 
     seedAgents.forEach((agent) => {
-      insertAgent.run({
+      const result = insertAgent.run({
         name: agent.name,
         slug: agent.slug,
         role: agent.role,
@@ -385,6 +445,13 @@ function seedDatabase(db: DatabaseSync) {
         createdAt: timestamp,
         updatedAt: timestamp,
       });
+      insertContentTranslation(
+        db,
+        "agent",
+        Number(result.lastInsertRowid),
+        translateAgentToEnglish(agent),
+        timestamp
+      );
     });
 
     const transactionMap = new Map<string, number>();
@@ -440,7 +507,7 @@ function seedDatabase(db: DatabaseSync) {
         throw new Error(`Missing taxonomy for seed property ${property.slug}`);
       }
 
-      insertProperty.run({
+      const result = insertProperty.run({
         title: property.title,
         slug: property.slug,
         transactionTypeId,
@@ -473,6 +540,13 @@ function seedDatabase(db: DatabaseSync) {
         createdAt: timestamp,
         updatedAt: timestamp,
       });
+      insertContentTranslation(
+        db,
+        "property",
+        Number(result.lastInsertRowid),
+        translatePropertyToEnglish(property as unknown as Property),
+        timestamp
+      );
     });
 
     const insertPage = db.prepare(
@@ -488,7 +562,7 @@ function seedDatabase(db: DatabaseSync) {
     (["home", "buy", "rent", "daily-rent", "about", "contact"] as const).forEach(
       (pageKey) => {
         const page = getSeedPage(pageKey);
-        insertPage.run({
+        const record: PageRecord<PageKey> = {
           pageKey,
           title:
             pageKey === "home"
@@ -505,9 +579,20 @@ function seedDatabase(db: DatabaseSync) {
           seoTitle: seedSiteSettings.defaultSeoTitle,
           seoDescription: seedSiteSettings.defaultSeoDescription,
           ogImageUrl: "hero" in page ? page.hero.backgroundImage : seedSiteSettings.defaultOgImage,
-          contentJson: toJson(page),
+          updatedAt: timestamp,
+          content: page,
+        };
+
+        insertPage.run({
+          pageKey: record.pageKey,
+          title: record.title,
+          seoTitle: record.seoTitle,
+          seoDescription: record.seoDescription,
+          ogImageUrl: record.ogImageUrl,
+          contentJson: toJson(record.content),
           updatedAt: timestamp,
         });
+        insertContentTranslation(db, "page-content", pageKey, translatePageRecordToEnglish(record), timestamp);
       }
     );
 

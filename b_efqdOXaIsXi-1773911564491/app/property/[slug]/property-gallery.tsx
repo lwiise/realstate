@@ -3,14 +3,16 @@
 import { useState } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, Expand, Play } from "lucide-react";
+import type { Locale } from "@/lib/cms-types";
 
 interface PropertyGalleryProps {
   images: string[];
   video?: string;
   title: string;
+  locale?: Locale;
 }
 
-export function PropertyGallery({ images, video, title }: PropertyGalleryProps) {
+export function PropertyGallery({ images, video, title, locale = "fr" }: PropertyGalleryProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   
@@ -21,7 +23,7 @@ export function PropertyGallery({ images, video, title }: PropertyGalleryProps) 
   if (allMedia.length === 0) {
     return (
       <div className="flex aspect-[16/10] items-center justify-center bg-black text-sm text-white/60">
-        Aucun media disponible pour cette propriete.
+        {locale === "en" ? "No media available for this property." : "Aucun media disponible pour cette propriete."}
       </div>
     );
   }
@@ -51,7 +53,7 @@ export function PropertyGallery({ images, video, title }: PropertyGalleryProps) 
           ) : (
             <Image
               src={currentMedia.src}
-              alt={`${title} - Image ${currentIndex + 1}`}
+              alt={`${title} - ${locale === "en" ? "Image" : "Image"} ${currentIndex + 1}`}
               fill
               className="object-cover"
               priority
@@ -64,14 +66,14 @@ export function PropertyGallery({ images, video, title }: PropertyGalleryProps) 
               <button
                 onClick={goToPrev}
                 className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/50 backdrop-blur-sm flex items-center justify-center text-white hover:bg-gold hover:text-black transition-colors opacity-0 group-hover:opacity-100"
-                aria-label="Media precedent"
+                aria-label={locale === "en" ? "Previous media" : "Media precedent"}
               >
                 <ChevronLeft className="w-6 h-6" />
               </button>
               <button
                 onClick={goToNext}
                 className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/50 backdrop-blur-sm flex items-center justify-center text-white hover:bg-gold hover:text-black transition-colors opacity-0 group-hover:opacity-100"
-                aria-label="Media suivant"
+                aria-label={locale === "en" ? "Next media" : "Media suivant"}
               >
                 <ChevronRight className="w-6 h-6" />
               </button>
@@ -83,7 +85,7 @@ export function PropertyGallery({ images, video, title }: PropertyGalleryProps) 
             <button
               onClick={() => setIsFullscreen(true)}
               className="absolute top-4 right-4 w-10 h-10 bg-black/50 backdrop-blur-sm flex items-center justify-center text-white hover:bg-gold hover:text-black transition-colors opacity-0 group-hover:opacity-100"
-              aria-label="Voir en plein ecran"
+              aria-label={locale === "en" ? "View fullscreen" : "Voir en plein ecran"}
             >
               <Expand className="w-4 h-4" />
             </button>
@@ -109,7 +111,9 @@ export function PropertyGallery({ images, video, title }: PropertyGalleryProps) 
               <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
                 <Play className="w-6 h-6 text-gold fill-gold" />
               </div>
-              <span className="text-xs text-white bg-black/50 px-2 py-1">Video</span>
+              <span className="text-xs text-white bg-black/50 px-2 py-1">
+                {locale === "en" ? "Video" : "Video"}
+              </span>
             </button>
           )}
           {images.slice(0, video ? 2 : 3).map((image, index) => (
@@ -124,7 +128,7 @@ export function PropertyGallery({ images, video, title }: PropertyGalleryProps) 
             >
               <Image
                 src={image}
-                alt={`${title} - Miniature ${index + 1}`}
+                alt={`${title} - ${locale === "en" ? "Thumbnail" : "Miniature"} ${index + 1}`}
                 fill
                 className="object-cover"
               />
@@ -142,7 +146,7 @@ export function PropertyGallery({ images, video, title }: PropertyGalleryProps) 
           <button
             onClick={() => setIsFullscreen(false)}
             className="absolute top-4 right-4 w-12 h-12 bg-white/10 flex items-center justify-center text-white hover:bg-gold hover:text-black transition-colors"
-            aria-label="Fermer le plein ecran"
+            aria-label={locale === "en" ? "Close fullscreen" : "Fermer le plein ecran"}
           >
             <span className="text-2xl">&times;</span>
           </button>
@@ -151,7 +155,7 @@ export function PropertyGallery({ images, video, title }: PropertyGalleryProps) 
             <div className="relative w-full h-full">
               <Image
                 src={currentMedia.src}
-                alt={`${title} - Image ${currentIndex + 1}`}
+                alt={`${title} - ${locale === "en" ? "Image" : "Image"} ${currentIndex + 1}`}
                 fill
                 className="object-contain"
               />
@@ -166,7 +170,7 @@ export function PropertyGallery({ images, video, title }: PropertyGalleryProps) 
                   goToPrev();
                 }}
                 className="absolute left-4 top-1/2 -translate-y-1/2 w-14 h-14 bg-white/10 flex items-center justify-center text-white hover:bg-gold hover:text-black transition-colors"
-                aria-label="Media precedent"
+                aria-label={locale === "en" ? "Previous media" : "Media precedent"}
               >
                 <ChevronLeft className="w-8 h-8" />
               </button>
@@ -176,7 +180,7 @@ export function PropertyGallery({ images, video, title }: PropertyGalleryProps) 
                   goToNext();
                 }}
                 className="absolute right-4 top-1/2 -translate-y-1/2 w-14 h-14 bg-white/10 flex items-center justify-center text-white hover:bg-gold hover:text-black transition-colors"
-                aria-label="Media suivant"
+                aria-label={locale === "en" ? "Next media" : "Media suivant"}
               >
                 <ChevronRight className="w-8 h-8" />
               </button>

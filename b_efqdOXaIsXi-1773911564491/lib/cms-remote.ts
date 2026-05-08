@@ -13,6 +13,7 @@ import type {
   PropertyType,
   SiteSettings,
   TransactionType,
+  TranslationPayload,
 } from "@/lib/cms-types";
 import { executeRemote, queryRemoteRow, queryRemoteRows } from "@/lib/remote-db";
 import { getSeedPage, seedFooter, seedNavigation, seedSiteSettings } from "@/lib/seed-data";
@@ -30,6 +31,77 @@ function parseJson<T>(value: unknown, fallback: T): T {
   }
 
   return value as T;
+}
+
+async function getContentTranslationRemote(
+  entityType: string,
+  entityId: string | number
+): Promise<TranslationPayload | null> {
+  const row = await queryRemoteRow<{ data_json: unknown }>(
+    "SELECT data_json FROM content_translations WHERE entity_type = $1 AND entity_id = $2 AND locale = 'en'",
+    [entityType, String(entityId)]
+  );
+
+  return parseJson<TranslationPayload | null>(row?.data_json, null);
+}
+
+async function withTranslationRemote<T extends object>(
+  entityType: string,
+  entityId: string | number,
+  value: T
+) {
+  return {
+    ...value,
+    translationEn: await getContentTranslationRemote(entityType, entityId),
+  };
+}
+
+async function withPropertyTranslationRemote(property: Property): Promise<Property> {
+  const [transactionTranslation, propertyTypeTranslation] = await Promise.all([
+    getContentTranslationRemote("transaction-type", property.transactionTypeId),
+    getContentTranslationRemote("property-type", property.propertyTypeId),
+  ]);
+  const translatedProperty = await withTranslationRemote("property", property.id, property);
+  const propertyPayload = translatedProperty.translationEn ?? {};
+
+  return {
+    ...translatedProperty,
+    translationEn: {
+      ...propertyPayload,
+      transactionType: typeof transactionTranslation?.label === "string"
+        ? transactionTranslation.label
+        : property.transactionType,
+      propertyType: typeof propertyTypeTranslation?.label === "string"
+        ? propertyTypeTranslation.label
+        : property.propertyType,
+      priceSuffix: typeof transactionTranslation?.priceSuffix === "string"
+        ? transactionTranslation.priceSuffix
+        : property.priceSuffix,
+    },
+    agent: translatedProperty.agent
+      ? await withTranslationRemote("agent", translatedProperty.agent.id, translatedProperty.agent)
+      : translatedProperty.agent,
+  };
+}
+
+export async function upsertContentTranslationRemote(
+  entityType: string,
+  entityId: string | number,
+  locale: "en",
+  payload: TranslationPayload
+) {
+  await executeRemote(
+    `
+      INSERT INTO content_translations (
+        entity_type, entity_id, locale, data_json, updated_at
+      ) VALUES (
+        $1, $2, $3, $4::jsonb, $5
+      )
+      ON CONFLICT (entity_type, entity_id, locale)
+      DO UPDATE SET data_json = EXCLUDED.data_json, updated_at = EXCLUDED.updated_at
+    `,
+    [entityType, String(entityId), locale, JSON.stringify(payload), new Date().toISOString()]
+  );
 }
 
 function mapBoolean(value: number | boolean | string | null | undefined) {
@@ -262,10 +334,10 @@ export async function getSiteSettingsRemote(): Promise<SiteSettings> {
   );
 
   if (!row) {
-    return seedSiteSettings;
+    return withTranslationRemote("site-settings", "1", seedSiteSettings);
   }
 
-  return {
+  return withTranslationRemote("site-settings", "1", {
     siteName: String(row.site_name),
     siteUrl: String(row.site_url),
     siteDescription: String(row.site_description),
@@ -282,7 +354,7 @@ export async function getSiteSettingsRemote(): Promise<SiteSettings> {
     copyrightText: String(row.copyright_text),
     defaultSeoTitle: String(row.default_seo_title),
     defaultSeoDescription: String(row.default_seo_description),
-  };
+  });
 }
 
 export async function updateSiteSettingsRemote(input: SiteSettings) {
@@ -346,14 +418,14 @@ export async function getNavigationSettingsRemote(): Promise<NavigationSettings>
   );
 
   if (!row) {
-    return seedNavigation;
+    return withTranslationRemote("navigation-settings", "1", seedNavigation);
   }
 
-  return {
+  return withTranslationRemote("navigation-settings", "1", {
     logoUrl: String(row.logo_url),
     logoAlt: String(row.logo_alt),
     links: parseJson<NavigationSettings["links"]>(row.links_json, []),
-  };
+  });
 }
 
 export async function updateNavigationSettingsRemote(input: NavigationSettings) {
@@ -377,16 +449,16 @@ export async function getFooterSettingsRemote(): Promise<FooterSettings> {
   );
 
   if (!row) {
-    return seedFooter;
+    return withTranslationRemote("footer-settings", "1", seedFooter);
   }
 
-  return {
+  return withTranslationRemote("footer-settings", "1", {
     brandText: String(row.brand_text),
     quickLinks: parseJson<FooterSettings["quickLinks"]>(row.quick_links_json, []),
     propertyLinks: parseJson<FooterSettings["propertyLinks"]>(row.property_links_json, []),
     socialLinks: parseJson<FooterSettings["socialLinks"]>(row.social_links_json, []),
     legalLinks: parseJson<FooterSettings["legalLinks"]>(row.legal_links_json, []),
-  };
+  });
 }
 
 export async function updateFooterSettingsRemote(input: FooterSettings) {
@@ -425,7 +497,7 @@ export async function getPageContentRemote<TPageKey extends PageKey>(
   );
 
   if (!row) {
-    return {
+    return withTranslationRemote("page-content", pageKey, {
       pageKey,
       title: pageKey,
       seoTitle: seedSiteSettings.defaultSeoTitle,
@@ -433,10 +505,10 @@ export async function getPageContentRemote<TPageKey extends PageKey>(
       ogImageUrl: seedSiteSettings.defaultOgImage,
       content: getSeedPage(pageKey),
       updatedAt: new Date().toISOString(),
-    };
+    });
   }
 
-  return {
+  return withTranslationRemote("page-content", pageKey, {
     pageKey,
     title: String(row.title),
     seoTitle: (row.seo_title as string | null) ?? null,
@@ -444,7 +516,7 @@ export async function getPageContentRemote<TPageKey extends PageKey>(
     ogImageUrl: (row.og_image_url as string | null) ?? null,
     content: parseJson<PageContentMap[TPageKey]>(row.content_json, getSeedPage(pageKey)),
     updatedAt: String(row.updated_at),
-  };
+  });
 }
 
 export async function updatePageContentRemote<TPageKey extends PageKey>(
@@ -486,7 +558,7 @@ export async function getTransactionTypesRemote(options?: { includeInactive?: bo
     `
   );
 
-  return rows.map(mapTransactionType);
+  return Promise.all(rows.map((row) => withTranslationRemote("transaction-type", Number(row.id), mapTransactionType(row))));
 }
 
 export async function findTransactionTypeRemote(value?: string | null) {
@@ -581,7 +653,7 @@ export async function getPropertyTypesRemote(options?: { includeInactive?: boole
     `
   );
 
-  return rows.map(mapPropertyType);
+  return Promise.all(rows.map((row) => withTranslationRemote("property-type", Number(row.id), mapPropertyType(row))));
 }
 
 export async function findPropertyTypeRemote(value?: string | null) {
@@ -660,7 +732,7 @@ export async function getAgentsRemote(options?: { includeUnpublished?: boolean }
     `
   );
 
-  return rows.map(mapAgent);
+  return Promise.all(rows.map((row) => withTranslationRemote("agent", Number(row.id), mapAgent(row))));
 }
 
 export async function getAgentByIdRemote(id: number) {
@@ -669,7 +741,7 @@ export async function getAgentByIdRemote(id: number) {
     [id]
   );
 
-  return row ? mapAgent(row) : undefined;
+  return row ? withTranslationRemote("agent", Number(row.id), mapAgent(row)) : undefined;
 }
 
 export async function upsertAgentRemote(
@@ -756,7 +828,7 @@ export async function getPropertiesRemote(
     values
   );
 
-  return rows.map(mapProperty);
+  return Promise.all(rows.map((row) => withPropertyTranslationRemote(mapProperty(row))));
 }
 
 export async function getPropertyBySlugRemote(slug: string) {
@@ -777,7 +849,7 @@ export async function getPropertyBySlugRemote(slug: string) {
     values
   );
 
-  return row ? mapProperty(row) : undefined;
+  return row ? withPropertyTranslationRemote(mapProperty(row)) : undefined;
 }
 
 export async function getPropertyByIdRemote(id: number) {
@@ -790,7 +862,7 @@ export async function getPropertyByIdRemote(id: number) {
     [id]
   );
 
-  return row ? mapProperty(row) : undefined;
+  return row ? withPropertyTranslationRemote(mapProperty(row)) : undefined;
 }
 
 export async function getFeaturedPropertiesRemote(limit = 6) {
@@ -818,7 +890,7 @@ export async function getSimilarPropertiesRemote(
     [currentId, transactionTypeSlug, propertyTypeSlug, limit]
   );
 
-  return rows.map(mapProperty);
+  return Promise.all(rows.map((row) => withPropertyTranslationRemote(mapProperty(row))));
 }
 
 export async function getPropertyCitiesRemote(

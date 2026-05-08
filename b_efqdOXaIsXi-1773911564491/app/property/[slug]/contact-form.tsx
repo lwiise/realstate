@@ -3,19 +3,42 @@
 import { useState } from "react";
 import { MessageCircle, Send } from "lucide-react";
 import { buildWhatsAppLink } from "@/lib/data";
+import type { Locale } from "@/lib/cms-types";
 
 interface ContactFormProps {
   propertyId?: number;
   propertyTitle: string;
   agentPhone?: string;
+  locale?: Locale;
 }
 
-export function ContactForm({ propertyId, propertyTitle, agentPhone }: ContactFormProps) {
+export function ContactForm({ propertyId, propertyTitle, agentPhone, locale = "fr" }: ContactFormProps) {
+  const text = {
+    defaultMessage: locale === "en"
+      ? `I am interested in "${propertyTitle}" and would like to schedule a viewing.`
+      : `Je suis interesse par "${propertyTitle}" et je souhaite organiser une visite.`,
+    whatsappMessage: locale === "en"
+      ? `Hello, I am interested in "${propertyTitle}". Can you contact me?`
+      : `Bonjour, je suis interesse par "${propertyTitle}". Pouvez-vous me contacter ?`,
+    sentTitle: locale === "en" ? "Message sent" : "Message envoye",
+    sentBody: locale === "en" ? "Thank you. Our team will contact you shortly." : "Merci. Notre equipe vous contactera rapidement.",
+    title: locale === "en" ? "Send an inquiry" : "Envoyer une demande",
+    name: locale === "en" ? "Name" : "Nom",
+    email: "Email",
+    phone: locale === "en" ? "Phone" : "Telephone",
+    message: "Message",
+    namePlaceholder: locale === "en" ? "Your name" : "Votre nom",
+    emailPlaceholder: locale === "en" ? "Your email" : "Votre e-mail",
+    phonePlaceholder: locale === "en" ? "Your phone" : "Votre telephone",
+    sending: locale === "en" ? "Sending..." : "Envoi...",
+    submit: locale === "en" ? "Send request" : "Envoyer la demande",
+    whatsapp: locale === "en" ? "Contact on WhatsApp" : "Contacter sur WhatsApp",
+  };
   const [formState, setFormState] = useState({
     name: "",
     email: "",
     phone: "",
-    message: `Je suis interesse par "${propertyTitle}" et je souhaite organiser une visite.`,
+    message: text.defaultMessage,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -49,7 +72,7 @@ export function ContactForm({ propertyId, propertyTitle, agentPhone }: ContactFo
   const handleWhatsApp = () => {
     const href = buildWhatsAppLink(
       agentPhone || "+212612345678",
-      `Bonjour, je suis interesse par "${propertyTitle}". Pouvez-vous me contacter ?`
+      text.whatsappMessage
     );
     window.open(href, "_blank");
   };
@@ -60,9 +83,9 @@ export function ContactForm({ propertyId, propertyTitle, agentPhone }: ContactFo
         <div className="w-16 h-16 bg-gold mx-auto flex items-center justify-center mb-4">
           <Send className="w-6 h-6 text-black" />
         </div>
-        <h3 className="font-serif text-xl mb-2">Message envoye</h3>
+        <h3 className="font-serif text-xl mb-2">{text.sentTitle}</h3>
         <p className="text-muted-foreground text-sm">
-          Merci. Notre equipe vous contactera rapidement.
+          {text.sentBody}
         </p>
       </div>
     );
@@ -70,11 +93,11 @@ export function ContactForm({ propertyId, propertyTitle, agentPhone }: ContactFo
 
   return (
     <div className="bg-secondary p-6">
-      <h3 className="font-serif text-xl mb-6">Envoyer une demande</h3>
+      <h3 className="font-serif text-xl mb-6">{text.title}</h3>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label htmlFor="name" className="block text-xs text-muted-foreground mb-2 uppercase tracking-wide">
-            Nom
+            {text.name}
           </label>
           <input
             type="text"
@@ -83,12 +106,12 @@ export function ContactForm({ propertyId, propertyTitle, agentPhone }: ContactFo
             value={formState.name}
             onChange={(event) => setFormState({ ...formState, name: event.target.value })}
             className="w-full h-11 px-4 border border-border bg-white focus:outline-none focus:border-gold transition-colors text-sm"
-            placeholder="Votre nom"
+            placeholder={text.namePlaceholder}
           />
         </div>
         <div>
           <label htmlFor="email" className="block text-xs text-muted-foreground mb-2 uppercase tracking-wide">
-            Email
+            {text.email}
           </label>
           <input
             type="email"
@@ -96,12 +119,12 @@ export function ContactForm({ propertyId, propertyTitle, agentPhone }: ContactFo
             value={formState.email}
             onChange={(event) => setFormState({ ...formState, email: event.target.value })}
             className="w-full h-11 px-4 border border-border bg-white focus:outline-none focus:border-gold transition-colors text-sm"
-            placeholder="Votre e-mail"
+            placeholder={text.emailPlaceholder}
           />
         </div>
         <div>
           <label htmlFor="phone" className="block text-xs text-muted-foreground mb-2 uppercase tracking-wide">
-            Telephone
+            {text.phone}
           </label>
           <input
             type="tel"
@@ -110,12 +133,12 @@ export function ContactForm({ propertyId, propertyTitle, agentPhone }: ContactFo
             value={formState.phone}
             onChange={(event) => setFormState({ ...formState, phone: event.target.value })}
             className="w-full h-11 px-4 border border-border bg-white focus:outline-none focus:border-gold transition-colors text-sm"
-            placeholder="Votre telephone"
+            placeholder={text.phonePlaceholder}
           />
         </div>
         <div>
           <label htmlFor="message" className="block text-xs text-muted-foreground mb-2 uppercase tracking-wide">
-            Message
+            {text.message}
           </label>
           <textarea
             id="message"
@@ -132,11 +155,11 @@ export function ContactForm({ propertyId, propertyTitle, agentPhone }: ContactFo
           className="cta-dark-button w-full h-12 font-medium text-sm tracking-wide uppercase disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
           {isSubmitting ? (
-            "Envoi..."
+            text.sending
           ) : (
             <>
               <Send className="w-4 h-4" />
-              Envoyer la demande
+              {text.submit}
             </>
           )}
         </button>
@@ -147,7 +170,7 @@ export function ContactForm({ propertyId, propertyTitle, agentPhone }: ContactFo
           className="w-full h-12 bg-[#25D366] text-white font-medium text-sm tracking-wide uppercase hover:bg-[#20BA5A] transition-all duration-300 flex items-center justify-center gap-2"
         >
           <MessageCircle className="w-5 h-5" />
-          Contacter sur WhatsApp
+          {text.whatsapp}
         </button>
       </form>
     </div>

@@ -4,6 +4,8 @@ import { Check } from "lucide-react";
 import { Footer } from "@/components/footer";
 import { Navbar } from "@/components/navbar";
 import { getPageContent } from "@/lib/cms";
+import { getRequestLocale } from "@/lib/i18n-server";
+import { localizePageRecord } from "@/lib/i18n-content";
 import { buildPageMetadata } from "@/lib/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -11,7 +13,8 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function AboutPage() {
-  const page = await getPageContent("about");
+  const locale = await getRequestLocale();
+  const page = localizePageRecord(await getPageContent("about"), locale);
 
   return (
     <main className="min-h-screen">

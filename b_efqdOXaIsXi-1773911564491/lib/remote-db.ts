@@ -10,6 +10,17 @@ import {
   seedSiteSettings,
   seedTransactionTypes,
 } from "@/lib/seed-data";
+import {
+  translateAgentToEnglish,
+  translateFooterToEnglish,
+  translateNavigationToEnglish,
+  translatePageRecordToEnglish,
+  translatePropertyToEnglish,
+  translatePropertyTypeToEnglish,
+  translateSiteSettingsToEnglish,
+  translateTransactionTypeToEnglish,
+} from "@/lib/auto-translate";
+import type { PageKey, PageRecord, Property } from "@/lib/cms-types";
 
 declare global {
   // eslint-disable-next-line no-var
@@ -318,11 +329,41 @@ const REMOTE_SCHEMA_SQL = `
     source_page TEXT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL
   );
+
+  CREATE TABLE IF NOT EXISTS content_translations (
+    entity_type TEXT NOT NULL,
+    entity_id TEXT NOT NULL,
+    locale TEXT NOT NULL,
+    data_json JSONB NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL,
+    PRIMARY KEY (entity_type, entity_id, locale)
+  );
 `;
 
 async function migrateRemoteDatabase() {
   const pool = getRemotePool();
   await pool.query(REMOTE_SCHEMA_SQL);
+}
+
+async function insertRemoteContentTranslation(
+  client: { query: (text: string, values?: unknown[]) => Promise<unknown> },
+  entityType: string,
+  entityId: string | number,
+  payload: Record<string, unknown>,
+  timestamp: string
+) {
+  await client.query(
+    `
+      INSERT INTO content_translations (
+        entity_type, entity_id, locale, data_json, updated_at
+      ) VALUES (
+        $1, $2, 'en', $3::jsonb, $4
+      )
+      ON CONFLICT (entity_type, entity_id, locale)
+      DO UPDATE SET data_json = EXCLUDED.data_json, updated_at = EXCLUDED.updated_at
+    `,
+    [entityType, String(entityId), toJson(payload), timestamp]
+  );
 }
 
 async function seedRemoteDatabase() {
@@ -375,6 +416,13 @@ async function seedRemoteDatabase() {
         timestamp,
       ]
     );
+    await insertRemoteContentTranslation(
+      client,
+      "site-settings",
+      "1",
+      translateSiteSettingsToEnglish(seedSiteSettings),
+      timestamp
+    );
 
     await client.query(
       `
@@ -387,6 +435,13 @@ async function seedRemoteDatabase() {
         toJson(seedNavigation.links),
         timestamp,
       ]
+    );
+    await insertRemoteContentTranslation(
+      client,
+      "navigation-settings",
+      "1",
+      translateNavigationToEnglish(seedNavigation),
+      timestamp
     );
 
     await client.query(
@@ -406,9 +461,16 @@ async function seedRemoteDatabase() {
         timestamp,
       ]
     );
+    await insertRemoteContentTranslation(
+      client,
+      "footer-settings",
+      "1",
+      translateFooterToEnglish(seedFooter),
+      timestamp
+    );
 
     for (const item of seedTransactionTypes) {
-      await client.query(
+      const result = await client.query<{ id: number }>(
         `
           INSERT INTO transaction_types (
             label, slug, description, image_url, is_active, sort_order, route_path,
@@ -419,6 +481,7 @@ async function seedRemoteDatabase() {
             $8, $9, $10, $11, $12,
             $13, $14
           )
+          RETURNING id
         `,
         [
           item.label,
@@ -437,16 +500,24 @@ async function seedRemoteDatabase() {
           timestamp,
         ]
       );
+      await insertRemoteContentTranslation(
+        client,
+        "transaction-type",
+        result.rows[0].id,
+        translateTransactionTypeToEnglish(item),
+        timestamp
+      );
     }
 
     for (const item of seedPropertyTypes) {
-      await client.query(
+      const result = await client.query<{ id: number }>(
         `
           INSERT INTO property_types (
             label, slug, description, image_url, is_active, sort_order, seo_title, seo_description, created_at, updated_at
           ) VALUES (
             $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
           )
+          RETURNING id
         `,
         [
           item.label,
@@ -461,10 +532,17 @@ async function seedRemoteDatabase() {
           timestamp,
         ]
       );
+      await insertRemoteContentTranslation(
+        client,
+        "property-type",
+        result.rows[0].id,
+        translatePropertyTypeToEnglish(item),
+        timestamp
+      );
     }
 
     for (const agent of seedAgents) {
-      await client.query(
+      const result = await client.query<{ id: number }>(
         `
           INSERT INTO agents (
             name, slug, role, phone, email, photo_url, bio, whatsapp, is_published,
@@ -473,6 +551,7 @@ async function seedRemoteDatabase() {
             $1, $2, $3, $4, $5, $6, $7, $8, $9,
             $10, $11, $12, $13, $14
           )
+          RETURNING id
         `,
         [
           agent.name,
@@ -490,6 +569,13 @@ async function seedRemoteDatabase() {
           timestamp,
           timestamp,
         ]
+      );
+      await insertRemoteContentTranslation(
+        client,
+        "agent",
+        result.rows[0].id,
+        translateAgentToEnglish(agent),
+        timestamp
       );
     }
 
@@ -514,7 +600,7 @@ async function seedRemoteDatabase() {
         throw new Error(`Missing taxonomy for seed property ${property.slug}`);
       }
 
-      await client.query(
+      const result = await client.query<{ id: number }>(
         `
           INSERT INTO properties (
             title, slug, transaction_type_id, property_type_id, status, featured, city,
@@ -529,6 +615,7 @@ async function seedRemoteDatabase() {
             $21, $22, $23, $24, $25, $26,
             $27, $28, $29, $30, $31
           )
+          RETURNING id
         `,
         [
           property.title,
@@ -564,20 +651,20 @@ async function seedRemoteDatabase() {
           timestamp,
         ]
       );
+      await insertRemoteContentTranslation(
+        client,
+        "property",
+        result.rows[0].id,
+        translatePropertyToEnglish(property as unknown as Property),
+        timestamp
+      );
     }
 
     for (const pageKey of ["home", "buy", "rent", "daily-rent", "about", "contact"] as const) {
       const page = getSeedPage(pageKey);
-      await client.query(
-        `
-          INSERT INTO page_contents (
-            page_key, title, seo_title, seo_description, og_image_url, content_json, updated_at
-          ) VALUES (
-            $1, $2, $3, $4, $5, $6::jsonb, $7
-          )
-        `,
-        [
-          pageKey,
+      const record: PageRecord<PageKey> = {
+        pageKey,
+        title:
           pageKey === "home"
             ? "Accueil"
             : pageKey === "buy"
@@ -589,12 +676,36 @@ async function seedRemoteDatabase() {
               : pageKey === "about"
                 ? "A propos"
                 : "Contact",
-          seedSiteSettings.defaultSeoTitle,
-          seedSiteSettings.defaultSeoDescription,
-          "hero" in page ? page.hero.backgroundImage : seedSiteSettings.defaultOgImage,
-          toJson(page),
+        seoTitle: seedSiteSettings.defaultSeoTitle,
+        seoDescription: seedSiteSettings.defaultSeoDescription,
+        ogImageUrl: "hero" in page ? page.hero.backgroundImage : seedSiteSettings.defaultOgImage,
+        content: page,
+        updatedAt: timestamp,
+      };
+      await client.query(
+        `
+          INSERT INTO page_contents (
+            page_key, title, seo_title, seo_description, og_image_url, content_json, updated_at
+          ) VALUES (
+            $1, $2, $3, $4, $5, $6::jsonb, $7
+          )
+        `,
+        [
+          record.pageKey,
+          record.title,
+          record.seoTitle,
+          record.seoDescription,
+          record.ogImageUrl,
+          toJson(record.content),
           timestamp,
         ]
+      );
+      await insertRemoteContentTranslation(
+        client,
+        "page-content",
+        pageKey,
+        translatePageRecordToEnglish(record),
+        timestamp
       );
     }
 

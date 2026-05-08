@@ -11,6 +11,7 @@ import type {
   PropertyType,
   SiteSettings,
   TransactionType,
+  TranslationPayload,
 } from "@/lib/cms-types";
 import * as localCms from "@/lib/cms-local";
 import * as remoteCms from "@/lib/cms-remote";
@@ -125,6 +126,18 @@ export async function updatePageContent<TPageKey extends PageKey>(input: PageRec
   return writeWithProvider(
     () => remoteCms.updatePageContentRemote(input),
     () => localCms.updatePageContent(input)
+  );
+}
+
+export async function upsertContentTranslation(
+  entityType: string,
+  entityId: string | number,
+  locale: "en",
+  payload: TranslationPayload
+) {
+  return writeWithProvider(
+    () => remoteCms.upsertContentTranslationRemote(entityType, entityId, locale, payload),
+    () => localCms.upsertContentTranslation(entityType, entityId, locale, payload)
   );
 }
 
