@@ -1,0 +1,18 @@
+﻿
+> my-project@0.1.0 start
+> next start
+
+▲ Next.js 16.1.6
+- Local:         http://localhost:3100
+- Network:       http://192.168.0.109:3100
+
+✓ Starting...
+✓ Ready in 427ms
+node.exe : (node:25048) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:25048) Ex...nge at any time:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+(Use `node --trace-warnings ...` to show where the warning was created)

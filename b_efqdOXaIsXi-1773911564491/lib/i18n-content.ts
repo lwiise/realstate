@@ -9,7 +9,6 @@ import type {
   PropertyType,
   SiteSettings,
   TransactionType,
-  TranslationPayload,
 } from "@/lib/cms-types";
 import {
   translateAgentToEnglish,
@@ -19,43 +18,39 @@ import {
   translatePropertyToEnglish,
   translatePropertyTypeToEnglish,
   translateSiteSettingsToEnglish,
+  translateTextToEnglish,
   translateTransactionTypeToEnglish,
 } from "@/lib/auto-translate";
 
-function englishPayload(record: { translationEn?: TranslationPayload | null }) {
-  return record.translationEn ?? {};
+// English content is always re-derived at read time from the canonical FR data
+// so dictionary updates apply immediately and stored translations cannot go
+// stale. Stored translations (saved by admin actions) are kept in the database
+// for auditing and as future-proofing if a manual translation editor is added.
+
+function pickString(generated: string | null | undefined, fallback: string): string {
+  return typeof generated === "string" && generated.length > 0 ? generated : fallback;
 }
 
-function getString(payload: TranslationPayload, key: string, fallback: string): string;
-function getString(payload: TranslationPayload, key: string, fallback?: string | null): string | null | undefined;
-function getString(payload: TranslationPayload, key: string, fallback?: string | null) {
-  const value = payload[key];
-  return typeof value === "string" ? value : fallback;
-}
-
-function getArray<T>(payload: TranslationPayload, key: string, fallback: T[]): T[] {
-  const value = payload[key];
-  return Array.isArray(value) ? (value as T[]) : fallback;
-}
-
-function getObject<T>(payload: TranslationPayload, key: string, fallback: T): T {
-  const value = payload[key];
-  return value && typeof value === "object" ? (value as T) : fallback;
+function pickStringOrNull(
+  generated: string | null | undefined,
+  fallback: string | null | undefined
+): string | null | undefined {
+  if (typeof generated === "string") return generated;
+  return fallback;
 }
 
 export function localizeSiteSettings(settings: SiteSettings, locale: Locale): SiteSettings {
   if (locale === "fr") return settings;
 
   const generated = translateSiteSettingsToEnglish(settings);
-  const payload = englishPayload(settings);
 
   return {
     ...settings,
-    siteDescription: getString(payload, "siteDescription", generated.siteDescription ?? settings.siteDescription),
-    siteKeywords: getArray<string>(payload, "siteKeywords", generated.siteKeywords),
-    copyrightText: getString(payload, "copyrightText", generated.copyrightText ?? settings.copyrightText),
-    defaultSeoTitle: getString(payload, "defaultSeoTitle", generated.defaultSeoTitle ?? settings.defaultSeoTitle),
-    defaultSeoDescription: getString(payload, "defaultSeoDescription", generated.defaultSeoDescription ?? settings.defaultSeoDescription),
+    siteDescription: pickString(generated.siteDescription, settings.siteDescription),
+    siteKeywords: generated.siteKeywords?.length ? generated.siteKeywords : settings.siteKeywords,
+    copyrightText: pickString(generated.copyrightText, settings.copyrightText),
+    defaultSeoTitle: pickString(generated.defaultSeoTitle, settings.defaultSeoTitle),
+    defaultSeoDescription: pickString(generated.defaultSeoDescription, settings.defaultSeoDescription),
   };
 }
 
@@ -63,12 +58,11 @@ export function localizeNavigation(navigation: NavigationSettings, locale: Local
   if (locale === "fr") return navigation;
 
   const generated = translateNavigationToEnglish(navigation);
-  const payload = englishPayload(navigation);
 
   return {
     ...navigation,
-    logoAlt: getString(payload, "logoAlt", generated.logoAlt ?? navigation.logoAlt),
-    links: getArray<NavigationSettings["links"][number]>(payload, "links", generated.links),
+    logoAlt: pickString(generated.logoAlt, navigation.logoAlt),
+    links: generated.links?.length ? generated.links : navigation.links,
   };
 }
 
@@ -76,14 +70,13 @@ export function localizeFooter(footer: FooterSettings, locale: Locale): FooterSe
   if (locale === "fr") return footer;
 
   const generated = translateFooterToEnglish(footer);
-  const payload = englishPayload(footer);
 
   return {
     ...footer,
-    brandText: getString(payload, "brandText", generated.brandText ?? footer.brandText),
-    quickLinks: getArray<FooterSettings["quickLinks"][number]>(payload, "quickLinks", generated.quickLinks),
-    propertyLinks: getArray<FooterSettings["propertyLinks"][number]>(payload, "propertyLinks", generated.propertyLinks),
-    legalLinks: getArray<FooterSettings["legalLinks"][number]>(payload, "legalLinks", generated.legalLinks),
+    brandText: pickString(generated.brandText, footer.brandText),
+    quickLinks: generated.quickLinks?.length ? generated.quickLinks : footer.quickLinks,
+    propertyLinks: generated.propertyLinks?.length ? generated.propertyLinks : footer.propertyLinks,
+    legalLinks: generated.legalLinks?.length ? generated.legalLinks : footer.legalLinks,
   };
 }
 
@@ -91,14 +84,13 @@ export function localizeTransactionType(type: TransactionType, locale: Locale): 
   if (locale === "fr") return type;
 
   const generated = translateTransactionTypeToEnglish(type);
-  const payload = englishPayload(type);
 
   return {
     ...type,
-    label: getString(payload, "label", generated.label ?? type.label),
-    description: getString(payload, "description", generated.description ?? type.description),
-    navLabel: getString(payload, "navLabel", generated.navLabel ?? type.navLabel),
-    priceSuffix: getString(payload, "priceSuffix", generated.priceSuffix ?? type.priceSuffix),
+    label: pickString(generated.label, type.label),
+    description: pickStringOrNull(generated.description, type.description),
+    navLabel: pickStringOrNull(generated.navLabel, type.navLabel),
+    priceSuffix: pickStringOrNull(generated.priceSuffix, type.priceSuffix),
   };
 }
 
@@ -110,12 +102,11 @@ export function localizePropertyType(type: PropertyType, locale: Locale): Proper
   if (locale === "fr") return type;
 
   const generated = translatePropertyTypeToEnglish(type);
-  const payload = englishPayload(type);
 
   return {
     ...type,
-    label: getString(payload, "label", generated.label ?? type.label),
-    description: getString(payload, "description", generated.description ?? type.description),
+    label: pickString(generated.label, type.label),
+    description: pickStringOrNull(generated.description, type.description),
   };
 }
 
@@ -127,14 +118,13 @@ export function localizeAgent(agent: Agent, locale: Locale): Agent {
   if (locale === "fr") return agent;
 
   const generated = translateAgentToEnglish(agent);
-  const payload = englishPayload(agent);
 
   return {
     ...agent,
-    role: getString(payload, "role", generated.role ?? agent.role),
-    bio: getString(payload, "bio", generated.bio ?? agent.bio),
-    seoTitle: getString(payload, "seoTitle", generated.seoTitle ?? agent.seoTitle),
-    seoDescription: getString(payload, "seoDescription", generated.seoDescription ?? agent.seoDescription),
+    role: pickString(generated.role, agent.role),
+    bio: pickStringOrNull(generated.bio, agent.bio),
+    seoTitle: pickStringOrNull(generated.seoTitle, agent.seoTitle),
+    seoDescription: pickStringOrNull(generated.seoDescription, agent.seoDescription),
   };
 }
 
@@ -142,24 +132,22 @@ export function localizeProperty(property: Property, locale: Locale): Property {
   if (locale === "fr") return property;
 
   const generated = translatePropertyToEnglish(property);
-  const payload = englishPayload(property);
-  const transactionType = getString(payload, "transactionType", property.transactionType);
-  const propertyType = getString(payload, "propertyType", property.propertyType);
-  const priceSuffix = getString(payload, "priceSuffix", property.priceSuffix);
 
   return {
     ...property,
-    title: getString(payload, "title", generated.title ?? property.title),
-    transactionType,
-    propertyType,
-    priceSuffix,
-    neighborhood: getString(payload, "neighborhood", generated.neighborhood ?? property.neighborhood),
-    fullAddress: getString(payload, "fullAddress", generated.fullAddress ?? property.fullAddress),
-    shortDescription: getString(payload, "shortDescription", generated.shortDescription ?? property.shortDescription),
-    longDescription: getString(payload, "longDescription", generated.longDescription ?? property.longDescription),
-    features: getArray<string>(payload, "features", generated.features),
-    seoTitle: getString(payload, "seoTitle", generated.seoTitle ?? property.seoTitle),
-    seoDescription: getString(payload, "seoDescription", generated.seoDescription ?? property.seoDescription),
+    title: pickString(generated.title, property.title),
+    transactionType: pickString(translateTextToEnglish(property.transactionType), property.transactionType),
+    propertyType: pickString(translateTextToEnglish(property.propertyType), property.propertyType),
+    priceSuffix: property.priceSuffix
+      ? pickStringOrNull(translateTextToEnglish(property.priceSuffix), property.priceSuffix)
+      : property.priceSuffix,
+    neighborhood: pickString(generated.neighborhood, property.neighborhood),
+    fullAddress: pickStringOrNull(generated.fullAddress, property.fullAddress),
+    shortDescription: pickString(generated.shortDescription, property.shortDescription),
+    longDescription: pickString(generated.longDescription, property.longDescription),
+    features: generated.features?.length ? generated.features : property.features,
+    seoTitle: pickStringOrNull(generated.seoTitle, property.seoTitle),
+    seoDescription: pickStringOrNull(generated.seoDescription, property.seoDescription),
     agent: property.agent ? localizeAgent(property.agent, locale) : property.agent,
   };
 }
@@ -175,13 +163,12 @@ export function localizePageRecord<TPageKey extends PageKey>(
   if (locale === "fr") return page;
 
   const generated = translatePageRecordToEnglish(page);
-  const payload = englishPayload(page);
 
   return {
     ...page,
-    title: getString(payload, "title", generated.title),
-    seoTitle: getString(payload, "seoTitle", generated.seoTitle),
-    seoDescription: getString(payload, "seoDescription", generated.seoDescription),
-    content: getObject(payload, "content", generated.content),
+    title: pickString(generated.title, page.title),
+    seoTitle: pickStringOrNull(generated.seoTitle, page.seoTitle),
+    seoDescription: pickStringOrNull(generated.seoDescription, page.seoDescription),
+    content: generated.content,
   };
 }

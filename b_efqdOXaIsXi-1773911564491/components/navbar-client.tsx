@@ -34,6 +34,23 @@ export function NavbarClient({
     }
   };
 
+  const handleLanguageChange = (
+    event: React.MouseEvent<HTMLAnchorElement>,
+    target: Locale,
+    href: string
+  ) => {
+    event.preventDefault();
+    setLanguageOpen(false);
+    setMobileMenuOpen(false);
+    if (typeof document !== "undefined") {
+      const oneYear = 60 * 60 * 24 * 365;
+      document.cookie = `site-locale=${target}; path=/; max-age=${oneYear}; samesite=lax`;
+    }
+    if (typeof window !== "undefined") {
+      window.location.assign(href);
+    }
+  };
+
   const languageOptions: Array<{ locale: Locale; label: string }> = [
     { locale: "fr", label: "Français" },
     { locale: "en", label: "English" },
@@ -87,20 +104,25 @@ export function NavbarClient({
 
             {languageOpen ? (
               <div className="absolute right-0 mt-2 w-40 overflow-hidden rounded-md border border-border bg-white shadow-lg">
-                {languageOptions.map((option) => (
-                  <Link
-                    key={option.locale}
-                    href={switchLocalePath(pathname, search, option.locale)}
-                    onClick={() => setLanguageOpen(false)}
-                    className={`block px-4 py-3 text-sm transition-colors ${
-                      locale === option.locale
-                        ? "bg-gold text-black"
-                        : "text-black/75 hover:bg-secondary hover:text-black"
-                    }`}
-                  >
-                    {option.label}
-                  </Link>
-                ))}
+                {languageOptions.map((option) => {
+                  const targetHref = switchLocalePath(pathname, search, option.locale);
+                  return (
+                    <a
+                      key={option.locale}
+                      href={targetHref}
+                      onClick={(event) =>
+                        handleLanguageChange(event, option.locale, targetHref)
+                      }
+                      className={`block px-4 py-3 text-sm transition-colors ${
+                        locale === option.locale
+                          ? "bg-gold text-black"
+                          : "text-black/75 hover:bg-secondary hover:text-black"
+                      }`}
+                    >
+                      {option.label}
+                    </a>
+                  );
+                })}
               </div>
             ) : null}
           </div>
@@ -137,20 +159,25 @@ export function NavbarClient({
                   {locale === "en" ? "Language" : "Langue"}
                 </p>
                 <div className="grid grid-cols-2 overflow-hidden rounded-md border border-border">
-                  {languageOptions.map((option) => (
-                    <Link
-                      key={option.locale}
-                      href={switchLocalePath(pathname, search, option.locale)}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className={`px-4 py-3 text-center text-sm font-medium ${
-                        locale === option.locale
-                          ? "bg-gold text-black"
-                          : "bg-white text-black/70"
-                      }`}
-                    >
-                      {option.label}
-                    </Link>
-                  ))}
+                  {languageOptions.map((option) => {
+                    const targetHref = switchLocalePath(pathname, search, option.locale);
+                    return (
+                      <a
+                        key={option.locale}
+                        href={targetHref}
+                        onClick={(event) =>
+                          handleLanguageChange(event, option.locale, targetHref)
+                        }
+                        className={`px-4 py-3 text-center text-sm font-medium ${
+                          locale === option.locale
+                            ? "bg-gold text-black"
+                            : "bg-white text-black/70"
+                        }`}
+                      >
+                        {option.label}
+                      </a>
+                    );
+                  })}
                 </div>
               </div>
             </div>
