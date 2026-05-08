@@ -52,7 +52,7 @@ export function SearchBar({
               onChange={(event) => setTransactionSlug(event.target.value)}
               className="w-full h-10 px-3 border border-border bg-background text-sm focus:outline-none focus:border-gold"
             >
-              <option value="">All types</option>
+              <option value="">Tous les types</option>
               {transactionTypes.map((type) => (
                 <option key={type.id} value={type.slug}>
                   {type.label}
@@ -62,14 +62,14 @@ export function SearchBar({
           </div>
           <div className="flex-1">
             <label className="block text-xs text-muted-foreground mb-1.5 uppercase tracking-wide">
-              Property type
+              Type de bien
             </label>
             <select
               value={propertyTypeSlug}
               onChange={(event) => setPropertyTypeSlug(event.target.value)}
               className="w-full h-10 px-3 border border-border bg-background text-sm focus:outline-none focus:border-gold"
             >
-              <option value="">All properties</option>
+              <option value="">Tous les biens</option>
               {propertyTypes.map((type) => (
                 <option key={type.id} value={type.slug}>
                   {type.label}
@@ -84,7 +84,7 @@ export function SearchBar({
               className="w-full md:w-auto h-10 px-6 bg-gold text-black font-medium text-sm tracking-wide uppercase hover:bg-gold/90 transition-colors flex items-center justify-center gap-2"
             >
               <Search className="w-4 h-4" />
-              Search
+              Rechercher
             </button>
           </div>
         </div>
@@ -98,14 +98,14 @@ export function SearchBar({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
             <label className="block text-xs text-muted-foreground mb-2 uppercase tracking-wide font-medium">
-              Transaction type
+              Type de transaction
             </label>
             <select
               value={transactionSlug}
               onChange={(event) => setTransactionSlug(event.target.value)}
               className="w-full h-12 px-4 border border-border bg-background text-foreground focus:outline-none focus:border-gold transition-colors"
             >
-              <option value="">Select type</option>
+              <option value="">Selectionner un type</option>
               {transactionTypes.map((type) => (
                 <option key={type.id} value={type.slug}>
                   {type.label}
@@ -116,14 +116,14 @@ export function SearchBar({
 
           <div>
             <label className="block text-xs text-muted-foreground mb-2 uppercase tracking-wide font-medium">
-              Property type
+              Type de bien
             </label>
             <select
               value={propertyTypeSlug}
               onChange={(event) => setPropertyTypeSlug(event.target.value)}
               className="w-full h-12 px-4 border border-border bg-background text-foreground focus:outline-none focus:border-gold transition-colors"
             >
-              <option value="">Select property</option>
+              <option value="">Selectionner un bien</option>
               {propertyTypes.map((type) => (
                 <option key={type.id} value={type.slug}>
                   {type.label}
@@ -139,7 +139,7 @@ export function SearchBar({
               className="cta-dark-button w-full h-12 font-medium text-sm tracking-wide uppercase flex items-center justify-center gap-3"
             >
               <Search className="w-5 h-5" />
-              Search properties
+              Rechercher des biens
             </button>
           </div>
         </div>

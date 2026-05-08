@@ -30,7 +30,16 @@ export function formatPrice(
 
 export function formatArea(area?: number | null, areaUnit = "sqft") {
   if (area == null) return null;
-  return `${area.toLocaleString()} ${areaUnit}`;
+  const unitLabels: Record<string, string> = {
+    sqft: "pi²",
+    "sq ft": "pi²",
+    sqm: "m²",
+    "sq m": "m²",
+    m2: "m²",
+    "m²": "m²",
+  };
+  const normalizedUnit = areaUnit.trim().toLowerCase();
+  return `${area.toLocaleString("fr-FR")} ${unitLabels[normalizedUnit] ?? areaUnit}`;
 }
 
 export function buildWhatsAppLink(phone: string, message: string) {

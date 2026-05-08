@@ -64,14 +64,14 @@ export function PropertyGallery({ images, video, title }: PropertyGalleryProps) 
               <button
                 onClick={goToPrev}
                 className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/50 backdrop-blur-sm flex items-center justify-center text-white hover:bg-gold hover:text-black transition-colors opacity-0 group-hover:opacity-100"
-                aria-label="Previous media"
+                aria-label="Media precedent"
               >
                 <ChevronLeft className="w-6 h-6" />
               </button>
               <button
                 onClick={goToNext}
                 className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/50 backdrop-blur-sm flex items-center justify-center text-white hover:bg-gold hover:text-black transition-colors opacity-0 group-hover:opacity-100"
-                aria-label="Next media"
+                aria-label="Media suivant"
               >
                 <ChevronRight className="w-6 h-6" />
               </button>
@@ -83,7 +83,7 @@ export function PropertyGallery({ images, video, title }: PropertyGalleryProps) 
             <button
               onClick={() => setIsFullscreen(true)}
               className="absolute top-4 right-4 w-10 h-10 bg-black/50 backdrop-blur-sm flex items-center justify-center text-white hover:bg-gold hover:text-black transition-colors opacity-0 group-hover:opacity-100"
-              aria-label="View fullscreen"
+              aria-label="Voir en plein ecran"
             >
               <Expand className="w-4 h-4" />
             </button>
@@ -95,7 +95,7 @@ export function PropertyGallery({ images, video, title }: PropertyGalleryProps) 
           </div>
         </div>
         
-        {/* Thumbnails */}
+        {/* Miniatures */}
         <div className="lg:col-span-1 grid grid-cols-3 lg:grid-cols-1 gap-4 auto-rows-max">
           {video && (
             <button
@@ -109,7 +109,7 @@ export function PropertyGallery({ images, video, title }: PropertyGalleryProps) 
               <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
                 <Play className="w-6 h-6 text-gold fill-gold" />
               </div>
-              <span className="text-xs text-white bg-black/50 px-2 py-1">Vidéo</span>
+              <span className="text-xs text-white bg-black/50 px-2 py-1">Video</span>
             </button>
           )}
           {images.slice(0, video ? 2 : 3).map((image, index) => (
@@ -124,7 +124,7 @@ export function PropertyGallery({ images, video, title }: PropertyGalleryProps) 
             >
               <Image
                 src={image}
-                alt={`${title} - Thumbnail ${index + 1}`}
+                alt={`${title} - Miniature ${index + 1}`}
                 fill
                 className="object-cover"
               />
@@ -142,7 +142,7 @@ export function PropertyGallery({ images, video, title }: PropertyGalleryProps) 
           <button
             onClick={() => setIsFullscreen(false)}
             className="absolute top-4 right-4 w-12 h-12 bg-white/10 flex items-center justify-center text-white hover:bg-gold hover:text-black transition-colors"
-            aria-label="Close fullscreen"
+            aria-label="Fermer le plein ecran"
           >
             <span className="text-2xl">&times;</span>
           </button>
@@ -166,7 +166,7 @@ export function PropertyGallery({ images, video, title }: PropertyGalleryProps) 
                   goToPrev();
                 }}
                 className="absolute left-4 top-1/2 -translate-y-1/2 w-14 h-14 bg-white/10 flex items-center justify-center text-white hover:bg-gold hover:text-black transition-colors"
-                aria-label="Previous media"
+                aria-label="Media precedent"
               >
                 <ChevronLeft className="w-8 h-8" />
               </button>
@@ -176,7 +176,7 @@ export function PropertyGallery({ images, video, title }: PropertyGalleryProps) 
                   goToNext();
                 }}
                 className="absolute right-4 top-1/2 -translate-y-1/2 w-14 h-14 bg-white/10 flex items-center justify-center text-white hover:bg-gold hover:text-black transition-colors"
-                aria-label="Next media"
+                aria-label="Media suivant"
               >
                 <ChevronRight className="w-8 h-8" />
               </button>

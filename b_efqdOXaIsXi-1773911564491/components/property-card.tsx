@@ -40,7 +40,7 @@ export async function PropertyCard({ property }: PropertyCardProps) {
           <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <button 
               className="w-9 h-9 bg-white/90 backdrop-blur-sm flex items-center justify-center hover:bg-gold transition-colors"
-              aria-label="Add to favorites"
+              aria-label="Ajouter aux favoris"
             >
               <Heart className="w-4 h-4" />
             </button>
@@ -49,7 +49,7 @@ export async function PropertyCard({ property }: PropertyCardProps) {
           {/* View property button */}
           <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
             <span className="inline-flex items-center gap-2 bg-gold text-black text-xs px-4 py-2 font-medium tracking-wide">
-              View Property
+              Voir le bien
               <ArrowUpRight className="w-3 h-3" />
             </span>
           </div>
@@ -85,13 +85,17 @@ export async function PropertyCard({ property }: PropertyCardProps) {
             {property.bedrooms && (
               <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
               <Bed className="w-4 h-4" />
-                <span>{property.bedrooms} Beds</span>
+                <span>
+                  {property.bedrooms} {property.bedrooms === 1 ? "chambre" : "chambres"}
+                </span>
               </div>
             )}
             {property.bathrooms && (
               <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
               <Bath className="w-4 h-4" />
-                <span>{property.bathrooms} Baths</span>
+                <span>
+                  {property.bathrooms} {property.bathrooms === 1 ? "salle de bain" : "salles de bain"}
+                </span>
               </div>
             )}
             {property.area ? (

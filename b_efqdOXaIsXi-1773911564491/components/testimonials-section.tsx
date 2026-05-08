@@ -95,7 +95,7 @@ export function TestimonialsSection({ content }: TestimonialsSectionProps) {
                         </div>
 
                         <p className="font-serif text-2xl md:text-3xl leading-tight text-white mb-10">
-                          “{testimonial.quote}”
+                          "{testimonial.quote}"
                         </p>
 
                         <div className="mt-auto flex flex-col gap-4 border-t border-white/10 pt-6 sm:flex-row sm:items-end sm:justify-between">
@@ -125,7 +125,7 @@ export function TestimonialsSection({ content }: TestimonialsSectionProps) {
                       "h-1.5 rounded-full transition-all duration-300",
                       current === index ? "w-12 bg-gold" : "w-6 bg-black/15 hover:bg-black/30"
                     )}
-                    aria-label={`Go to testimonial ${index + 1}`}
+                    aria-label={`Aller au temoignage ${index + 1}`}
                   />
                 ))}
               </div>
@@ -135,7 +135,7 @@ export function TestimonialsSection({ content }: TestimonialsSectionProps) {
                   type="button"
                   onClick={() => api?.scrollPrev()}
                   className="flex h-12 w-12 items-center justify-center border border-border text-foreground transition-colors hover:border-gold hover:text-gold"
-                  aria-label="Previous testimonial"
+                  aria-label="Temoignage precedent"
                 >
                   <ArrowLeft className="w-4 h-4" />
                 </button>
@@ -143,7 +143,7 @@ export function TestimonialsSection({ content }: TestimonialsSectionProps) {
                   type="button"
                   onClick={() => api?.scrollNext()}
                   className="flex h-12 w-12 items-center justify-center bg-black text-white transition-colors hover:bg-gold hover:text-black"
-                  aria-label="Next testimonial"
+                  aria-label="Temoignage suivant"
                 >
                   <ArrowRight className="w-4 h-4" />
                 </button>

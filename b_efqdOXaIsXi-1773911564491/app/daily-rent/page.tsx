@@ -169,7 +169,7 @@ export default async function DailyRentPage() {
               href="/properties?transaction=daily-rent"
               className="hidden md:inline-flex rounded-md border border-border px-4 py-3 text-xs uppercase tracking-wide transition-colors hover:border-gold"
             >
-              View all
+              Voir tout
             </Link>
           </div>
 

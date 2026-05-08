@@ -93,7 +93,7 @@ export function PropertyFilters({
             !value.transaction ? "bg-black text-white border-black" : "border-border text-foreground hover:border-gold"
           )}
         >
-          All ({Object.values(countsByTransaction).reduce((total, count) => total + count, 0)})
+          Tous ({Object.values(countsByTransaction).reduce((total, count) => total + count, 0)})
         </button>
         {transactionTypes.map((type) => (
           <button
@@ -117,7 +117,7 @@ export function PropertyFilters({
           type="search"
           value={keyword}
           onChange={(event) => setKeyword(event.target.value)}
-          placeholder="Keyword search"
+          placeholder="Recherche par mot-cle"
           className="h-11 rounded-md border border-border bg-background px-3 text-sm xl:col-span-2"
         />
         <select
@@ -125,7 +125,7 @@ export function PropertyFilters({
           onChange={(event) => updateQuery({ type: event.target.value })}
           className="h-11 rounded-md border border-border bg-background px-3 text-sm"
         >
-          <option value="">All property types</option>
+          <option value="">Tous les types de biens</option>
           {propertyTypes.map((type) => (
             <option key={type.id} value={type.slug}>
               {type.label}
@@ -137,7 +137,7 @@ export function PropertyFilters({
           onChange={(event) => updateQuery({ city: event.target.value })}
           className="h-11 rounded-md border border-border bg-background px-3 text-sm"
         >
-          <option value="">All cities</option>
+          <option value="">Toutes les villes</option>
           {cities.map((city) => (
             <option key={city} value={city}>
               {city}
@@ -149,7 +149,7 @@ export function PropertyFilters({
           min="0"
           value={minPrice}
           onChange={(event) => setMinPrice(event.target.value)}
-          placeholder="Min price"
+          placeholder="Prix min"
           className="h-11 rounded-md border border-border bg-background px-3 text-sm"
         />
         <input
@@ -157,7 +157,7 @@ export function PropertyFilters({
           min="0"
           value={maxPrice}
           onChange={(event) => setMaxPrice(event.target.value)}
-          placeholder="Max price"
+          placeholder="Prix max"
           className="h-11 rounded-md border border-border bg-background px-3 text-sm"
         />
       </div>
@@ -169,7 +169,7 @@ export function PropertyFilters({
             checked={Boolean(value.featured)}
             onChange={(event) => updateQuery({ featured: event.target.checked })}
           />
-          Featured only
+          Biens en vedette seulement
         </label>
         <button
           type="button"
@@ -181,7 +181,7 @@ export function PropertyFilters({
           }}
           className="rounded-md border border-border px-4 py-2 text-xs uppercase tracking-wide transition-colors hover:border-gold"
         >
-          Clear filters
+          Effacer les filtres
         </button>
       </div>
     </div>

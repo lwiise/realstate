@@ -15,7 +15,7 @@ export function ContactForm({ propertyId, propertyTitle, agentPhone }: ContactFo
     name: "",
     email: "",
     phone: "",
-    message: `I'm interested in "${propertyTitle}" and would like to schedule a viewing.`,
+    message: `Je suis interesse par "${propertyTitle}" et je souhaite organiser une visite.`,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -60,9 +60,9 @@ export function ContactForm({ propertyId, propertyTitle, agentPhone }: ContactFo
         <div className="w-16 h-16 bg-gold mx-auto flex items-center justify-center mb-4">
           <Send className="w-6 h-6 text-black" />
         </div>
-        <h3 className="font-serif text-xl mb-2">Message sent</h3>
+        <h3 className="font-serif text-xl mb-2">Message envoye</h3>
         <p className="text-muted-foreground text-sm">
-          Thank you. Our team will contact you shortly.
+          Merci. Notre equipe vous contactera rapidement.
         </p>
       </div>
     );
@@ -70,11 +70,11 @@ export function ContactForm({ propertyId, propertyTitle, agentPhone }: ContactFo
 
   return (
     <div className="bg-secondary p-6">
-      <h3 className="font-serif text-xl mb-6">Send an inquiry</h3>
+      <h3 className="font-serif text-xl mb-6">Envoyer une demande</h3>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label htmlFor="name" className="block text-xs text-muted-foreground mb-2 uppercase tracking-wide">
-            Name
+            Nom
           </label>
           <input
             type="text"
@@ -83,7 +83,7 @@ export function ContactForm({ propertyId, propertyTitle, agentPhone }: ContactFo
             value={formState.name}
             onChange={(event) => setFormState({ ...formState, name: event.target.value })}
             className="w-full h-11 px-4 border border-border bg-white focus:outline-none focus:border-gold transition-colors text-sm"
-            placeholder="Your name"
+            placeholder="Votre nom"
           />
         </div>
         <div>
@@ -96,12 +96,12 @@ export function ContactForm({ propertyId, propertyTitle, agentPhone }: ContactFo
             value={formState.email}
             onChange={(event) => setFormState({ ...formState, email: event.target.value })}
             className="w-full h-11 px-4 border border-border bg-white focus:outline-none focus:border-gold transition-colors text-sm"
-            placeholder="Your email"
+            placeholder="Votre e-mail"
           />
         </div>
         <div>
           <label htmlFor="phone" className="block text-xs text-muted-foreground mb-2 uppercase tracking-wide">
-            Phone
+            Telephone
           </label>
           <input
             type="tel"
@@ -110,7 +110,7 @@ export function ContactForm({ propertyId, propertyTitle, agentPhone }: ContactFo
             value={formState.phone}
             onChange={(event) => setFormState({ ...formState, phone: event.target.value })}
             className="w-full h-11 px-4 border border-border bg-white focus:outline-none focus:border-gold transition-colors text-sm"
-            placeholder="Your phone"
+            placeholder="Votre telephone"
           />
         </div>
         <div>
@@ -132,11 +132,11 @@ export function ContactForm({ propertyId, propertyTitle, agentPhone }: ContactFo
           className="cta-dark-button w-full h-12 font-medium text-sm tracking-wide uppercase disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
           {isSubmitting ? (
-            "Sending..."
+            "Envoi..."
           ) : (
             <>
               <Send className="w-4 h-4" />
-              Send inquiry
+              Envoyer la demande
             </>
           )}
         </button>
@@ -147,7 +147,7 @@ export function ContactForm({ propertyId, propertyTitle, agentPhone }: ContactFo
           className="w-full h-12 bg-[#25D366] text-white font-medium text-sm tracking-wide uppercase hover:bg-[#20BA5A] transition-all duration-300 flex items-center justify-center gap-2"
         >
           <MessageCircle className="w-5 h-5" />
-          Contact on WhatsApp
+          Contacter sur WhatsApp
         </button>
       </form>
     </div>

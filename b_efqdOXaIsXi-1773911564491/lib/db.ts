@@ -492,10 +492,16 @@ function seedDatabase(db: DatabaseSync) {
           pageKey,
           title:
             pageKey === "home"
-              ? "Homepage"
+              ? "Accueil"
+              : pageKey === "buy"
+                ? "Acheter"
+                : pageKey === "rent"
+                  ? "Louer"
               : pageKey === "daily-rent"
-                ? "Daily rent"
-                : pageKey.charAt(0).toUpperCase() + pageKey.slice(1),
+                ? "Location journaliere"
+                : pageKey === "about"
+                  ? "A propos"
+                  : "Contact",
           seoTitle: seedSiteSettings.defaultSeoTitle,
           seoDescription: seedSiteSettings.defaultSeoDescription,
           ogImageUrl: "hero" in page ? page.hero.backgroundImage : seedSiteSettings.defaultOgImage,

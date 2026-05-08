@@ -51,15 +51,15 @@ export async function generateMetadata({
   const title = transactionType
     ? propertyType
       ? `${propertyType.label} - ${transactionType.label}`
-      : `Properties - ${transactionType.label}`
+      : `Proprietes - ${transactionType.label}`
     : propertyType
       ? propertyType.label
-      : "All properties";
-  const locationSuffix = city ? ` in ${city}` : "";
+      : "Toutes les proprietes";
+  const locationSuffix = city ? ` a ${city}` : "";
   const description =
     keyword || minPrice || maxPrice || featured
-      ? `Browse filtered property listings${locationSuffix} on ${siteSettings.siteName}.`
-      : `Browse ${title.toLowerCase()}${locationSuffix} on ${siteSettings.siteName}.`;
+      ? `Parcourez les annonces immobilieres filtrees${locationSuffix} sur ${siteSettings.siteName}.`
+      : `Parcourez ${title.toLowerCase()}${locationSuffix} sur ${siteSettings.siteName}.`;
 
   return {
     title,
@@ -139,10 +139,10 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="flex items-center gap-2 text-sm mb-6">
             <Link href="/" className="text-white/60 hover:text-gold transition-colors">
-              Home
+              Accueil
             </Link>
             <ChevronRight className="w-4 h-4 text-white/40" />
-            <span className="text-gold">Properties</span>
+            <span className="text-gold">Biens</span>
             {transactionType ? (
               <>
                 <ChevronRight className="w-4 h-4 text-white/40" />
@@ -161,7 +161,7 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
             {pageTitle}
           </h1>
           <p className="text-white/60">
-            {properties.length} {properties.length === 1 ? "property" : "properties"} found
+            {properties.length} {properties.length === 1 ? "bien trouve" : "biens trouves"}
           </p>
         </div>
       </section>
@@ -199,15 +199,15 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
               <div className="w-20 h-20 bg-secondary mx-auto flex items-center justify-center mb-6">
                 <SlidersHorizontal className="w-8 h-8 text-muted-foreground" />
               </div>
-              <h3 className="font-serif text-2xl text-foreground mb-2">No properties found</h3>
+              <h3 className="font-serif text-2xl text-foreground mb-2">Aucun bien trouve</h3>
               <p className="text-muted-foreground mb-6">
-                Try adjusting your filters to find available listings.
+                Modifiez vos filtres pour trouver les annonces disponibles.
               </p>
               <Link
                 href="/properties"
                 className="cta-dark-button inline-flex items-center gap-2 px-6 py-3 text-sm tracking-wide uppercase"
               >
-                Clear filters
+                Effacer les filtres
               </Link>
             </div>
           )}

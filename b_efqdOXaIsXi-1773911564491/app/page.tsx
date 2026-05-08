@@ -122,7 +122,7 @@ export default async function HomePage() {
         </div>
 
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
-          <span className="text-white/50 text-xs uppercase tracking-widest">Scroll</span>
+          <span className="text-white/50 text-xs uppercase tracking-widest">Defiler</span>
           <div className="w-px h-12 bg-gradient-to-b from-white/50 to-transparent" />
         </div>
       </section>
@@ -272,7 +272,7 @@ export default async function HomePage() {
 
             <div className="lg:pl-16">
               <div className="bg-black text-white p-8 md:p-12 h-full">
-                <h3 className="font-serif text-2xl text-gold mb-8">Our offices</h3>
+                <h3 className="font-serif text-2xl text-gold mb-8">Nos bureaux</h3>
 
                 <div className="space-y-8">
                   {homePage.content.contact.offices.map((office) => (

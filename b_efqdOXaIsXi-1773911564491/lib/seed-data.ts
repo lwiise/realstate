@@ -50,12 +50,12 @@ export interface SeedProperty {
 }
 
 export const seedSiteSettings: SiteSettings = {
-  siteName: "MDK IMMOBILIER Real Estate",
+  siteName: "MDK IMMOBILIER",
   siteUrl: "http://localhost:3000",
   siteDescription:
-    "MDK IMMOBILIER Real Estate propose des proprietes de prestige a Tanger pour l'achat, la location longue duree et la location journaliere.",
+    "MDK IMMOBILIER propose des proprietes de prestige a Tanger pour l'achat, la location longue duree et la location journaliere.",
   siteKeywords: [
-    "MDK IMMOBILIER Real Estate",
+    "MDK IMMOBILIER",
     "immobilier Tanger",
     "proprietes de luxe Tanger",
     "acheter propriete Tanger",
@@ -69,10 +69,10 @@ export const seedSiteSettings: SiteSettings = {
   contactPhone: "+212 6 12-34-56-78",
   whatsappNumber: "+212612345678",
   companyAddress: "Boulevard Pasteur, Suite 500, Tanger, Maroc",
-  currencyCode: "USD",
-  currencyLocale: "en-US",
-  copyrightText: "© 2026 MDK IMMOBILIER Real Estate. Tous droits reserves.",
-  defaultSeoTitle: "MDK IMMOBILIER Real Estate",
+  currencyCode: "MAD",
+  currencyLocale: "fr-MA",
+  copyrightText: "© 2026 MDK IMMOBILIER. Tous droits reserves.",
+  defaultSeoTitle: "MDK IMMOBILIER",
   defaultSeoDescription:
     "Achetez, louez ou reservez des proprietes d'exception a Tanger avec une agence qui privilegie la discretion, la selection et l'accompagnement sur mesure.",
 };
@@ -112,8 +112,8 @@ export const seedFooter: FooterSettings = {
     { label: "LinkedIn", href: "#", isEnabled: true },
   ],
   legalLinks: [
-    { label: "Privacy Policy", href: "#", isEnabled: true },
-    { label: "Terms of Service", href: "#", isEnabled: true },
+    { label: "Politique de confidentialite", href: "#", isEnabled: true },
+    { label: "Conditions d'utilisation", href: "#", isEnabled: true },
   ],
 };
 
@@ -211,9 +211,9 @@ export const seedAgents: SeedAgent[] = [
   {
     name: "Amina Bennani",
     slug: "amina-bennani",
-    role: "Luxury Property Specialist",
+    role: "Specialiste biens de luxe",
     phone: "+212 6 12-34-56-78",
-    email: "amina@aurumtanger.com",
+    email: "amina@mdkimmobilier.com",
     photoUrl:
       "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&q=80",
     bio: "Amina accompagne des acheteurs et voyageurs exigeants sur des actifs premium a Tanger.",
@@ -226,9 +226,9 @@ export const seedAgents: SeedAgent[] = [
   {
     name: "Hassan Kharrouby",
     slug: "hassan-kharrouby",
-    role: "Senior Villa Consultant",
+    role: "Conseiller senior villas",
     phone: "+212 6 22-33-44-55",
-    email: "hassan@aurumtanger.com",
+    email: "hassan@mdkimmobilier.com",
     photoUrl:
       "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&q=80",
     bio: "Hassan pilote les mandats villa et les selections patrimoniales les plus sensibles.",
@@ -241,9 +241,9 @@ export const seedAgents: SeedAgent[] = [
   {
     name: "Mohammed Tahir",
     slug: "mohammed-tahir",
-    role: "Commercial Assets Advisor",
+    role: "Conseiller actifs commerciaux",
     phone: "+212 6 33-44-55-66",
-    email: "mohammed@aurumtanger.com",
+    email: "mohammed@mdkimmobilier.com",
     photoUrl:
       "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&q=80",
     bio: "Mohammed conseille les investisseurs sur les immeubles de bureaux et actifs commerciaux.",
@@ -256,12 +256,12 @@ export const seedAgents: SeedAgent[] = [
   {
     name: "Fatima Larbi",
     slug: "fatima-larbi",
-    role: "Retail Leasing Expert",
+    role: "Expert location commerciale",
     phone: "+212 6 44-55-66-77",
-    email: "fatima@aurumtanger.com",
+    email: "fatima@mdkimmobilier.com",
     photoUrl:
       "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=300&q=80",
-    bio: "Fatima gere les surfaces retail et showrooms de centre-ville.",
+    bio: "Fatima gere les surfaces commerciales et showrooms de centre-ville.",
     whatsapp: "+212644556677",
     isPublished: true,
     sortOrder: 4,
@@ -271,9 +271,9 @@ export const seedAgents: SeedAgent[] = [
   {
     name: "Ahmed Moroccan",
     slug: "ahmed-moroccan",
-    role: "Land Acquisition Advisor",
+    role: "Conseiller foncier",
     phone: "+212 6 55-66-77-88",
-    email: "ahmed@aurumtanger.com",
+    email: "ahmed@mdkimmobilier.com",
     photoUrl:
       "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&q=80",
     bio: "Ahmed structure les dossiers fonciers et les opportunites terrain a fort potentiel.",
@@ -286,9 +286,9 @@ export const seedAgents: SeedAgent[] = [
   {
     name: "Nadia Fassi",
     slug: "nadia-fassi",
-    role: "Hospitality Curator",
+    role: "Conseillere sejours haut de gamme",
     phone: "+212 6 66-77-88-99",
-    email: "nadia@aurumtanger.com",
+    email: "nadia@mdkimmobilier.com",
     photoUrl:
       "https://images.unsplash.com/photo-1598550874175-4d0ef436c909?w=300&q=80",
     bio: "Nadia selectionne les retraites haut de gamme et les experiences journalieres exclusives.",
@@ -301,9 +301,9 @@ export const seedAgents: SeedAgent[] = [
   {
     name: "Karim Idrissi",
     slug: "karim-idrissi",
-    role: "Urban Rentals Consultant",
+    role: "Conseiller locations urbaines",
     phone: "+212 6 77-88-99-00",
-    email: "karim@aurumtanger.com",
+    email: "karim@mdkimmobilier.com",
     photoUrl:
       "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=300&q=80",
     bio: "Karim couvre les locations urbaines, executives et flexibles.",
@@ -316,12 +316,12 @@ export const seedAgents: SeedAgent[] = [
   {
     name: "Salma Idrissi",
     slug: "salma-idrissi",
-    role: "Corporate Property Advisor",
+    role: "Conseillere immobilier d'entreprise",
     phone: "+212 6 18-22-44-66",
-    email: "salma@aurumtanger.com",
+    email: "salma@mdkimmobilier.com",
     photoUrl:
       "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&q=80",
-    bio: "Salma accompagne les acquisitions corporate et les actifs signature.",
+    bio: "Salma accompagne les acquisitions d'entreprise et les actifs signature.",
     whatsapp: "+212618224466",
     isPublished: true,
     sortOrder: 8,
@@ -331,9 +331,9 @@ export const seedAgents: SeedAgent[] = [
   {
     name: "Leila Bennouna",
     slug: "leila-bennouna",
-    role: "Experience Venue Specialist",
+    role: "Specialiste lieux d'experience",
     phone: "+212 6 70-30-40-50",
-    email: "leila@aurumtanger.com",
+    email: "leila@mdkimmobilier.com",
     photoUrl:
       "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&q=80",
     bio: "Leila positionne les lieux scenographiques pour marques et evenements prives.",
@@ -387,7 +387,7 @@ export const seedProperties: SeedProperty[] = [
       "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1200&q=80",
     video:
       "https://cdn.pixabay.com/vimeo/780730376/780730376-e25fa51a0f8888c3d88cb1cac79c5dc2.mp4",
-    agentEmail: "amina@aurumtanger.com",
+    agentEmail: "amina@mdkimmobilier.com",
     sortOrder: 1,
   },
   {
@@ -429,7 +429,7 @@ export const seedProperties: SeedProperty[] = [
       "https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=1200&q=80",
     video:
       "https://cdn.pixabay.com/vimeo/780730376/780730376-e25fa51a0f8888c3d88cb1cac79c5dc2.mp4",
-    agentEmail: "hassan@aurumtanger.com",
+    agentEmail: "hassan@mdkimmobilier.com",
     sortOrder: 2,
   },
   {
@@ -468,7 +468,7 @@ export const seedProperties: SeedProperty[] = [
     ],
     coverImage:
       "https://images.unsplash.com/photo-1497366216548-37526070297c?w=1200&q=80",
-    agentEmail: "mohammed@aurumtanger.com",
+    agentEmail: "mohammed@mdkimmobilier.com",
     sortOrder: 3,
   },
   {
@@ -507,7 +507,7 @@ export const seedProperties: SeedProperty[] = [
     ],
     coverImage:
       "https://images.unsplash.com/photo-1604754742629-3e5728249d73?w=1200&q=80",
-    agentEmail: "fatima@aurumtanger.com",
+    agentEmail: "fatima@mdkimmobilier.com",
     sortOrder: 4,
   },
   {
@@ -545,7 +545,7 @@ export const seedProperties: SeedProperty[] = [
     ],
     coverImage:
       "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=1200&q=80",
-    agentEmail: "ahmed@aurumtanger.com",
+    agentEmail: "ahmed@mdkimmobilier.com",
     sortOrder: 5,
   },
   {
@@ -577,7 +577,7 @@ export const seedProperties: SeedProperty[] = [
       "Cinema prive",
       "Ponton yacht",
       "Securite 24/7",
-      "Helipad",
+      "Helisurface",
     ],
     images: [
       "https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=1200&q=80",
@@ -586,7 +586,7 @@ export const seedProperties: SeedProperty[] = [
     ],
     coverImage:
       "https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=1200&q=80",
-    agentEmail: "nadia@aurumtanger.com",
+    agentEmail: "nadia@mdkimmobilier.com",
     sortOrder: 6,
   },
   {
@@ -627,7 +627,7 @@ export const seedProperties: SeedProperty[] = [
     ],
     coverImage:
       "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1200&q=80",
-    agentEmail: "karim@aurumtanger.com",
+    agentEmail: "karim@mdkimmobilier.com",
     sortOrder: 7,
   },
   {
@@ -668,7 +668,7 @@ export const seedProperties: SeedProperty[] = [
     ],
     coverImage:
       "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1200&q=80",
-    agentEmail: "amina@aurumtanger.com",
+    agentEmail: "amina@mdkimmobilier.com",
     sortOrder: 8,
   },
   {
@@ -706,7 +706,7 @@ export const seedProperties: SeedProperty[] = [
     ],
     coverImage:
       "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1200&q=80",
-    agentEmail: "mohammed@aurumtanger.com",
+    agentEmail: "mohammed@mdkimmobilier.com",
     sortOrder: 9,
   },
   {
@@ -744,7 +744,7 @@ export const seedProperties: SeedProperty[] = [
     ],
     coverImage:
       "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1200&q=80",
-    agentEmail: "ahmed@aurumtanger.com",
+    agentEmail: "ahmed@mdkimmobilier.com",
     sortOrder: 10,
   },
   {
@@ -785,7 +785,7 @@ export const seedProperties: SeedProperty[] = [
     ],
     coverImage:
       "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1200&q=80",
-    agentEmail: "hassan@aurumtanger.com",
+    agentEmail: "hassan@mdkimmobilier.com",
     sortOrder: 11,
   },
   {
@@ -824,7 +824,7 @@ export const seedProperties: SeedProperty[] = [
     ],
     coverImage:
       "https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=1200&q=80",
-    agentEmail: "karim@aurumtanger.com",
+    agentEmail: "karim@mdkimmobilier.com",
     sortOrder: 12,
   },
   {
@@ -862,7 +862,7 @@ export const seedProperties: SeedProperty[] = [
     ],
     coverImage:
       "https://images.unsplash.com/photo-1497366412874-3415097a27e7?w=1200&q=80",
-    agentEmail: "salma@aurumtanger.com",
+    agentEmail: "salma@mdkimmobilier.com",
     sortOrder: 13,
   },
   {
@@ -878,9 +878,9 @@ export const seedProperties: SeedProperty[] = [
     priceMode: "monthly",
     priceSuffix: "/mois",
     shortDescription:
-      "Terrain amenage pour activations saisonnieres, hospitality events ou projets modulaires.",
+      "Terrain amenage pour activations saisonnieres, evenements prives ou projets modulaires.",
     longDescription: description(
-      "Grand terrain amenage pour activations saisonnieres, hospitality events ou projets modulaires avec acces direct depuis la route du Cap."
+      "Grand terrain amenage pour activations saisonnieres, evenements prives ou projets modulaires avec acces direct depuis la route du Cap."
     ),
     area: 56000,
     areaUnit: "sqft",
@@ -901,18 +901,18 @@ export const seedProperties: SeedProperty[] = [
     ],
     coverImage:
       "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=1200&q=80",
-    agentEmail: "ahmed@aurumtanger.com",
+    agentEmail: "ahmed@mdkimmobilier.com",
     sortOrder: 14,
   },
   {
-    title: "Showroom evenementiel waterfront",
-    slug: "showroom-evenementiel-waterfront",
+    title: "Salle d'exposition evenementielle en front de mer",
+    slug: "salle-exposition-evenementielle-front-de-mer",
     transactionSlug: "daily-rent",
     propertyTypeSlug: "commercial",
     status: "published",
     featured: false,
     city: "Tanger",
-    neighborhood: "Waterfront",
+    neighborhood: "Front de mer",
     price: 1900,
     priceMode: "daily",
     priceSuffix: "/jour",
@@ -926,7 +926,7 @@ export const seedProperties: SeedProperty[] = [
     features: [
       "Facade vitree",
       "Eclairage scenique",
-      "Back office",
+      "Espace arriere-boutique",
       "Cuisine traiteur",
       "Acces VIP",
       "Sonorisation",
@@ -940,7 +940,7 @@ export const seedProperties: SeedProperty[] = [
     ],
     coverImage:
       "https://images.unsplash.com/photo-1556740749-887f6717d7e4?w=1200&q=80",
-    agentEmail: "leila@aurumtanger.com",
+    agentEmail: "leila@mdkimmobilier.com",
     sortOrder: 15,
   },
   {
@@ -956,9 +956,9 @@ export const seedProperties: SeedProperty[] = [
     priceMode: "daily",
     priceSuffix: "/jour",
     shortDescription:
-      "Terrain privatisable pour retraites exclusives, installations lifestyle et evenements outdoor.",
+      "Terrain privatisable pour retraites exclusives, installations art de vivre et evenements en plein air.",
     longDescription: description(
-      "Terrain panoramique privatisable pour retraites exclusives, installations lifestyle et evenements outdoor avec vues degagees sur la cote."
+      "Terrain panoramique privatisable pour retraites exclusives, installations art de vivre et evenements en plein air avec vues degagees sur la cote."
     ),
     area: 64000,
     areaUnit: "sqft",
@@ -979,7 +979,7 @@ export const seedProperties: SeedProperty[] = [
     ],
     coverImage:
       "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200&q=80",
-    agentEmail: "ahmed@aurumtanger.com",
+    agentEmail: "ahmed@mdkimmobilier.com",
     sortOrder: 16,
   },
 ];
@@ -996,10 +996,10 @@ export const seedPages: PageContentMap = {
         "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1920&q=80",
     },
     about: {
-      eyebrow: "A propos de Aurum Tanger",
+      eyebrow: "A propos de MDK IMMOBILIER",
       title: "Redefinir le luxe immobilier",
       descriptionPrimary:
-        "Depuis plus de deux decennies, Aurum Tanger est la destination de reference pour des proprietes exceptionnelles. Nous comprenons que trouver la maison parfaite est plus qu'une transaction: c'est decouvrir un espace qui reflete vos aspirations et votre style de vie.",
+        "Depuis plus de deux decennies, MDK IMMOBILIER est la destination de reference pour des proprietes exceptionnelles. Nous comprenons que trouver la maison parfaite est plus qu'une transaction: c'est decouvrir un espace qui reflete vos aspirations et votre style de vie.",
       descriptionSecondary:
         "Notre portefeuille selectionne presente les residences les plus exclusives, des domaines en bord de mer aux retraites en penthouse, chacune choisie pour sa distinction architecturale et sa qualite sans compromis.",
       images: [
@@ -1027,16 +1027,16 @@ export const seedPages: PageContentMap = {
       eyebrow: "La voix de nos clients",
       title: "Des experiences discretes, fluides et memorables",
       description:
-        "Chaque transaction est accompagnee avec le meme niveau de rigueur, de clarte et de sens du detail. Voici comment nos clients decrivent l'experience Aurum.",
+        "Chaque transaction est accompagnee avec le meme niveau de rigueur, de clarte et de sens du detail. Voici comment nos clients decrivent l'experience MDK IMMOBILIER.",
       stats: [
-        { label: "Repeat clients", value: "98%" },
-        { label: "First shortlist", value: "24h" },
-        { label: "Client rating", value: "5.0" },
+        { label: "Clients fideles", value: "98%" },
+        { label: "Premiere selection", value: "24h" },
+        { label: "Note client", value: "5.0" },
       ],
       items: [
         {
           quote:
-            "Aurum a securise un appartement waterfront avant sa mise sur le marche public. L'accompagnement a ete precis, discret et tres rassurant jusqu'a la signature.",
+            "MDK IMMOBILIER a securise un appartement en front de mer avant sa mise sur le marche public. L'accompagnement a ete precis, discret et tres rassurant jusqu'a la signature.",
           name: "Samira El Khoury",
           role: "Investisseur prive",
           focus: "Appartement | Acheter",
@@ -1050,7 +1050,7 @@ export const seedPages: PageContentMap = {
         },
         {
           quote:
-            "Pour notre retreat executif, nous avions besoin d'un lieu fort, flexible et impeccable. La recommandation d'Aurum a transforme l'experience de tout l'evenement.",
+            "Pour notre retraite executive, nous avions besoin d'un lieu fort, flexible et impeccable. La recommandation de MDK IMMOBILIER a transforme l'experience de tout l'evenement.",
           name: "Lea Marchand",
           role: "Fondatrice studio evenementiel",
           focus: "Commercial | Location journaliere",
@@ -1059,7 +1059,7 @@ export const seedPages: PageContentMap = {
           quote:
             "Leur lecture du marche local nous a fait gagner un temps considerable. Les biens proposes etaient pertinents, bien negocies et parfaitement alignes avec notre strategie.",
           name: "Rachid Benali",
-          role: "Family office advisor",
+          role: "Conseiller patrimonial",
           focus: "Bureau | Acheter",
         },
       ],
@@ -1083,7 +1083,7 @@ export const seedPages: PageContentMap = {
       offices: [
         { name: "Tanger", lines: ["Boulevard Pasteur, Suite 500", "Tanger, 90000 Maroc"] },
         { name: "Casablanca", lines: ["Boulevard de la Corniche", "Casablanca, 20100 Maroc"] },
-        { name: "Marrakech", lines: ["Gueliz Square", "Marrakech, 40000 Maroc"] },
+        { name: "Marrakech", lines: ["Place Gueliz", "Marrakech, 40000 Maroc"] },
       ],
     },
   },
@@ -1104,36 +1104,36 @@ export const seedPages: PageContentMap = {
         "Selectionnez un type de bien pour explorer nos annonces exclusives disponibles a l'achat.",
     },
     stats: [
-      { label: "Sales Volume", value: "$2.5B+" },
-      { label: "Properties Sold", value: "500+" },
-      { label: "Expert Agents", value: "50+" },
-      { label: "Years Experience", value: "20+" },
+      { label: "Volume de ventes", value: "2,5 Md+" },
+      { label: "Biens vendus", value: "500+" },
+      { label: "Agents experts", value: "50+" },
+      { label: "Annees d'experience", value: "20+" },
     ],
     whyBuy: {
-      eyebrow: "Why choose us",
-      title: "Expert guidance for your investment",
+      eyebrow: "Pourquoi nous choisir",
+      title: "Un accompagnement expert pour votre investissement",
       description:
-        "When you purchase through Aurum Estates, you're not just buying a property. You're making a strategic investment with the support of industry-leading expertise.",
+        "Lorsque vous achetez avec MDK IMMOBILIER, vous n'achetez pas seulement un bien. Vous realisez un investissement strategique avec l'appui d'une expertise immobiliere de haut niveau.",
       image:
         "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80",
       items: [
         {
           number: "01",
-          title: "Market analysis",
+          title: "Analyse du marche",
           description:
-            "Comprehensive market insights to ensure your investment decision is well informed.",
+            "Des analyses completes du marche pour prendre une decision d'investissement bien informee.",
         },
         {
           number: "02",
-          title: "Legal support",
+          title: "Accompagnement juridique",
           description:
-            "Full legal assistance throughout the purchase process for complete peace of mind.",
+            "Une assistance juridique complete tout au long du processus d'achat pour avancer sereinement.",
         },
         {
           number: "03",
-          title: "Financing options",
+          title: "Solutions de financement",
           description:
-            "Access to exclusive financing solutions tailored to your profile and goals.",
+            "Acces a des solutions de financement adaptees a votre profil et a vos objectifs.",
         },
       ],
     },
@@ -1155,29 +1155,29 @@ export const seedPages: PageContentMap = {
         "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1920&q=80",
     },
     categorySection: {
-      eyebrow: "Choose your style",
+      eyebrow: "Choisissez votre style",
       title: "Types de proprietes",
       description:
         "Selectionnez un type de bien pour explorer nos locations premium.",
     },
     benefits: {
-      eyebrow: "Rental benefits",
-      title: "Why rent with Aurum",
+      eyebrow: "Avantages de la location",
+      title: "Pourquoi louer avec MDK IMMOBILIER",
       items: [
         {
-          title: "Verified properties",
+          title: "Biens verifies",
           description:
-            "Every property is personally inspected and verified by our team before publication.",
+            "Chaque bien est inspecte et verifie par notre equipe avant publication.",
         },
         {
-          title: "Flexible terms",
+          title: "Conditions flexibles",
           description:
-            "Customizable lease durations for long stays, executive assignments or seasonal needs.",
+            "Durees de bail adaptables pour longs sejours, missions professionnelles ou besoins saisonniers.",
         },
         {
-          title: "24/7 support",
+          title: "Assistance 24/7",
           description:
-            "Dedicated support team available around the clock throughout the tenant journey.",
+            "Une equipe dediee disponible a tout moment pendant tout le parcours locatif.",
         },
       ],
     },
@@ -1199,14 +1199,14 @@ export const seedPages: PageContentMap = {
         "https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=1920&q=80",
     },
     categorySection: {
-      eyebrow: "Choose your experience",
+      eyebrow: "Choisissez votre experience",
       title: "Types de proprietes",
       description:
         "Selectionnez un type de bien pour explorer nos options exclusives de location journaliere.",
     },
     services: {
-      eyebrow: "Premium services",
-      title: "Every day is extraordinary",
+      eyebrow: "Services haut de gamme",
+      title: "Chaque jour devient exceptionnel",
       description:
         "Nos proprietes journalieres incluent des services et amenites concus pour rendre chaque moment memorable.",
       images: [
@@ -1214,39 +1214,39 @@ export const seedPages: PageContentMap = {
         "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=600&q=80",
       ],
       points: [
-        "Concierge service",
-        "Private chef available",
-        "Chauffeur service",
-        "Daily housekeeping",
-        "Event planning",
-        "24/7 security",
+        "Service de conciergerie",
+        "Chef prive disponible",
+        "Service chauffeur",
+        "Menage quotidien",
+        "Organisation d'evenements",
+        "Securite 24/7",
       ],
     },
     useCases: {
-      eyebrow: "Perfect for",
-      title: "Every occasion",
+      eyebrow: "Ideal pour",
+      title: "Chaque occasion",
       items: [
         {
-          title: "Vacation retreats",
-          description: "Luxury escapes",
+          title: "Sejours de vacances",
+          description: "Escapades de luxe",
           image:
             "https://images.unsplash.com/photo-1540541338287-41700207dee6?w=600&q=80",
         },
         {
-          title: "Private events",
-          description: "Memorable celebrations",
+          title: "Evenements prives",
+          description: "Celebrations memorables",
           image:
             "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=600&q=80",
         },
         {
-          title: "Corporate meetings",
-          description: "Impressive venues",
+          title: "Reunions d'entreprise",
+          description: "Lieux remarquables",
           image:
             "https://images.unsplash.com/photo-1497366216548-37526070297c?w=600&q=80",
         },
         {
-          title: "Film and photo",
-          description: "Stunning backdrops",
+          title: "Tournages et shootings",
+          description: "Decors spectaculaires",
           image:
             "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=600&q=80",
         },
@@ -1273,7 +1273,7 @@ export const seedPages: PageContentMap = {
       eyebrow: "Notre histoire",
       title: "Selection, accompagnement et execution",
       descriptionPrimary:
-        "MDK IMMOBILIER Real Estate agit comme un partenaire de confiance pour les clients qui attendent plus qu'une simple recherche de biens. Notre role consiste a cadrer le besoin, filtrer le marche et construire un parcours clair jusqu'a la signature.",
+        "MDK IMMOBILIER agit comme un partenaire de confiance pour les clients qui attendent plus qu'une simple recherche de biens. Notre role consiste a cadrer le besoin, filtrer le marche et construire un parcours clair jusqu'a la signature.",
       descriptionSecondary:
         "Nous privilegions la qualite de portefeuille, la lecture du quartier, le potentiel patrimonial et la qualite de service. Chaque recommandation est pensee pour reduire le bruit et accelerer la bonne decision.",
       image:
@@ -1326,7 +1326,7 @@ export const seedPages: PageContentMap = {
     offices: [
       { name: "Tanger", lines: ["Boulevard Pasteur, Suite 500", "Tanger, 90000 Maroc"] },
       { name: "Casablanca", lines: ["Boulevard de la Corniche", "Casablanca, 20100 Maroc"] },
-      { name: "Marrakech", lines: ["Gueliz Square", "Marrakech, 40000 Maroc"] },
+      { name: "Marrakech", lines: ["Place Gueliz", "Marrakech, 40000 Maroc"] },
     ],
     form: {
       title: "Envoyer une demande",

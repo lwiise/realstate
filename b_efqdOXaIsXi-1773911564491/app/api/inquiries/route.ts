@@ -14,7 +14,7 @@ export async function POST(request: Request) {
 
   if (!payload.name?.trim() || !payload.phone?.trim() || !payload.message?.trim()) {
     return NextResponse.json(
-      { error: "Name, phone and message are required." },
+      { error: "Le nom, le telephone et le message sont obligatoires." },
       { status: 400 }
     );
   }
@@ -26,7 +26,7 @@ export async function POST(request: Request) {
     email: payload.email?.trim() || null,
     phone: payload.phone.trim(),
     message: payload.message.trim(),
-    sourcePage: payload.sourcePage?.trim() || "website",
+    sourcePage: payload.sourcePage?.trim() || "site web",
   });
 
   return NextResponse.json({ ok: true, id });

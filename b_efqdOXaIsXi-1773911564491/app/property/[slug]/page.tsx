@@ -65,11 +65,11 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="flex items-center gap-2 text-sm mb-6">
             <Link href="/" className="text-white/60 hover:text-gold transition-colors">
-              Home
+              Accueil
             </Link>
             <ChevronRight className="w-4 h-4 text-white/40" />
             <Link href="/properties" className="text-white/60 hover:text-gold transition-colors">
-              Properties
+              Biens
             </Link>
             <ChevronRight className="w-4 h-4 text-white/40" />
             <Link
@@ -142,7 +142,7 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
                     </div>
                     <div>
                       <p className="text-2xl font-serif">{property.bedrooms}</p>
-                      <p className="text-sm text-muted-foreground">Bedrooms</p>
+                      <p className="text-sm text-muted-foreground">Chambres</p>
                     </div>
                   </div>
                 ) : null}
@@ -153,7 +153,7 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
                     </div>
                     <div>
                       <p className="text-2xl font-serif">{property.bathrooms}</p>
-                      <p className="text-sm text-muted-foreground">Bathrooms</p>
+                      <p className="text-sm text-muted-foreground">Salles de bain</p>
                     </div>
                   </div>
                 ) : null}
@@ -174,7 +174,7 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
                   </div>
                   <div>
                     <p className="text-lg font-serif truncate">{property.city}</p>
-                    <p className="text-sm text-muted-foreground">Location</p>
+                    <p className="text-sm text-muted-foreground">Localisation</p>
                   </div>
                 </div>
               </div>
@@ -186,13 +186,13 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
                 </p>
                 {property.fullAddress ? (
                   <p className="mt-4 text-sm text-muted-foreground">
-                    Address: {property.fullAddress}
+                    Adresse : {property.fullAddress}
                   </p>
                 ) : null}
               </div>
 
               <div>
-                <h2 className="font-serif text-2xl mb-6">Features and amenities</h2>
+                <h2 className="font-serif text-2xl mb-6">Caracteristiques et prestations</h2>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   {property.features.map((feature) => (
                     <div key={feature} className="flex items-center gap-3">
@@ -208,11 +208,11 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
               <div className="flex gap-4 pt-6 border-t border-border">
                 <button className="flex items-center gap-2 px-6 py-3 border border-border hover:border-gold transition-colors">
                   <Heart className="w-4 h-4" />
-                  <span className="text-sm">Save</span>
+                  <span className="text-sm">Enregistrer</span>
                 </button>
                 <button className="flex items-center gap-2 px-6 py-3 border border-border hover:border-gold transition-colors">
                   <Share2 className="w-4 h-4" />
-                  <span className="text-sm">Share</span>
+                  <span className="text-sm">Partager</span>
                 </button>
               </div>
             </div>
@@ -252,7 +252,7 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
                         className="flex items-center justify-center gap-2 bg-gold text-black py-3 text-sm font-medium hover:bg-white transition-colors"
                       >
                         <Phone className="w-4 h-4" />
-                        Call
+                        Appeler
                       </a>
                       <a
                         href={whatsappHref}
@@ -283,16 +283,16 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between mb-12">
               <div>
-                <p className="text-gold uppercase tracking-[0.2em] text-sm mb-2">Explore more</p>
+                <p className="text-gold uppercase tracking-[0.2em] text-sm mb-2">Explorer plus</p>
                 <h2 className="font-serif text-3xl md:text-4xl text-foreground">
-                  Similar properties
+                  Biens similaires
                 </h2>
               </div>
               <Link
                 href={`/properties?transaction=${property.transactionTypeSlug}&type=${property.propertyTypeSlug}`}
                 className="hidden md:inline-flex items-center gap-2 text-gold hover:gap-4 transition-all duration-300 text-sm font-medium"
               >
-                View all
+                Voir tout
                 <ChevronRight className="w-4 h-4" />
               </Link>
             </div>
@@ -313,7 +313,7 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-gold transition-colors"
           >
             <ChevronLeft className="w-4 h-4" />
-            Back to properties
+            Retour aux biens
           </Link>
         </div>
       </section>

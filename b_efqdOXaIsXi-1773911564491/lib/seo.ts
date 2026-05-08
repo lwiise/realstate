@@ -94,8 +94,8 @@ export async function buildPropertyMetadata(
 
   if (!resolvedProperty) {
     return {
-      title: "Property not found",
-      description: `${siteSettings.siteName} could not find this listing.`,
+      title: "Bien introuvable",
+      description: `${siteSettings.siteName} n'a pas trouve cette annonce.`,
       alternates: {
         canonical: normalizedPathname,
       },

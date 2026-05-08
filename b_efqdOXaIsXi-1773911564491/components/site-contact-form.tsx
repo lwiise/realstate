@@ -54,9 +54,9 @@ export function SiteContactForm({ sourcePage, submitLabel }: SiteContactFormProp
   if (isSubmitted) {
     return (
       <div className="rounded-md border border-border bg-secondary px-6 py-8 text-center">
-        <h3 className="font-serif text-2xl text-foreground">Message sent</h3>
+        <h3 className="font-serif text-2xl text-foreground">Message envoye</h3>
         <p className="mt-3 text-sm text-muted-foreground">
-          Thank you. Our team will come back to you shortly.
+          Merci. Notre equipe vous recontactera rapidement.
         </p>
       </div>
     );
@@ -70,7 +70,7 @@ export function SiteContactForm({ sourcePage, submitLabel }: SiteContactFormProp
             htmlFor="firstName"
             className="block text-xs text-muted-foreground mb-2 uppercase tracking-wide"
           >
-            First name
+            Prenom
           </label>
           <input
             type="text"
@@ -87,7 +87,7 @@ export function SiteContactForm({ sourcePage, submitLabel }: SiteContactFormProp
             htmlFor="lastName"
             className="block text-xs text-muted-foreground mb-2 uppercase tracking-wide"
           >
-            Last name
+            Nom
           </label>
           <input
             type="text"
@@ -122,8 +122,8 @@ export function SiteContactForm({ sourcePage, submitLabel }: SiteContactFormProp
         <label
           htmlFor="phone"
           className="block text-xs text-muted-foreground mb-2 uppercase tracking-wide"
-        >
-          Phone
+          >
+          Telephone
         </label>
         <input
           type="tel"
@@ -150,7 +150,7 @@ export function SiteContactForm({ sourcePage, submitLabel }: SiteContactFormProp
           value={formState.message}
           onChange={handleChange("message")}
           className="w-full px-4 py-3 border border-border bg-background focus:outline-none focus:border-gold transition-colors resize-none"
-          placeholder="Describe your request..."
+          placeholder="Decrivez votre demande..."
         />
       </div>
 
@@ -159,7 +159,7 @@ export function SiteContactForm({ sourcePage, submitLabel }: SiteContactFormProp
         disabled={isSubmitting}
         className="cta-dark-button w-full h-14 font-medium text-sm tracking-wide uppercase disabled:opacity-60"
       >
-        {isSubmitting ? "Sending..." : submitLabel}
+        {isSubmitting ? "Envoi..." : submitLabel}
       </button>
     </form>
   );
