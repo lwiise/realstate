@@ -12,6 +12,19 @@ import { getFeaturedProperties, getPageContent, getPropertyTypes, getSiteSetting
 import { buildWhatsAppLink } from "@/lib/data";
 import { buildPageMetadata } from "@/lib/seo";
 
+function WhatsAppIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 32 32"
+      fill="currentColor"
+      className={className}
+    >
+      <path d="M16.04 3.2c-7.08 0-12.84 5.75-12.84 12.83 0 2.26.59 4.47 1.72 6.42L3.1 29.08l6.79-1.78a12.76 12.76 0 0 0 6.15 1.57h.01c7.08 0 12.84-5.75 12.84-12.84 0-3.43-1.34-6.65-3.76-9.07A12.73 12.73 0 0 0 16.04 3.2Zm0 23.5h-.01c-1.94 0-3.84-.52-5.5-1.5l-.39-.23-4.03 1.06 1.08-3.93-.25-.4a10.59 10.59 0 0 1-1.62-5.66c0-5.91 4.81-10.72 10.73-10.72 2.86 0 5.55 1.12 7.57 3.14a10.64 10.64 0 0 1 3.14 7.58c0 5.91-4.82 10.66-10.72 10.66Zm5.88-8.02c-.32-.16-1.9-.94-2.2-1.05-.29-.1-.5-.16-.72.16-.21.32-.83 1.05-1.02 1.26-.19.21-.38.24-.7.08-.32-.16-1.36-.5-2.59-1.6-.96-.86-1.61-1.91-1.8-2.23-.19-.32-.02-.5.14-.66.15-.15.32-.38.49-.57.16-.19.21-.32.32-.54.11-.21.05-.4-.03-.57-.08-.16-.72-1.74-.99-2.38-.26-.62-.52-.54-.72-.55h-.61c-.21 0-.56.08-.85.4-.29.32-1.12 1.09-1.12 2.66s1.15 3.09 1.31 3.3c.16.21 2.26 3.45 5.47 4.84.76.33 1.36.53 1.83.68.77.24 1.47.21 2.02.13.62-.09 1.9-.78 2.17-1.53.27-.75.27-1.39.19-1.53-.08-.13-.29-.21-.61-.37Z" />
+    </svg>
+  );
+}
+
 export async function generateMetadata(): Promise<Metadata> {
   return buildPageMetadata("home", "/");
 }
@@ -29,9 +42,23 @@ export default async function HomePage() {
     siteSettings.whatsappNumber,
     "Bonjour, je souhaite louer ou vendre mon bien avec MDK IMMOBILIER. Merci de me contacter."
   );
+  const floatingWhatsappHref = buildWhatsAppLink(
+    siteSettings.whatsappNumber,
+    "Bonjour, je souhaite obtenir plus d'informations sur vos biens. Merci de me contacter."
+  );
 
   return (
     <main className="min-h-screen">
+      <a
+        href={floatingWhatsappHref}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Contacter MDK IMMOBILIER sur WhatsApp"
+        className="fixed bottom-5 right-5 z-[80] inline-flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-[0_12px_30px_rgba(0,0,0,0.28)] transition-all duration-300 hover:-translate-y-1 hover:bg-[#1ebe5d] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#25D366] sm:bottom-6 sm:right-6 sm:h-16 sm:w-16"
+      >
+        <WhatsAppIcon className="h-8 w-8 sm:h-9 sm:w-9" />
+      </a>
+
       <section className="premium-top-bar fixed inset-x-0 top-0 z-[60]">
         <div className="premium-top-bar-shell mx-auto flex w-full max-w-7xl flex-col items-center justify-center gap-2 px-2 py-2 sm:h-14 sm:flex-row sm:gap-3 sm:px-6 sm:py-0 md:h-16 md:gap-5 lg:px-8">
           <p className="whitespace-nowrap text-center text-[9px] font-semibold uppercase leading-none tracking-[0.015em] text-white [text-shadow:0_0_18px_rgba(212,175,55,0.18)] min-[360px]:text-[10px] sm:text-[13px] md:text-base lg:text-[1.15rem] xl:text-[1.3rem]">
