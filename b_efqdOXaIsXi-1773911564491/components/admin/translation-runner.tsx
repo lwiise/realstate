@@ -78,7 +78,7 @@ export function TranslationRunner({ initialPending, geminiConfigured, model }: T
       {/* Connection test */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4">
         <div>
-          <p className="text-sm font-medium text-foreground">Connexion Gemini</p>
+          <p className="text-sm font-medium text-foreground">Connexion à l&apos;IA de traduction (OpenRouter)</p>
           <p className="text-xs text-muted-foreground">
             Clé : {geminiConfigured ? "détectée ✓" : "non détectée ✗"} · Modèle :{" "}
             <span className="font-mono">{model}</span>
@@ -100,7 +100,7 @@ export function TranslationRunner({ initialPending, geminiConfigured, model }: T
           <p className="text-sm text-emerald-600">✓ Connexion réussie. Exemple : « {testResult.sample} »</p>
         ) : (
           <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-            <p className="font-medium">Échec de la connexion Gemini :</p>
+            <p className="font-medium">Échec de la connexion :</p>
             <p className="mt-1 break-words font-mono text-xs">{testResult.error}</p>
           </div>
         )

@@ -1,33 +1,46 @@
 // =============================================================================
-// Gemini translation client — ALL Gemini API calls live in this file.
-// SERVER-ONLY: imported only by server actions, route handlers, and CLI scripts.
-// Never import this from a "use client" component or a public page.
-// The API key is read from process.env.google_api (Netlify env var) and is sent
-// only in the x-goog-api-key request header — never in a URL, log, or response.
+// AI translation client — ALL translation API calls live here.
+// Uses OpenRouter (https://openrouter.ai), an OpenAI-compatible gateway, so the
+// model is easily swappable. SERVER-ONLY: imported only by server actions, route
+// handlers, and CLI scripts. Never import from a "use client" component / public page.
+//
+// The API key is read from process.env.google_api (the existing Netlify variable —
+// it holds an OpenRouter key) and sent only in the Authorization header, never in a
+// URL, log, or response. Override the model with OPENROUTER_MODEL.
 // =============================================================================
 
-const GEMINI_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models";
-const DEFAULT_MODEL = "gemini-2.0-flash";
-const REQUEST_TIMEOUT_MS = 20_000;
+const OPENROUTER_ENDPOINT = "https://openrouter.ai/api/v1/chat/completions";
 
-// Exact instruction requested for the luxury real-estate use case.
-const TRANSLATION_PROMPT = [
-  "Translate the following website/admin content from French to English.",
+// Default model: strong, fast, low-cost multilingual translation. Override via
+// OPENROUTER_MODEL — e.g. "openai/gpt-4o" or "anthropic/claude-sonnet-4" for a
+// different quality/cost trade-off (any OpenRouter "provider/model" slug works).
+const DEFAULT_MODEL = "google/gemini-2.5-flash";
+const REQUEST_TIMEOUT_MS = 30_000;
+
+const SYSTEM_PROMPT = [
+  "You are a professional translator for a luxury real estate brand.",
+  "Translate the JSON values provided by the user from French to English.",
   "Keep the meaning accurate, natural, professional, and suitable for a luxury real estate website.",
   "Preserve formatting and structure (paragraphs, line breaks, bullet points).",
   "Do not translate brand names, project names, developer names, addresses, URLs, emails, phone numbers, slugs, IDs, or code-like values.",
-  "Return JSON only using the exact same keys as the input. Translate only the string values.",
-].join("\n");
+  "Return ONLY a JSON object using the exact same keys as the input; translate only the string values.",
+].join(" ");
 
-// The key is documented as `google_api` (Netlify), but accept the common variants too
-// so a casing/name mismatch doesn't silently disable translation.
+// The key is documented as `google_api`; also accept common aliases. Tolerate stray
+// surrounding quotes / whitespace that are easy to paste into an env var by mistake.
 function resolveApiKey(): string | undefined {
-  const raw = process.env.google_api ?? process.env.GOOGLE_API ?? process.env.GEMINI_API_KEY;
-  return raw && raw.trim() ? raw.trim() : undefined;
+  const raw =
+    process.env.google_api ??
+    process.env.OPENROUTER_API_KEY ??
+    process.env.GOOGLE_API ??
+    process.env.GEMINI_API_KEY;
+  if (!raw) return undefined;
+  const cleaned = raw.trim().replace(/^["']|["']$/g, "").trim();
+  return cleaned || undefined;
 }
 
 function resolveModel(): string {
-  return process.env.GEMINI_MODEL?.trim() || DEFAULT_MODEL;
+  return process.env.OPENROUTER_MODEL?.trim() || process.env.GEMINI_MODEL?.trim() || DEFAULT_MODEL;
 }
 
 export function getGeminiModel(): string {
@@ -38,22 +51,23 @@ export function isGeminiConfigured(): boolean {
   return Boolean(resolveApiKey());
 }
 
-class GeminiError extends Error {}
+class TranslateError extends Error {}
 
-/** Strip an accidental ```json ... ``` markdown fence if the model adds one. */
-function stripCodeFence(text: string): string {
-  const trimmed = text.trim();
-  if (trimmed.startsWith("```")) {
-    return trimmed
-      .replace(/^```(?:json)?\s*/i, "")
-      .replace(/\s*```$/, "")
-      .trim();
+/** Extract a JSON object from the model output (strips ``` fences / surrounding prose). */
+function extractJsonObject(text: string): string {
+  let value = text.trim();
+  if (value.startsWith("```")) {
+    value = value.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "").trim();
   }
-  return trimmed;
+  if (value.startsWith("{")) return value;
+  const start = value.indexOf("{");
+  const end = value.lastIndexOf("}");
+  if (start !== -1 && end > start) return value.slice(start, end + 1);
+  return value;
 }
 
 /**
- * Translate a JSON object of French field values to English.
+ * Translate a JSON object of French field values to English via OpenRouter.
  * Input/output share the exact same keys; only string values change.
  * Throws on missing key, network error, timeout, non-200, or unparseable output —
  * callers (translation-service) catch this and mark the entity "needs_translation".
@@ -63,7 +77,7 @@ export async function translateJsonFrToEn(
 ): Promise<Record<string, unknown>> {
   const apiKey = resolveApiKey();
   if (!apiKey) {
-    throw new GeminiError("No Gemini API key found (set the google_api environment variable).");
+    throw new TranslateError("No translation API key found (set the google_api environment variable).");
   }
 
   // Nothing translatable -> return as-is, no API call.
@@ -76,45 +90,52 @@ export async function translateJsonFrToEn(
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
   try {
-    const response = await fetch(`${GEMINI_ENDPOINT}/${model}:generateContent`, {
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+      "X-Title": "MDK Immobilier",
+    };
+    // Optional attribution header recommended by OpenRouter.
+    if (process.env.NEXT_PUBLIC_SITE_URL) {
+      headers["HTTP-Referer"] = process.env.NEXT_PUBLIC_SITE_URL;
+    }
+
+    const response = await fetch(OPENROUTER_ENDPOINT, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-goog-api-key": apiKey,
-      },
+      headers,
       body: JSON.stringify({
-        contents: [
-          {
-            role: "user",
-            parts: [{ text: `${TRANSLATION_PROMPT}\n\nInput JSON:\n${JSON.stringify(fields)}` }],
-          },
+        model,
+        temperature: 0.2,
+        response_format: { type: "json_object" },
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          { role: "user", content: `Input JSON:\n${JSON.stringify(fields)}` },
         ],
-        generationConfig: {
-          temperature: 0.2,
-          responseMimeType: "application/json",
-          maxOutputTokens: 8192,
-        },
       }),
       signal: controller.signal,
     });
 
     if (!response.ok) {
-      // Read body for server-side logging context, but never surface the key.
       const detail = await response.text().catch(() => "");
-      throw new GeminiError(`Gemini API returned ${response.status}: ${detail.slice(0, 500)}`);
+      throw new TranslateError(`OpenRouter API returned ${response.status}: ${detail.slice(0, 600)}`);
     }
 
     const data = (await response.json()) as {
-      candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
+      choices?: Array<{ message?: { content?: string } }>;
+      error?: { message?: string };
     };
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!text) {
-      throw new GeminiError("Gemini API returned an empty response.");
+    if (data.error?.message) {
+      throw new TranslateError(`OpenRouter error: ${data.error.message}`);
     }
 
-    const parsed = JSON.parse(stripCodeFence(text));
+    const text = data.choices?.[0]?.message?.content;
+    if (!text) {
+      throw new TranslateError("OpenRouter returned an empty response.");
+    }
+
+    const parsed = JSON.parse(extractJsonObject(text));
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-      throw new GeminiError("Gemini did not return a JSON object.");
+      throw new TranslateError("Translation did not return a JSON object.");
     }
     return parsed as Record<string, unknown>;
   } finally {
@@ -136,7 +157,7 @@ export interface GeminiTestResult {
 export async function testGeminiConnection(): Promise<GeminiTestResult> {
   const model = resolveModel();
   if (!resolveApiKey()) {
-    return { ok: false, model, error: "Aucune clé API Gemini détectée (variable google_api)." };
+    return { ok: false, model, error: "Aucune clé API détectée (variable google_api)." };
   }
   try {
     const result = await translateJsonFrToEn({ greeting: "Bonjour, bienvenue chez MDK Immobilier" });
