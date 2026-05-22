@@ -123,56 +123,63 @@ function computeSourceHash(payload: TranslationPayload): string {
 }
 
 /**
- * Strips everything that must never be translated (skipKeys values, and all
- * non-string scalars) so only translatable text is sent to Gemini.
+ * Flattens the translatable LEAF strings of a payload to a flat { "<path>": "<french>" }
+ * map (e.g. "content.hero.title", "features.0", "content.testimonials.items.0.quote").
+ * Sending a one-level object — instead of a deep nested one — makes it far easier for the
+ * model to return syntactically valid JSON. skipKeys values and non-strings are omitted.
  */
-function toSendable(value: unknown, key?: string): unknown {
+function flattenTranslatable(source: TranslationPayload): Record<string, string> {
+  const out: Record<string, string> = {};
+  const walk = (value: unknown, path: string, key?: string) => {
+    if (typeof value === "string") {
+      if (!skipKeys.has(key ?? "") && value.trim().length > 0) out[path] = value;
+      return;
+    }
+    if (Array.isArray(value)) {
+      if (skipKeys.has(key ?? "")) return;
+      value.forEach((item, index) => walk(item, `${path}.${index}`, key));
+      return;
+    }
+    if (value && typeof value === "object") {
+      for (const [childKey, childValue] of Object.entries(value as Record<string, unknown>)) {
+        walk(childValue, path ? `${path}.${childKey}` : childKey, childKey);
+      }
+    }
+    // numbers, booleans, null -> omitted
+  };
+  walk(source, "");
+  return out;
+}
+
+/**
+ * Rebuilds the original nested structure, replacing each translatable leaf with the English
+ * value from the flat map (matched by the same path) when present & non-empty; otherwise
+ * keeps the French source. skipKeys / numbers / booleans always come from the source — so
+ * URLs, slugs, emails, phones and IDs are guaranteed to be exactly the originals.
+ */
+function applyFlatTranslations(
+  value: unknown,
+  flat: Record<string, unknown>,
+  path = "",
+  key?: string
+): unknown {
   if (typeof value === "string") {
-    return skipKeys.has(key ?? "") ? undefined : value;
+    if (skipKeys.has(key ?? "")) return value;
+    const translated = flat[path];
+    return typeof translated === "string" && translated.trim().length > 0 ? translated : value;
   }
   if (Array.isArray(value)) {
-    if (skipKeys.has(key ?? "")) return undefined;
-    return value.map((item) => toSendable(item, key));
+    if (skipKeys.has(key ?? "")) return value;
+    return value.map((item, index) => applyFlatTranslations(item, flat, `${path}.${index}`, key));
   }
   if (value && typeof value === "object") {
     const out: Record<string, unknown> = {};
     for (const [childKey, childValue] of Object.entries(value as Record<string, unknown>)) {
-      const sendable = toSendable(childValue, childKey);
-      if (sendable !== undefined) out[childKey] = sendable;
+      out[childKey] = applyFlatTranslations(childValue, flat, path ? `${path}.${childKey}` : childKey, childKey);
     }
     return out;
   }
-  return undefined; // numbers, booleans, null — not translatable
-}
-
-/**
- * Merges Gemini's English over the French source. English text wins for normal
- * string fields; everything else (skipKeys, numbers, booleans, missing values)
- * comes from the French source — so URLs, slugs, emails, phones and IDs are
- * guaranteed to be exactly the originals.
- */
-function mergeTranslated(source: unknown, translated: unknown, key?: string): unknown {
-  if (typeof source === "string") {
-    if (skipKeys.has(key ?? "")) return source;
-    return typeof translated === "string" && translated.trim().length > 0 ? translated : source;
-  }
-  if (Array.isArray(source)) {
-    if (skipKeys.has(key ?? "")) return source;
-    const translatedArray = Array.isArray(translated) ? translated : [];
-    return source.map((item, index) => mergeTranslated(item, translatedArray[index], key));
-  }
-  if (source && typeof source === "object") {
-    const translatedObject =
-      translated && typeof translated === "object" && !Array.isArray(translated)
-        ? (translated as Record<string, unknown>)
-        : {};
-    const out: Record<string, unknown> = {};
-    for (const [childKey, childValue] of Object.entries(source as Record<string, unknown>)) {
-      out[childKey] = mergeTranslated(childValue, translatedObject[childKey], childKey);
-    }
-    return out;
-  }
-  return source; // numbers, booleans, null
+  return value; // numbers, booleans, null
 }
 
 async function safeUpsert(
@@ -224,9 +231,9 @@ export async function syncEntityTranslation(
       return { status: "needs_translation", skipped: false };
     }
 
-    const sendable = toSendable(source) as Record<string, unknown>;
-    const translated = await translateJsonFrToEn(sendable);
-    const merged = mergeTranslated(source, translated) as TranslationPayload;
+    const flat = flattenTranslatable(source);
+    const translatedFlat = await translateJsonFrToEn(flat);
+    const merged = applyFlatTranslations(source, translatedFlat) as TranslationPayload;
     await writeTranslation(entityType, entityId, merged, {
       sourceHash,
       status: "translated",

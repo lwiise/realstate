@@ -27,6 +27,7 @@ const SYSTEM_PROMPT = [
   "Preserve formatting and structure (paragraphs, line breaks, bullet points).",
   "Do not translate brand names, project names, developer names, addresses, URLs, emails, phone numbers, slugs, IDs, or code-like values.",
   "Return ONLY a JSON object using the exact same keys as the input; translate only the string values.",
+  "The keys are identifiers — copy them exactly and translate only the values.",
 ].join(" ");
 
 // The key is documented as `google_api`; also accept common aliases. Tolerate stray
