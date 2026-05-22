@@ -5,11 +5,12 @@ import { Footer } from "@/components/footer";
 import { Navbar } from "@/components/navbar";
 import { PropertyCard } from "@/components/property-card";
 import { PropertyTypeCard } from "@/components/property-type-card";
-import { getPageContent, getProperties, getPropertyCountByType, getPropertyTypes } from "@/lib/cms";
+import { getPageContent, getProperties, getPropertyCountByType, getPropertyTypes, getSiteSettings } from "@/lib/cms";
 import { getRequestLocale } from "@/lib/i18n-server";
-import { localizePageRecord, localizeProperties, localizePropertyTypes } from "@/lib/i18n-content";
+import { localizePageRecord, localizeProperties, localizePropertyTypes, localizeSiteSettings } from "@/lib/i18n-content";
 import { localizePath } from "@/lib/i18n";
 import { buildPageMetadata } from "@/lib/seo";
+import { imageSrc } from "@/lib/data";
 
 export async function generateMetadata(): Promise<Metadata> {
   return buildPageMetadata("rent", "/rent");
@@ -17,15 +18,17 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function RentPage() {
   const locale = await getRequestLocale();
-  const [rawPage, rawPropertyTypes, propertyCounts, rawProperties] = await Promise.all([
+  const [rawPage, rawPropertyTypes, propertyCounts, rawProperties, rawSiteSettings] = await Promise.all([
     getPageContent("rent"),
     getPropertyTypes(),
     getPropertyCountByType("rent"),
     getProperties({ transactionSlug: "rent", limit: 6 }),
+    getSiteSettings(),
   ]);
   const page = localizePageRecord(rawPage, locale);
   const propertyTypes = localizePropertyTypes(rawPropertyTypes, locale);
   const properties = localizeProperties(rawProperties, locale);
+  const siteSettings = localizeSiteSettings(rawSiteSettings, locale);
 
   return (
     <main className="min-h-screen">
@@ -34,7 +37,7 @@ export default async function RentPage() {
       <section className="relative h-[60vh] min-h-[500px] flex items-center justify-center">
         <div className="absolute inset-0">
           <Image
-            src={page.content.hero.backgroundImage}
+            src={imageSrc(page.content.hero.backgroundImage)}
             alt={page.content.hero.title}
             fill
             className="object-cover"
@@ -138,7 +141,7 @@ export default async function RentPage() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {properties.map((property) => (
-              <PropertyCard key={property.id} property={property} />
+              <PropertyCard key={property.id} property={property} siteSettings={siteSettings} locale={locale} />
             ))}
           </div>
         </div>

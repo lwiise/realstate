@@ -111,7 +111,10 @@ export function SiteSettingsForm({ settings, mediaAssets }: SiteSettingsFormProp
             <input
               name="currencyCode"
               defaultValue={settings.currencyCode}
-              className="h-12 w-full rounded-md border border-border bg-background px-4 text-sm"
+              required
+              placeholder="MAD"
+              title="Code ISO de la devise, ex. MAD, EUR, USD"
+              className="h-12 w-full rounded-md border border-border bg-background px-4 text-sm uppercase"
             />
           </label>
           <label className="space-y-2">
@@ -119,6 +122,9 @@ export function SiteSettingsForm({ settings, mediaAssets }: SiteSettingsFormProp
             <input
               name="currencyLocale"
               defaultValue={settings.currencyLocale}
+              required
+              placeholder="fr-MA"
+              title="Locale de formatage, ex. fr-MA, fr-FR, en-US"
               className="h-12 w-full rounded-md border border-border bg-background px-4 text-sm"
             />
           </label>

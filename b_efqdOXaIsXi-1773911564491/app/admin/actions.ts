@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import {
   countAdminUsers,
@@ -28,6 +28,7 @@ import {
   getProperties,
   getPropertyById,
   getTransactionTypes,
+  CMS_CACHE_TAG,
   updateFooterSettings,
   updateNavigationSettings,
   updatePageContent,
@@ -81,6 +82,21 @@ function getJsonValue<T>(formData: FormData, key: string, fallback: T): T {
   }
 }
 
+// A blank/invalid currency code or locale makes Intl.NumberFormat throw, which used to
+// crash every page that renders a price. Validate here and fall back to the site default.
+function normalizeCurrency(code: string, locale: string) {
+  const fallbackCode = "MAD";
+  const fallbackLocale = "fr-MA";
+  const safeCode = code.trim().toUpperCase() || fallbackCode;
+  const safeLocale = locale.trim() || fallbackLocale;
+  try {
+    new Intl.NumberFormat(safeLocale, { style: "currency", currency: safeCode }).format(1);
+    return { currencyCode: safeCode, currencyLocale: safeLocale };
+  } catch {
+    return { currencyCode: fallbackCode, currencyLocale: fallbackLocale };
+  }
+}
+
 function revalidateSite(propertySlug?: string) {
   const paths = [
     "/",
@@ -113,6 +129,9 @@ function revalidateSite(propertySlug?: string) {
   });
 
   paths.forEach((path) => revalidatePath(path));
+  // Clears the cached CMS reads (unstable_cache) so edits show up immediately.
+  // Next 16 requires the cache-life profile as the second argument.
+  revalidateTag(CMS_CACHE_TAG, "max");
 }
 
 function withSavedParam(path: string) {
@@ -459,6 +478,11 @@ export async function saveFooterAction(formData: FormData) {
 export async function saveSiteSettingsAction(formData: FormData) {
   await requireAdminUser();
 
+  const { currencyCode, currencyLocale } = normalizeCurrency(
+    getValue(formData, "currencyCode"),
+    getValue(formData, "currencyLocale")
+  );
+
   const input: SiteSettings = {
     siteName: getValue(formData, "siteName"),
     siteUrl: getValue(formData, "siteUrl"),
@@ -471,8 +495,8 @@ export async function saveSiteSettingsAction(formData: FormData) {
     contactPhone: getValue(formData, "contactPhone"),
     whatsappNumber: getValue(formData, "whatsappNumber"),
     companyAddress: getValue(formData, "companyAddress"),
-    currencyCode: getValue(formData, "currencyCode"),
-    currencyLocale: getValue(formData, "currencyLocale"),
+    currencyCode,
+    currencyLocale,
     copyrightText: getValue(formData, "copyrightText"),
     defaultSeoTitle: getValue(formData, "defaultSeoTitle"),
     defaultSeoDescription: getValue(formData, "defaultSeoDescription"),

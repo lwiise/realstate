@@ -7,6 +7,7 @@ import { getPageContent } from "@/lib/cms";
 import { getRequestLocale } from "@/lib/i18n-server";
 import { localizePageRecord } from "@/lib/i18n-content";
 import { buildPageMetadata } from "@/lib/seo";
+import { imageSrc } from "@/lib/data";
 
 export async function generateMetadata(): Promise<Metadata> {
   return buildPageMetadata("about", "/about");
@@ -22,7 +23,7 @@ export default async function AboutPage() {
 
       <section className="relative h-[60vh] min-h-[500px] flex items-center justify-center">
         <div className="absolute inset-0">
-          <Image src={page.content.hero.backgroundImage} alt={page.content.hero.title} fill className="object-cover" priority />
+          <Image src={imageSrc(page.content.hero.backgroundImage)} alt={page.content.hero.title} fill className="object-cover" priority />
           <div className="absolute inset-0 bg-black/60" />
         </div>
 
@@ -42,7 +43,7 @@ export default async function AboutPage() {
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="relative">
               <div className="aspect-[4/5] relative overflow-hidden">
-                <Image src={page.content.story.image} alt={page.content.story.title} fill className="object-cover" />
+                <Image src={imageSrc(page.content.story.image)} alt={page.content.story.title} fill className="object-cover" />
               </div>
               <div className="absolute -bottom-6 -left-6 w-32 h-32 border-2 border-gold -z-10" />
             </div>

@@ -892,6 +892,26 @@ export function getPropertyCountByType(transactionSlug?: string) {
   return new Map(rows.map((row) => [row.slug, Number(row.count)]));
 }
 
+export function getPropertyCountsByTransaction() {
+  const db = getDb();
+  const rows = db
+    .prepare(
+      `
+        SELECT
+          transaction_types.slug,
+          COUNT(properties.id) as count
+        FROM transaction_types
+        LEFT JOIN properties
+          ON properties.transaction_type_id = transaction_types.id
+          AND properties.status = 'published'
+        GROUP BY transaction_types.id
+      `
+    )
+    .all() as Array<{ slug: string; count: number }>;
+
+  return new Map(rows.map((row) => [row.slug, Number(row.count)]));
+}
+
 export function upsertProperty(
   input: Omit<
     Property,

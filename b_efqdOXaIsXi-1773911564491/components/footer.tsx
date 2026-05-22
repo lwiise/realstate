@@ -5,6 +5,7 @@ import { getFooterSettings, getSiteSettings } from "@/lib/cms";
 import { getRequestLocale } from "@/lib/i18n-server";
 import { localizeFooter, localizeSiteSettings } from "@/lib/i18n-content";
 import { localizePath } from "@/lib/i18n";
+import { imageSrc } from "@/lib/data";
 
 export async function Footer() {
   const locale = await getRequestLocale();
@@ -24,7 +25,7 @@ export async function Footer() {
           <div className="space-y-6">
             <Link href={localizePath("/", locale)} className="flex items-center bg-white p-2 rounded-[10px] overflow-hidden w-fit">
               <Image
-                src={siteSettings.logoUrl}
+                src={imageSrc(siteSettings.logoUrl, "/logo-mdk.png")}
                 alt={siteSettings.logoAlt}
                 width={120}
                 height={90}

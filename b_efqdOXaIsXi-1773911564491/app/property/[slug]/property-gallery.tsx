@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, Expand, Play } from "lucide-react";
 import type { Locale } from "@/lib/cms-types";
+import { imageSrc } from "@/lib/data";
 
 interface PropertyGalleryProps {
   images: string[];
@@ -52,7 +53,7 @@ export function PropertyGallery({ images, video, title, locale = "fr" }: Propert
             />
           ) : (
             <Image
-              src={currentMedia.src}
+              src={imageSrc(currentMedia.src)}
               alt={`${title} - ${locale === "en" ? "Image" : "Image"} ${currentIndex + 1}`}
               fill
               className="object-cover"
@@ -127,7 +128,7 @@ export function PropertyGallery({ images, video, title, locale = "fr" }: Propert
               }`}
             >
               <Image
-                src={image}
+                src={imageSrc(image)}
                 alt={`${title} - ${locale === "en" ? "Thumbnail" : "Miniature"} ${index + 1}`}
                 fill
                 className="object-cover"
@@ -154,7 +155,7 @@ export function PropertyGallery({ images, video, title, locale = "fr" }: Propert
           <div className="relative w-full h-full max-w-7xl mx-auto p-4 flex items-center justify-center">
             <div className="relative w-full h-full">
               <Image
-                src={currentMedia.src}
+                src={imageSrc(currentMedia.src)}
                 alt={`${title} - ${locale === "en" ? "Image" : "Image"} ${currentIndex + 1}`}
                 fill
                 className="object-contain"

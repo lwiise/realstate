@@ -330,7 +330,7 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
 
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
               {similarProperties.map((relatedProperty) => (
-                <PropertyCard key={relatedProperty.id} property={relatedProperty} />
+                <PropertyCard key={relatedProperty.id} property={relatedProperty} siteSettings={siteSettings} locale={locale} />
               ))}
             </div>
           </div>

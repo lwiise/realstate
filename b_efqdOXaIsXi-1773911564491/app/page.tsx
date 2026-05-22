@@ -9,7 +9,7 @@ import { SearchBar } from "@/components/search-bar";
 import { SiteContactForm } from "@/components/site-contact-form";
 import { TestimonialsSection } from "@/components/testimonials-section";
 import { getFeaturedProperties, getPageContent, getPropertyTypes, getSiteSettings, getTransactionTypes } from "@/lib/cms";
-import { buildWhatsAppLink } from "@/lib/data";
+import { buildWhatsAppLink, imageSrc } from "@/lib/data";
 import { getRequestLocale } from "@/lib/i18n-server";
 import {
   localizePageRecord,
@@ -124,7 +124,7 @@ export default async function HomePage() {
       <section className="relative flex min-h-screen items-center justify-center pt-40 sm:pt-36 md:h-screen md:min-h-[700px] md:pt-36">
         <div className="absolute inset-0">
           <Image
-            src={homePage.content.hero.backgroundImage}
+            src={imageSrc(homePage.content.hero.backgroundImage)}
             alt={homePage.content.hero.title}
             fill
             className="object-cover"
@@ -231,7 +231,7 @@ export default async function HomePage() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {featuredProperties.map((property) => (
-              <PropertyCard key={property.id} property={property} />
+              <PropertyCard key={property.id} property={property} siteSettings={siteSettings} locale={locale} />
             ))}
           </div>
 
@@ -252,7 +252,7 @@ export default async function HomePage() {
       <section className="relative py-24 lg:py-32 overflow-hidden">
         <div className="absolute inset-0 bg-black">
           <Image
-            src={homePage.content.cta.backgroundImage}
+            src={imageSrc(homePage.content.cta.backgroundImage)}
             alt={homePage.content.cta.title}
             fill
             className="object-cover opacity-30"

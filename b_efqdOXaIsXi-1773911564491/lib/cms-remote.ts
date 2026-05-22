@@ -937,6 +937,24 @@ export async function getPropertyCountByTypeRemote(transactionSlug?: string) {
   return new Map(rows.map((row) => [row.slug, Number(row.count)]));
 }
 
+export async function getPropertyCountsByTransactionRemote() {
+  const rows = await queryRemoteRows<{ slug: string; count: string }>(
+    `
+      SELECT
+        transaction_types.slug,
+        COUNT(properties.id)::text as count
+      FROM transaction_types
+      LEFT JOIN properties
+        ON properties.transaction_type_id = transaction_types.id
+        AND properties.status = 'published'
+      GROUP BY transaction_types.id, transaction_types.slug
+    `,
+    []
+  );
+
+  return new Map(rows.map((row: { slug: string; count: string }) => [row.slug, Number(row.count)]));
+}
+
 export async function upsertPropertyRemote(
   input: Omit<
     Property,

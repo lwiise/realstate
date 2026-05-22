@@ -7,8 +7,6 @@ import "./globals.css";
 
 const enableVercelAnalytics = process.env.VERCEL === "1";
 
-export const dynamic = "force-dynamic";
-
 const playfair = Playfair_Display({
   subsets: ["latin"],
   variable: "--font-serif",

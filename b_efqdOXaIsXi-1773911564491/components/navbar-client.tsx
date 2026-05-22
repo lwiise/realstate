@@ -7,6 +7,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { ChevronDown, Menu, X } from "lucide-react";
 import type { Locale, NavigationSettings } from "@/lib/cms-types";
 import { localizePath, stripLocalePrefix, switchLocalePath } from "@/lib/i18n";
+import { imageSrc } from "@/lib/data";
 
 interface NavbarClientProps {
   navigation: NavigationSettings;
@@ -64,7 +65,7 @@ export function NavbarClient({
         <div className="flex items-center justify-between h-20">
           <Link href={localizePath("/", locale)} className="flex items-center gap-3 h-full">
             <Image
-              src={navigation.logoUrl}
+              src={imageSrc(navigation.logoUrl, "/logo-mdk.png")}
               alt={navigation.logoAlt}
               width={115}
               height={86}

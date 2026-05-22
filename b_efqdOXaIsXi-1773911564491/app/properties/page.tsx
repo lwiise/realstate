@@ -10,6 +10,7 @@ import {
   findTransactionType,
   getProperties,
   getPropertyCities,
+  getPropertyCountsByTransaction,
   getPropertyTypes,
   getSiteSettings,
   getTransactionTypes,
@@ -121,12 +122,14 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
   const maxPrice = toValue(params.maxPrice) || undefined;
   const featured = toValue(params.featured) === "1";
 
-  const [rawTransactionType, rawPropertyType, rawTransactionTypes, rawPropertyTypes] = await Promise.all([
+  const [rawTransactionType, rawPropertyType, rawTransactionTypes, rawPropertyTypes, rawSiteSettings] = await Promise.all([
     findTransactionType(transactionParam),
     findPropertyType(propertyTypeParam),
     getTransactionTypes(),
     getPropertyTypes(),
+    getSiteSettings(),
   ]);
+  const siteSettings = localizeSiteSettings(rawSiteSettings, locale);
   const transactionType = rawTransactionType ? localizeTransactionType(rawTransactionType, locale) : undefined;
   const propertyType = rawPropertyType ? localizePropertyType(rawPropertyType, locale) : undefined;
   const transactionTypes = localizeTransactionTypes(rawTransactionTypes, locale);
@@ -141,10 +144,7 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
     featuredOnly: featured,
   }), locale);
 
-  const countEntries = await Promise.all(
-    transactionTypes.map(async (item) => [item.slug, (await getProperties({ transactionSlug: item.slug })).length] as const)
-  );
-  const countsByTransaction = Object.fromEntries(countEntries);
+  const countsByTransaction = Object.fromEntries(await getPropertyCountsByTransaction());
 
   const cities = await getPropertyCities({
     transactionSlug: transactionType?.slug,
@@ -232,7 +232,7 @@ export default async function PropertiesPage({ searchParams }: PropertiesPagePro
           {properties.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {properties.map((property) => (
-                <PropertyCard key={property.id} property={property} />
+                <PropertyCard key={property.id} property={property} siteSettings={siteSettings} locale={locale} />
               ))}
             </div>
           ) : (
