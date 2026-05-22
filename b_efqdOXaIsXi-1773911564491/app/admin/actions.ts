@@ -45,8 +45,8 @@ import {
   upsertPropertyType,
   upsertTransactionType,
 } from "@/lib/cms";
-import { syncEntityTranslation } from "@/lib/translation-service";
-import type { TranslatableEntityType } from "@/lib/translation-service";
+import { syncEntityTranslation, translatePendingBatch } from "@/lib/translation-service";
+import type { TranslatableEntityType, TranslateBatchResult } from "@/lib/translation-service";
 import { getSeedPage } from "@/lib/seed-data";
 import { slugify } from "@/lib/slug";
 
@@ -570,6 +570,17 @@ export async function retranslateEntityAction(formData: FormData) {
 
   const separator = redirectTo.includes("?") ? "&" : "?";
   redirect(`${redirectTo}${separator}translated=1`);
+}
+
+// Translates one batch of not-yet-translated content. The admin Translations page
+// calls this repeatedly until nothing remains (keeps each request within time limits).
+export async function translatePendingBatchAction(): Promise<TranslateBatchResult> {
+  await requireAdminUser();
+  const result = await translatePendingBatch(6);
+  if (result.translatedNow > 0) {
+    revalidateSite();
+  }
+  return result;
 }
 
 function parsePageContent<TPageKey extends PageKey>(

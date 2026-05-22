@@ -8,6 +8,7 @@ import {
   Globe,
   Home,
   ImageIcon,
+  Languages,
   LayoutDashboard,
   LogOut,
   MenuSquare,
@@ -45,6 +46,7 @@ const primaryLinks = [
   { href: "/admin/transaction-types", label: "Types de transaction", icon: Globe },
   { href: "/admin/media", label: "Médias", icon: ImageIcon },
   { href: "/admin/inquiries", label: "Demandes", icon: MessageSquareText },
+  { href: "/admin/translations", label: "Traductions", icon: Languages },
 ];
 
 const contentLinks = [

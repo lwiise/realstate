@@ -13,11 +13,12 @@
 // =============================================================================
 
 import { createHash } from "node:crypto";
-import type { TranslationMeta, TranslationPayload, TranslationStatus } from "@/lib/cms-types";
+import type { PageKey, TranslationMeta, TranslationPayload, TranslationStatus } from "@/lib/cms-types";
 import { skipKeys } from "@/lib/auto-translate";
 import { isGeminiConfigured, translateJsonFrToEn } from "@/lib/gemini-translate";
 import * as localCms from "@/lib/cms-local";
 import * as remoteCms from "@/lib/cms-remote";
+import * as adminCms from "@/lib/admin-cms";
 import { isRemoteDatabaseConfigured } from "@/lib/remote-db";
 
 // Translation reads/writes go straight to the active DB provider (no unstable_cache
@@ -246,4 +247,115 @@ export async function syncEntityTranslation(
     }
     return { status: "failed", skipped: false };
   }
+}
+
+// ---- Bulk helpers: used by the admin "Translate everything" tool ------------
+
+const ALL_PAGE_KEYS: PageKey[] = ["home", "buy", "rent", "daily-rent", "about", "contact"];
+
+export interface TranslatableEntityRef {
+  entityType: TranslatableEntityType;
+  entityId: string | number;
+  entity: Record<string, unknown>;
+  label: string;
+}
+
+/** Enumerates every translatable entity (including drafts / unpublished / inactive). */
+export async function listTranslatableEntities(): Promise<TranslatableEntityRef[]> {
+  const refs: TranslatableEntityRef[] = [];
+  const [site, navigation, footer] = await Promise.all([
+    adminCms.getSiteSettings(),
+    adminCms.getNavigationSettings(),
+    adminCms.getFooterSettings(),
+  ]);
+  refs.push({ entityType: "site-settings", entityId: "1", entity: site as unknown as Record<string, unknown>, label: "Paramètres du site" });
+  refs.push({ entityType: "navigation-settings", entityId: "1", entity: navigation as unknown as Record<string, unknown>, label: "Navigation" });
+  refs.push({ entityType: "footer-settings", entityId: "1", entity: footer as unknown as Record<string, unknown>, label: "Pied de page" });
+
+  for (const key of ALL_PAGE_KEYS) {
+    const page = await adminCms.getPageContent(key);
+    refs.push({ entityType: "page-content", entityId: key, entity: page as unknown as Record<string, unknown>, label: `Page : ${key}` });
+  }
+  for (const type of await adminCms.getTransactionTypes({ includeInactive: true })) {
+    refs.push({ entityType: "transaction-type", entityId: type.id, entity: type as unknown as Record<string, unknown>, label: `Transaction : ${type.label}` });
+  }
+  for (const type of await adminCms.getPropertyTypes({ includeInactive: true })) {
+    refs.push({ entityType: "property-type", entityId: type.id, entity: type as unknown as Record<string, unknown>, label: `Type : ${type.label}` });
+  }
+  for (const agent of await adminCms.getAgents({ includeUnpublished: true })) {
+    refs.push({ entityType: "agent", entityId: agent.id, entity: agent as unknown as Record<string, unknown>, label: `Agent : ${agent.name}` });
+  }
+  for (const property of await adminCms.getProperties({}, { includeDrafts: true })) {
+    refs.push({ entityType: "property", entityId: property.id, entity: property as unknown as Record<string, unknown>, label: `Bien : ${property.title}` });
+  }
+  return refs;
+}
+
+export interface TranslationOverview {
+  total: number;
+  translated: number;
+  pending: number;
+  failed: number;
+  geminiConfigured: boolean;
+}
+
+/** Read-only status summary for the admin Translations page. */
+export async function getTranslationOverview(): Promise<TranslationOverview> {
+  const entities = await listTranslatableEntities();
+  let translated = 0;
+  let pending = 0;
+  let failed = 0;
+  await Promise.all(
+    entities.map(async (ref) => {
+      const meta = await readTranslationMeta(ref.entityType, ref.entityId).catch(() => null);
+      if (meta?.status === "translated") translated += 1;
+      else if (meta?.status === "failed") failed += 1;
+      else pending += 1;
+    })
+  );
+  return { total: entities.length, translated, pending, failed, geminiConfigured: isGeminiConfigured() };
+}
+
+export interface TranslateBatchResult {
+  geminiConfigured: boolean;
+  translatedNow: number;
+  failed: number;
+  remaining: number;
+}
+
+/**
+ * Translates up to `limit` not-yet-translated entities in parallel. Kept small so a
+ * single request stays within serverless time limits — call repeatedly until remaining === 0.
+ */
+export async function translatePendingBatch(limit = 6): Promise<TranslateBatchResult> {
+  if (!isGeminiConfigured()) {
+    return { geminiConfigured: false, translatedNow: 0, failed: 0, remaining: 0 };
+  }
+
+  const entities = await listTranslatableEntities();
+  const statuses = await Promise.all(
+    entities.map(async (ref) => {
+      const meta = await readTranslationMeta(ref.entityType, ref.entityId).catch(() => null);
+      return { ref, translated: meta?.status === "translated" };
+    })
+  );
+  const pending = statuses.filter((entry) => !entry.translated).map((entry) => entry.ref);
+  const batch = pending.slice(0, limit);
+
+  let translatedNow = 0;
+  let failed = 0;
+  await Promise.all(
+    batch.map(async (ref) => {
+      const result = await syncEntityTranslation(ref.entityType, ref.entityId, ref.entity, { force: true });
+      if (result.status === "translated") translatedNow += 1;
+      else failed += 1;
+    })
+  );
+
+  return {
+    geminiConfigured: true,
+    translatedNow,
+    failed,
+    remaining: Math.max(0, pending.length - translatedNow),
+  };
 }
