@@ -2,7 +2,12 @@
 
 import { useState } from "react";
 import { Languages, Loader2, PlugZap } from "lucide-react";
-import { testGeminiAction, translatePendingBatchAction } from "@/app/admin/actions";
+import {
+  getPendingTranslationsAction,
+  revalidatePublicSiteAction,
+  testGeminiAction,
+  translateOneEntityAction,
+} from "@/app/admin/actions";
 
 interface TranslationRunnerProps {
   initialPending: number;
@@ -45,26 +50,41 @@ export function TranslationRunner({ initialPending, geminiConfigured, model }: T
     setFailed(0);
     setDone(false);
     try {
-      let guard = 300; // safety cap on loop iterations
-      while (guard-- > 0) {
-        const result = await translatePendingBatchAction();
-        if (result.error) setErrorDetail(result.error);
-        if (!result.geminiConfigured) {
-          setMessage("La clé Gemini (google_api) n'est pas configurée sur le serveur.");
-          break;
+      // List the pending items once, then translate them one at a time (each its own
+      // small request) so no single serverless call does heavy bulk work / times out.
+      const refs = await getPendingTranslationsAction();
+      setRemaining(refs.length);
+      if (refs.length === 0) {
+        setDone(true);
+        setMessage("Tout le contenu est déjà traduit.");
+        return;
+      }
+
+      let doneCount = 0;
+      let failedCount = 0;
+      for (const ref of refs) {
+        try {
+          const result = await translateOneEntityAction(ref.entityType, ref.entityId);
+          if (result.status === "translated") {
+            doneCount += 1;
+          } else {
+            failedCount += 1;
+            if (result.error) setErrorDetail((prev) => prev || result.error || "");
+          }
+        } catch {
+          failedCount += 1;
         }
-        setTranslated((value) => value + result.translatedNow);
-        setFailed((value) => value + result.failed);
-        setRemaining(result.remaining);
-        if (result.remaining <= 0) {
-          setDone(true);
-          setMessage("Tout le contenu a été traduit en anglais.");
-          break;
-        }
-        if (result.translatedNow === 0) {
-          setMessage("Arrêté : les traductions ont échoué. Voir le détail ci-dessous.");
-          break;
-        }
+        setTranslated(doneCount);
+        setFailed(failedCount);
+        setRemaining(refs.length - doneCount - failedCount);
+      }
+
+      await revalidatePublicSiteAction().catch(() => {});
+      if (failedCount === 0) {
+        setDone(true);
+        setMessage("Tout le contenu a été traduit en anglais.");
+      } else {
+        setMessage(`Terminé : ${doneCount} traduit(s), ${failedCount} en échec — relancez pour reprendre.`);
       }
     } catch {
       setMessage("Une erreur est survenue pendant la traduction.");

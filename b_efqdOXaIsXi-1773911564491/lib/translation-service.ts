@@ -323,6 +323,39 @@ export async function getTranslationOverview(): Promise<TranslationOverview> {
   return { total: entities.length, translated, pending, failed, geminiConfigured: isGeminiConfigured() };
 }
 
+export interface PendingEntityRef {
+  entityType: TranslatableEntityType;
+  entityId: string;
+  label: string;
+}
+
+/**
+ * Lists the entities that still need translation (status !== "translated"), as lightweight
+ * refs. The admin tool calls this ONCE, then translates each ref via its own small request —
+ * so no single serverless request has to load everything + translate in bulk (avoids timeouts).
+ */
+export async function getPendingEntities(): Promise<PendingEntityRef[]> {
+  try {
+    const entities = await listTranslatableEntities();
+    const checked = await Promise.all(
+      entities.map(async (ref) => {
+        const meta = await readTranslationMeta(ref.entityType, ref.entityId).catch(() => null);
+        return { ref, translated: meta?.status === "translated" };
+      })
+    );
+    return checked
+      .filter((entry) => !entry.translated)
+      .map((entry) => ({
+        entityType: entry.ref.entityType,
+        entityId: String(entry.ref.entityId),
+        label: entry.ref.label,
+      }));
+  } catch (error) {
+    console.warn("[translation] getPendingEntities failed:", error);
+    return [];
+  }
+}
+
 export interface TranslateBatchResult {
   geminiConfigured: boolean;
   translatedNow: number;

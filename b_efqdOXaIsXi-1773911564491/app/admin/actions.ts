@@ -45,7 +45,7 @@ import {
   upsertPropertyType,
   upsertTransactionType,
 } from "@/lib/cms";
-import { syncEntityTranslation, translatePendingBatch } from "@/lib/translation-service";
+import { getPendingEntities, syncEntityTranslation, translatePendingBatch } from "@/lib/translation-service";
 import type { TranslatableEntityType, TranslateBatchResult } from "@/lib/translation-service";
 import { testGeminiConnection } from "@/lib/gemini-translate";
 import type { GeminiTestResult } from "@/lib/gemini-translate";
@@ -589,6 +589,30 @@ export async function translatePendingBatchAction(): Promise<TranslateBatchResul
 export async function testGeminiAction(): Promise<GeminiTestResult> {
   await requireAdminUser();
   return testGeminiConnection();
+}
+
+// Per-entity translation flow (used by the Traductions page): list the pending items
+// once, then translate them one at a time so no single request does heavy bulk work.
+export async function getPendingTranslationsAction() {
+  await requireAdminUser();
+  return getPendingEntities();
+}
+
+export async function translateOneEntityAction(entityType: TranslatableEntityType, entityId: string) {
+  await requireAdminUser();
+  const entity = await loadEntityForTranslation(entityType, entityId);
+  if (!entity) {
+    return { status: "failed" as const, error: "Contenu introuvable." };
+  }
+  const result = await syncEntityTranslation(entityType, entityId, entity as Record<string, unknown>, {
+    force: true,
+  });
+  return { status: result.status, error: result.error };
+}
+
+export async function revalidatePublicSiteAction() {
+  await requireAdminUser();
+  revalidateSite();
 }
 
 function parsePageContent<TPageKey extends PageKey>(
