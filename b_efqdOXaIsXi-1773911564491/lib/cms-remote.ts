@@ -1,3 +1,4 @@
+import { cache } from "react";
 import type {
   Agent,
   FooterSettings,
@@ -35,16 +36,70 @@ function parseJson<T>(value: unknown, fallback: T): T {
   return value as T;
 }
 
+interface RemoteTranslationEntry {
+  payload: TranslationPayload | null;
+  sourceHash: string | null;
+  status: TranslationStatus | null;
+  updatedAt: string | null;
+}
+
+type TranslationRow = {
+  entity_type: unknown;
+  entity_id: unknown;
+  data_json: unknown;
+  source_hash?: string | null;
+  status?: string | null;
+  updated_at?: string | null;
+};
+
+// Loads EVERY stored English translation in a single query and indexes it by
+// "<entityType>:<entityId>". Memoized per request with React cache() so one page
+// render shares ONE query instead of one query per entity (the old N+1 that
+// serialized through the max:1 serverless pool and exhausted DB connections).
+// Never throws: tolerates the source_hash/status columns not existing yet, and
+// returns an empty map on any error so admin reads (which have no fallback) render.
+const getAllRemoteTranslations = cache(async (): Promise<Map<string, RemoteTranslationEntry>> => {
+  const map = new Map<string, RemoteTranslationEntry>();
+  const ingest = (rows: TranslationRow[]) => {
+    for (const row of rows) {
+      map.set(`${String(row.entity_type)}:${String(row.entity_id)}`, {
+        payload: parseJson<TranslationPayload | null>(row.data_json, null),
+        sourceHash: row.source_hash ?? null,
+        status: (row.status as TranslationStatus | undefined) ?? null,
+        updatedAt: row.updated_at ?? null,
+      });
+    }
+  };
+
+  try {
+    ingest(
+      await queryRemoteRows<TranslationRow>(
+        "SELECT entity_type, entity_id, data_json, source_hash, status, updated_at FROM content_translations WHERE locale = 'en'"
+      )
+    );
+    return map;
+  } catch {
+    // source_hash/status columns may not be migrated yet — retry with base columns only.
+    try {
+      ingest(
+        await queryRemoteRows<TranslationRow>(
+          "SELECT entity_type, entity_id, data_json FROM content_translations WHERE locale = 'en'"
+        )
+      );
+      return map;
+    } catch (error) {
+      console.warn("[cms-remote] getAllRemoteTranslations failed; serving without translations:", error);
+      return map;
+    }
+  }
+});
+
 async function getContentTranslationRemote(
   entityType: string,
   entityId: string | number
 ): Promise<TranslationPayload | null> {
-  const row = await queryRemoteRow<{ data_json: unknown }>(
-    "SELECT data_json FROM content_translations WHERE entity_type = $1 AND entity_id = $2 AND locale = 'en'",
-    [entityType, String(entityId)]
-  );
-
-  return parseJson<TranslationPayload | null>(row?.data_json, null);
+  const all = await getAllRemoteTranslations();
+  return all.get(`${entityType}:${String(entityId)}`)?.payload ?? null;
 }
 
 async function withTranslationRemote<T extends object>(
@@ -119,32 +174,24 @@ export async function upsertContentTranslationRemote(
   );
 }
 
-// Reads translation metadata (hash/status) + the stored payload in one query.
+// Reads translation metadata (hash/status) + the stored payload from the shared
+// per-request map (one query for the whole request, see getAllRemoteTranslations).
 export async function getTranslationMetaRemote(
   entityType: string,
   entityId: string | number
 ): Promise<TranslationMeta> {
-  // Must never throw: if the source_hash/status columns don't exist yet, degrade to
-  // empty meta so admin pages render instead of crashing.
+  // Must never throw: getAllRemoteTranslations already degrades to an empty map on
+  // error, so admin pages render instead of crashing.
   try {
-    const row = await queryRemoteRow<{
-      data_json: unknown;
-      source_hash: string | null;
-      status: string | null;
-      updated_at: string | null;
-    }>(
-      "SELECT data_json, source_hash, status, updated_at FROM content_translations WHERE entity_type = $1 AND entity_id = $2 AND locale = 'en'",
-      [entityType, String(entityId)]
-    );
-
+    const entry = (await getAllRemoteTranslations()).get(`${entityType}:${String(entityId)}`);
     return {
-      sourceHash: row?.source_hash ?? null,
-      status: (row?.status as TranslationStatus | undefined) ?? null,
-      updatedAt: row?.updated_at ?? null,
-      payload: parseJson<TranslationPayload | null>(row?.data_json, null),
+      sourceHash: entry?.sourceHash ?? null,
+      status: entry?.status ?? null,
+      updatedAt: entry?.updatedAt ?? null,
+      payload: entry?.payload ?? null,
     };
   } catch (error) {
-    console.warn("[cms-remote] getTranslationMetaRemote failed (translation columns missing?):", error);
+    console.warn("[cms-remote] getTranslationMetaRemote failed:", error);
     return { sourceHash: null, status: null, updatedAt: null, payload: null };
   }
 }

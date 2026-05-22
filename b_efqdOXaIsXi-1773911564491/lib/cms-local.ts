@@ -1,3 +1,4 @@
+import { cache } from "react";
 import type {
   Agent,
   FooterSettings,
@@ -30,15 +31,66 @@ function parseJson<T>(value: string | null | undefined, fallback: T): T {
   }
 }
 
-function getContentTranslation(entityType: string, entityId: string | number): TranslationPayload | null {
-  const db = getDb();
-  const row = db
-    .prepare(
-      "SELECT data_json FROM content_translations WHERE entity_type = ? AND entity_id = ? AND locale = 'en'"
-    )
-    .get(entityType, String(entityId)) as { data_json?: string } | undefined;
+interface LocalTranslationEntry {
+  payload: TranslationPayload | null;
+  sourceHash: string | null;
+  status: TranslationStatus | null;
+  updatedAt: string | null;
+}
 
-  return parseJson<TranslationPayload | null>(row?.data_json, null);
+type LocalTranslationRow = {
+  entity_type: string;
+  entity_id: string;
+  data_json?: string;
+  source_hash?: string | null;
+  status?: string | null;
+  updated_at?: string | null;
+};
+
+// Loads EVERY stored English translation in a single query, indexed by
+// "<entityType>:<entityId>", memoized per request with React cache(). Mirrors the
+// remote path (lib/cms-remote.ts) so dev behaves like prod: one query per request
+// instead of one per entity. Never throws (tolerates missing source_hash/status columns).
+const getAllLocalTranslations = cache((): Map<string, LocalTranslationEntry> => {
+  const map = new Map<string, LocalTranslationEntry>();
+  const ingest = (rows: LocalTranslationRow[]) => {
+    for (const row of rows) {
+      map.set(`${String(row.entity_type)}:${String(row.entity_id)}`, {
+        payload: parseJson<TranslationPayload | null>(row.data_json, null),
+        sourceHash: row.source_hash ?? null,
+        status: (row.status as TranslationStatus | undefined) ?? null,
+        updatedAt: row.updated_at ?? null,
+      });
+    }
+  };
+
+  try {
+    ingest(
+      getDb()
+        .prepare(
+          "SELECT entity_type, entity_id, data_json, source_hash, status, updated_at FROM content_translations WHERE locale = 'en'"
+        )
+        .all() as LocalTranslationRow[]
+    );
+    return map;
+  } catch {
+    // source_hash/status columns may not be migrated yet — retry with base columns only.
+    try {
+      ingest(
+        getDb()
+          .prepare("SELECT entity_type, entity_id, data_json FROM content_translations WHERE locale = 'en'")
+          .all() as LocalTranslationRow[]
+      );
+      return map;
+    } catch (error) {
+      console.warn("[cms-local] getAllLocalTranslations failed; serving without translations:", error);
+      return map;
+    }
+  }
+});
+
+function getContentTranslation(entityType: string, entityId: string | number): TranslationPayload | null {
+  return getAllLocalTranslations().get(`${entityType}:${String(entityId)}`)?.payload ?? null;
 }
 
 function withTranslation<T extends object>(entityType: string, entityId: string | number, value: T) {
@@ -102,29 +154,22 @@ export function upsertContentTranslation(
   });
 }
 
-// Reads translation metadata (hash/status) + the stored payload in one query.
+// Reads translation metadata (hash/status) + the stored payload from the shared
+// per-request map (one query for the whole request, see getAllLocalTranslations).
 // Used by the translation service for change detection and by the admin status badge.
 export function getTranslationMeta(entityType: string, entityId: string | number): TranslationMeta {
-  // Must never throw: if the source_hash/status columns don't exist yet (migration
-  // not applied), degrade to empty meta so admin pages render instead of crashing.
+  // Must never throw: getAllLocalTranslations already degrades to an empty map on
+  // error, so admin pages render instead of crashing.
   try {
-    const db = getDb();
-    const row = db
-      .prepare(
-        "SELECT data_json, source_hash, status, updated_at FROM content_translations WHERE entity_type = ? AND entity_id = ? AND locale = 'en'"
-      )
-      .get(entityType, String(entityId)) as
-      | { data_json?: string; source_hash?: string | null; status?: string | null; updated_at?: string | null }
-      | undefined;
-
+    const entry = getAllLocalTranslations().get(`${entityType}:${String(entityId)}`);
     return {
-      sourceHash: row?.source_hash ?? null,
-      status: (row?.status as TranslationStatus | undefined) ?? null,
-      updatedAt: row?.updated_at ?? null,
-      payload: parseJson<TranslationPayload | null>(row?.data_json, null),
+      sourceHash: entry?.sourceHash ?? null,
+      status: entry?.status ?? null,
+      updatedAt: entry?.updatedAt ?? null,
+      payload: entry?.payload ?? null,
     };
   } catch (error) {
-    console.warn("[cms-local] getTranslationMeta failed (translation columns missing?):", error);
+    console.warn("[cms-local] getTranslationMeta failed:", error);
     return { sourceHash: null, status: null, updatedAt: null, payload: null };
   }
 }
