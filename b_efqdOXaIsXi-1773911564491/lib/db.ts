@@ -243,16 +243,21 @@ export function migrateDatabase(db: DatabaseSync) {
   // Translation tracking columns, added incrementally so existing databases upgrade
   // safely (SQLite has no ADD COLUMN IF NOT EXISTS). source_hash detects French changes;
   // status is one of: translated | needs_translation | failed (NULL = never translated).
-  const translationColumns = db
-    .prepare("PRAGMA table_info(content_translations)")
-    .all() as Array<{ name: string }>;
-  const hasTranslationColumn = (name: string) =>
-    translationColumns.some((column) => column.name === name);
-  if (!hasTranslationColumn("source_hash")) {
-    db.exec("ALTER TABLE content_translations ADD COLUMN source_hash TEXT");
-  }
-  if (!hasTranslationColumn("status")) {
-    db.exec("ALTER TABLE content_translations ADD COLUMN status TEXT");
+  // Best-effort: a failure here must never break getDb() / the whole app.
+  try {
+    const translationColumns = db
+      .prepare("PRAGMA table_info(content_translations)")
+      .all() as Array<{ name: string }>;
+    const hasTranslationColumn = (name: string) =>
+      translationColumns.some((column) => column.name === name);
+    if (!hasTranslationColumn("source_hash")) {
+      db.exec("ALTER TABLE content_translations ADD COLUMN source_hash TEXT");
+    }
+    if (!hasTranslationColumn("status")) {
+      db.exec("ALTER TABLE content_translations ADD COLUMN status TEXT");
+    }
+  } catch (error) {
+    console.warn("[db] Skipped translation column migration:", error);
   }
 }
 

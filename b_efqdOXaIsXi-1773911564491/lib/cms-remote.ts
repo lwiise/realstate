@@ -124,22 +124,29 @@ export async function getTranslationMetaRemote(
   entityType: string,
   entityId: string | number
 ): Promise<TranslationMeta> {
-  const row = await queryRemoteRow<{
-    data_json: unknown;
-    source_hash: string | null;
-    status: string | null;
-    updated_at: string | null;
-  }>(
-    "SELECT data_json, source_hash, status, updated_at FROM content_translations WHERE entity_type = $1 AND entity_id = $2 AND locale = 'en'",
-    [entityType, String(entityId)]
-  );
+  // Must never throw: if the source_hash/status columns don't exist yet, degrade to
+  // empty meta so admin pages render instead of crashing.
+  try {
+    const row = await queryRemoteRow<{
+      data_json: unknown;
+      source_hash: string | null;
+      status: string | null;
+      updated_at: string | null;
+    }>(
+      "SELECT data_json, source_hash, status, updated_at FROM content_translations WHERE entity_type = $1 AND entity_id = $2 AND locale = 'en'",
+      [entityType, String(entityId)]
+    );
 
-  return {
-    sourceHash: row?.source_hash ?? null,
-    status: (row?.status as TranslationStatus | undefined) ?? null,
-    updatedAt: row?.updated_at ?? null,
-    payload: parseJson<TranslationPayload | null>(row?.data_json, null),
-  };
+    return {
+      sourceHash: row?.source_hash ?? null,
+      status: (row?.status as TranslationStatus | undefined) ?? null,
+      updatedAt: row?.updated_at ?? null,
+      payload: parseJson<TranslationPayload | null>(row?.data_json, null),
+    };
+  } catch (error) {
+    console.warn("[cms-remote] getTranslationMetaRemote failed (translation columns missing?):", error);
+    return { sourceHash: null, status: null, updatedAt: null, payload: null };
+  }
 }
 
 function mapBoolean(value: number | boolean | string | null | undefined) {

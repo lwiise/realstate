@@ -23,10 +23,12 @@ import { isRemoteDatabaseConfigured } from "@/lib/remote-db";
 
 // Translation reads/writes go straight to the active DB provider (no unstable_cache
 // layer), so this module also works in the standalone backfill script (outside Next.js).
-function readTranslationMeta(entityType: string, entityId: string | number): Promise<TranslationMeta> {
-  return isRemoteDatabaseConfigured()
-    ? remoteCms.getTranslationMetaRemote(entityType, entityId)
-    : Promise.resolve(localCms.getTranslationMeta(entityType, entityId));
+async function readTranslationMeta(entityType: string, entityId: string | number): Promise<TranslationMeta> {
+  // async so any (even synchronous) provider error becomes a catchable rejection.
+  if (isRemoteDatabaseConfigured()) {
+    return remoteCms.getTranslationMetaRemote(entityType, entityId);
+  }
+  return localCms.getTranslationMeta(entityType, entityId);
 }
 
 async function writeTranslation(
@@ -300,7 +302,13 @@ export interface TranslationOverview {
 
 /** Read-only status summary for the admin Translations page. */
 export async function getTranslationOverview(): Promise<TranslationOverview> {
-  const entities = await listTranslatableEntities();
+  let entities: TranslatableEntityRef[];
+  try {
+    entities = await listTranslatableEntities();
+  } catch (error) {
+    console.warn("[translation] getTranslationOverview: failed to list entities:", error);
+    return { total: 0, translated: 0, pending: 0, failed: 0, geminiConfigured: isGeminiConfigured() };
+  }
   let translated = 0;
   let pending = 0;
   let failed = 0;

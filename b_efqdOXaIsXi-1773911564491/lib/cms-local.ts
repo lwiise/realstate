@@ -105,21 +105,28 @@ export function upsertContentTranslation(
 // Reads translation metadata (hash/status) + the stored payload in one query.
 // Used by the translation service for change detection and by the admin status badge.
 export function getTranslationMeta(entityType: string, entityId: string | number): TranslationMeta {
-  const db = getDb();
-  const row = db
-    .prepare(
-      "SELECT data_json, source_hash, status, updated_at FROM content_translations WHERE entity_type = ? AND entity_id = ? AND locale = 'en'"
-    )
-    .get(entityType, String(entityId)) as
-    | { data_json?: string; source_hash?: string | null; status?: string | null; updated_at?: string | null }
-    | undefined;
+  // Must never throw: if the source_hash/status columns don't exist yet (migration
+  // not applied), degrade to empty meta so admin pages render instead of crashing.
+  try {
+    const db = getDb();
+    const row = db
+      .prepare(
+        "SELECT data_json, source_hash, status, updated_at FROM content_translations WHERE entity_type = ? AND entity_id = ? AND locale = 'en'"
+      )
+      .get(entityType, String(entityId)) as
+      | { data_json?: string; source_hash?: string | null; status?: string | null; updated_at?: string | null }
+      | undefined;
 
-  return {
-    sourceHash: row?.source_hash ?? null,
-    status: (row?.status as TranslationStatus | undefined) ?? null,
-    updatedAt: row?.updated_at ?? null,
-    payload: parseJson<TranslationPayload | null>(row?.data_json, null),
-  };
+    return {
+      sourceHash: row?.source_hash ?? null,
+      status: (row?.status as TranslationStatus | undefined) ?? null,
+      updatedAt: row?.updated_at ?? null,
+      payload: parseJson<TranslationPayload | null>(row?.data_json, null),
+    };
+  } catch (error) {
+    console.warn("[cms-local] getTranslationMeta failed (translation columns missing?):", error);
+    return { sourceHash: null, status: null, updatedAt: null, payload: null };
+  }
 }
 
 function mapBoolean(value: number | boolean | null | undefined) {

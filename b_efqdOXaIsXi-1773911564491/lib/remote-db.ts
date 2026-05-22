@@ -338,16 +338,30 @@ const REMOTE_SCHEMA_SQL = `
     updated_at TIMESTAMPTZ NOT NULL,
     PRIMARY KEY (entity_type, entity_id, locale)
   );
-
-  -- Translation tracking columns (source_hash detects French changes; status is
-  -- translated | needs_translation | failed). IF NOT EXISTS keeps this idempotent.
-  ALTER TABLE content_translations ADD COLUMN IF NOT EXISTS source_hash TEXT;
-  ALTER TABLE content_translations ADD COLUMN IF NOT EXISTS status TEXT;
 `;
+
+// Optional translation-tracking columns (source_hash detects French changes; status is
+// translated | needs_translation | failed). Applied SEPARATELY and best-effort: if a DB
+// role can't ALTER (or any other failure), it must NEVER break the core schema or reads —
+// the app simply degrades to "needs_translation" until the columns exist.
+const TRANSLATION_COLUMN_MIGRATIONS = [
+  "ALTER TABLE content_translations ADD COLUMN IF NOT EXISTS source_hash TEXT",
+  "ALTER TABLE content_translations ADD COLUMN IF NOT EXISTS status TEXT",
+];
 
 async function migrateRemoteDatabase() {
   const pool = getRemotePool();
   await pool.query(REMOTE_SCHEMA_SQL);
+  for (const sql of TRANSLATION_COLUMN_MIGRATIONS) {
+    try {
+      await pool.query(sql);
+    } catch (error) {
+      console.warn(
+        "[remote-db] Skipped translation column migration:",
+        error instanceof Error ? error.message : error
+      );
+    }
+  }
 }
 
 async function insertRemoteContentTranslation(
