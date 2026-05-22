@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { PropertyForm } from "@/components/admin/property-form";
+import { TranslationStatus } from "@/components/admin/translation-status";
 import {
   getAgents,
   getMediaAssets,
@@ -42,6 +43,8 @@ export default async function AdminEditPropertyPage({ params }: AdminEditPropert
           Retour aux propriétés
         </Link>
       </div>
+
+      <TranslationStatus entityType="property" entityId={id} redirectTo={`/admin/properties/${id}`} />
 
       <PropertyForm
         property={property}

@@ -17,6 +17,7 @@ import type {
   PageKey,
   PageRecord,
   Property,
+  PropertyType,
   SiteSettings,
   TransactionType,
 } from "@/lib/cms-types";
@@ -25,30 +26,27 @@ import {
   deleteProperty,
   deletePropertyType,
   deleteTransactionType,
+  getAgentById,
+  getFooterSettings,
+  getNavigationSettings,
+  getPageContent,
   getProperties,
   getPropertyById,
+  getPropertyTypes,
+  getSiteSettings,
   getTransactionTypes,
   CMS_CACHE_TAG,
   updateFooterSettings,
   updateNavigationSettings,
   updatePageContent,
   updateSiteSettings,
-  upsertContentTranslation,
   upsertAgent,
   upsertProperty,
   upsertPropertyType,
   upsertTransactionType,
 } from "@/lib/cms";
-import {
-  translateAgentToEnglish,
-  translateFooterToEnglish,
-  translateNavigationToEnglish,
-  translatePageRecordToEnglish,
-  translatePropertyToEnglish,
-  translatePropertyTypeToEnglish,
-  translateSiteSettingsToEnglish,
-  translateTransactionTypeToEnglish,
-} from "@/lib/auto-translate";
+import { syncEntityTranslation } from "@/lib/translation-service";
+import type { TranslatableEntityType } from "@/lib/translation-service";
 import { getSeedPage } from "@/lib/seed-data";
 import { slugify } from "@/lib/slug";
 
@@ -307,7 +305,9 @@ export async function savePropertyAction(formData: FormData) {
   };
 
   const savedId = await upsertProperty(propertyInput);
-  await upsertContentTranslation("property", savedId, "en", translatePropertyToEnglish(propertyInput));
+  // Generate + store the English translation (Gemini). Never throws; on failure the
+  // French content is kept and the row is flagged needs_translation/failed.
+  await syncEntityTranslation("property", savedId, propertyInput as Record<string, unknown>);
 
   revalidateSite(slug);
   if (existingProperty?.slug && existingProperty.slug !== slug) {
@@ -346,7 +346,7 @@ export async function saveAgentAction(formData: FormData) {
   };
 
   const savedId = await upsertAgent(agentInput);
-  await upsertContentTranslation("agent", savedId, "en", translateAgentToEnglish(agentInput));
+  await syncEntityTranslation("agent", savedId, agentInput as Record<string, unknown>);
 
   revalidateSite();
   redirect(withSavedParam(`/admin/agents/${savedId}`));
@@ -374,7 +374,7 @@ export async function savePropertyTypeAction(formData: FormData) {
   };
 
   const savedId = await upsertPropertyType(propertyTypeInput);
-  await upsertContentTranslation("property-type", savedId, "en", translatePropertyTypeToEnglish(propertyTypeInput));
+  await syncEntityTranslation("property-type", savedId, propertyTypeInput as Record<string, unknown>);
 
   revalidateSite();
   redirect(withSavedParam(`/admin/property-types/${savedId}`));
@@ -406,12 +406,7 @@ export async function saveTransactionTypeAction(formData: FormData) {
   };
 
   const savedId = await upsertTransactionType(transactionTypeInput);
-  await upsertContentTranslation(
-    "transaction-type",
-    savedId,
-    "en",
-    translateTransactionTypeToEnglish(transactionTypeInput)
-  );
+  await syncEntityTranslation("transaction-type", savedId, transactionTypeInput as Record<string, unknown>);
 
   revalidateSite();
   redirect(withSavedParam(`/admin/transaction-types/${savedId}`));
@@ -444,7 +439,7 @@ export async function saveNavigationAction(formData: FormData) {
   };
 
   await updateNavigationSettings(input);
-  await upsertContentTranslation("navigation-settings", "1", "en", translateNavigationToEnglish(input));
+  await syncEntityTranslation("navigation-settings", "1", input as unknown as Record<string, unknown>);
   revalidateSite();
   redirect(withSavedParam("/admin/navigation"));
 }
@@ -470,7 +465,7 @@ export async function saveFooterAction(formData: FormData) {
   };
 
   await updateFooterSettings(input);
-  await upsertContentTranslation("footer-settings", "1", "en", translateFooterToEnglish(input));
+  await syncEntityTranslation("footer-settings", "1", input as unknown as Record<string, unknown>);
   revalidateSite();
   redirect(withSavedParam("/admin/footer"));
 }
@@ -503,7 +498,7 @@ export async function saveSiteSettingsAction(formData: FormData) {
   };
 
   await updateSiteSettings(input);
-  await upsertContentTranslation("site-settings", "1", "en", translateSiteSettingsToEnglish(input));
+  await syncEntityTranslation("site-settings", "1", input as unknown as Record<string, unknown>);
   revalidateSite();
   redirect(withSavedParam("/admin/settings"));
 }
@@ -525,9 +520,56 @@ export async function savePageContentAction(formData: FormData) {
   };
 
   await updatePageContent(record);
-  await upsertContentTranslation("page-content", pageKey, "en", translatePageRecordToEnglish(record));
+  await syncEntityTranslation("page-content", pageKey, record as unknown as Record<string, unknown>);
   revalidateSite();
   redirect(withSavedParam(`/admin/content/${pageKey}`));
+}
+
+async function loadEntityForTranslation(
+  entityType: TranslatableEntityType,
+  entityId: string
+): Promise<unknown> {
+  switch (entityType) {
+    case "property":
+      return getPropertyById(Number(entityId));
+    case "agent":
+      return getAgentById(Number(entityId));
+    case "transaction-type":
+      return (await getTransactionTypes({ includeInactive: true })).find(
+        (item: TransactionType) => item.id === Number(entityId)
+      );
+    case "property-type":
+      return (await getPropertyTypes({ includeInactive: true })).find(
+        (item: PropertyType) => item.id === Number(entityId)
+      );
+    case "page-content":
+      return getPageContent(entityId as PageKey);
+    case "site-settings":
+      return getSiteSettings();
+    case "navigation-settings":
+      return getNavigationSettings();
+    case "footer-settings":
+      return getFooterSettings();
+    default:
+      return null;
+  }
+}
+
+// Forces a fresh Gemini translation for one entity. Backs the admin "Re-translate" button.
+export async function retranslateEntityAction(formData: FormData) {
+  await requireAdminUser();
+  const entityType = getValue(formData, "entityType") as TranslatableEntityType;
+  const entityId = getValue(formData, "entityId");
+  const redirectTo = getValue(formData, "redirectTo") || "/admin";
+
+  const entity = await loadEntityForTranslation(entityType, entityId);
+  if (entity) {
+    await syncEntityTranslation(entityType, entityId, entity as Record<string, unknown>, { force: true });
+    revalidateSite();
+  }
+
+  const separator = redirectTo.includes("?") ? "&" : "?";
+  redirect(`${redirectTo}${separator}translated=1`);
 }
 
 function parsePageContent<TPageKey extends PageKey>(

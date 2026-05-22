@@ -3,6 +3,7 @@ import type {
   FooterSettings,
   Locale,
   NavigationSettings,
+  PageContentMap,
   PageKey,
   PageRecord,
   Property,
@@ -10,87 +11,84 @@ import type {
   SiteSettings,
   TransactionType,
 } from "@/lib/cms-types";
-import {
-  translateAgentToEnglish,
-  translateFooterToEnglish,
-  translateNavigationToEnglish,
-  translatePageRecordToEnglish,
-  translatePropertyToEnglish,
-  translatePropertyTypeToEnglish,
-  translateSiteSettingsToEnglish,
-  translateTextToEnglish,
-  translateTransactionTypeToEnglish,
-} from "@/lib/auto-translate";
 
-// English content is always re-derived at read time from the canonical FR data
-// so dictionary updates apply immediately and stored translations cannot go
-// stale. Stored translations (saved by admin actions) are kept in the database
-// for auditing and as future-proofing if a manual translation editor is added.
+// English is served from the STORED translation (content_translations.data_json),
+// generated once by Gemini on save / backfill — never translated live at request time.
+// Each entity carries its saved English under `translationEn` (attached by the DB layer).
+// Any field that is missing/empty in the stored translation falls back to the French source.
 
-function pickString(generated: string | null | undefined, fallback: string): string {
+/** Reads the stored English payload off an entity, regardless of its declared type. */
+function storedEn(entity: unknown): Record<string, unknown> {
+  const value = (entity as { translationEn?: unknown } | null | undefined)?.translationEn;
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
+}
+
+function pickString(generated: unknown, fallback: string): string {
   return typeof generated === "string" && generated.length > 0 ? generated : fallback;
 }
 
 function pickStringOrNull(
-  generated: string | null | undefined,
+  generated: unknown,
   fallback: string | null | undefined
 ): string | null | undefined {
   if (typeof generated === "string") return generated;
   return fallback;
 }
 
+function pickArray<T>(generated: unknown, fallback: T[]): T[] {
+  return Array.isArray(generated) && generated.length > 0 ? (generated as T[]) : fallback;
+}
+
 export function localizeSiteSettings(settings: SiteSettings, locale: Locale): SiteSettings {
   if (locale === "fr") return settings;
-
-  const generated = translateSiteSettingsToEnglish(settings);
+  const en = storedEn(settings);
 
   return {
     ...settings,
-    siteDescription: pickString(generated.siteDescription, settings.siteDescription),
-    siteKeywords: generated.siteKeywords?.length ? generated.siteKeywords : settings.siteKeywords,
-    copyrightText: pickString(generated.copyrightText, settings.copyrightText),
-    defaultSeoTitle: pickString(generated.defaultSeoTitle, settings.defaultSeoTitle),
-    defaultSeoDescription: pickString(generated.defaultSeoDescription, settings.defaultSeoDescription),
+    siteDescription: pickString(en.siteDescription, settings.siteDescription),
+    siteKeywords: pickArray(en.siteKeywords, settings.siteKeywords),
+    copyrightText: pickString(en.copyrightText, settings.copyrightText),
+    defaultSeoTitle: pickString(en.defaultSeoTitle, settings.defaultSeoTitle),
+    defaultSeoDescription: pickString(en.defaultSeoDescription, settings.defaultSeoDescription),
   };
 }
 
 export function localizeNavigation(navigation: NavigationSettings, locale: Locale): NavigationSettings {
   if (locale === "fr") return navigation;
-
-  const generated = translateNavigationToEnglish(navigation);
+  const en = storedEn(navigation);
 
   return {
     ...navigation,
-    logoAlt: pickString(generated.logoAlt, navigation.logoAlt),
-    links: generated.links?.length ? generated.links : navigation.links,
+    logoAlt: pickString(en.logoAlt, navigation.logoAlt),
+    links: pickArray(en.links, navigation.links),
   };
 }
 
 export function localizeFooter(footer: FooterSettings, locale: Locale): FooterSettings {
   if (locale === "fr") return footer;
-
-  const generated = translateFooterToEnglish(footer);
+  const en = storedEn(footer);
 
   return {
     ...footer,
-    brandText: pickString(generated.brandText, footer.brandText),
-    quickLinks: generated.quickLinks?.length ? generated.quickLinks : footer.quickLinks,
-    propertyLinks: generated.propertyLinks?.length ? generated.propertyLinks : footer.propertyLinks,
-    legalLinks: generated.legalLinks?.length ? generated.legalLinks : footer.legalLinks,
+    brandText: pickString(en.brandText, footer.brandText),
+    quickLinks: pickArray(en.quickLinks, footer.quickLinks),
+    propertyLinks: pickArray(en.propertyLinks, footer.propertyLinks),
+    legalLinks: pickArray(en.legalLinks, footer.legalLinks),
   };
 }
 
 export function localizeTransactionType(type: TransactionType, locale: Locale): TransactionType {
   if (locale === "fr") return type;
-
-  const generated = translateTransactionTypeToEnglish(type);
+  const en = storedEn(type);
 
   return {
     ...type,
-    label: pickString(generated.label, type.label),
-    description: pickStringOrNull(generated.description, type.description),
-    navLabel: pickStringOrNull(generated.navLabel, type.navLabel),
-    priceSuffix: pickStringOrNull(generated.priceSuffix, type.priceSuffix),
+    label: pickString(en.label, type.label),
+    description: pickStringOrNull(en.description, type.description),
+    navLabel: pickStringOrNull(en.navLabel, type.navLabel),
+    priceSuffix: pickStringOrNull(en.priceSuffix, type.priceSuffix),
   };
 }
 
@@ -100,13 +98,12 @@ export function localizeTransactionTypes(types: TransactionType[], locale: Local
 
 export function localizePropertyType(type: PropertyType, locale: Locale): PropertyType {
   if (locale === "fr") return type;
-
-  const generated = translatePropertyTypeToEnglish(type);
+  const en = storedEn(type);
 
   return {
     ...type,
-    label: pickString(generated.label, type.label),
-    description: pickStringOrNull(generated.description, type.description),
+    label: pickString(en.label, type.label),
+    description: pickStringOrNull(en.description, type.description),
   };
 }
 
@@ -116,38 +113,38 @@ export function localizePropertyTypes(types: PropertyType[], locale: Locale) {
 
 export function localizeAgent(agent: Agent, locale: Locale): Agent {
   if (locale === "fr") return agent;
-
-  const generated = translateAgentToEnglish(agent);
+  const en = storedEn(agent);
 
   return {
     ...agent,
-    role: pickString(generated.role, agent.role),
-    bio: pickStringOrNull(generated.bio, agent.bio),
-    seoTitle: pickStringOrNull(generated.seoTitle, agent.seoTitle),
-    seoDescription: pickStringOrNull(generated.seoDescription, agent.seoDescription),
+    role: pickString(en.role, agent.role),
+    bio: pickStringOrNull(en.bio, agent.bio),
+    seoTitle: pickStringOrNull(en.seoTitle, agent.seoTitle),
+    seoDescription: pickStringOrNull(en.seoDescription, agent.seoDescription),
   };
 }
 
 export function localizeProperty(property: Property, locale: Locale): Property {
   if (locale === "fr") return property;
-
-  const generated = translatePropertyToEnglish(property);
+  const en = storedEn(property);
 
   return {
     ...property,
-    title: pickString(generated.title, property.title),
-    transactionType: pickString(translateTextToEnglish(property.transactionType), property.transactionType),
-    propertyType: pickString(translateTextToEnglish(property.propertyType), property.propertyType),
+    title: pickString(en.title, property.title),
+    // transactionType/propertyType/priceSuffix English values are injected into
+    // translationEn by the DB layer (withPropertyTranslation) from the related taxonomy rows.
+    transactionType: pickString(en.transactionType, property.transactionType),
+    propertyType: pickString(en.propertyType, property.propertyType),
     priceSuffix: property.priceSuffix
-      ? pickStringOrNull(translateTextToEnglish(property.priceSuffix), property.priceSuffix)
+      ? pickStringOrNull(en.priceSuffix, property.priceSuffix)
       : property.priceSuffix,
-    neighborhood: pickString(generated.neighborhood, property.neighborhood),
-    fullAddress: pickStringOrNull(generated.fullAddress, property.fullAddress),
-    shortDescription: pickString(generated.shortDescription, property.shortDescription),
-    longDescription: pickString(generated.longDescription, property.longDescription),
-    features: generated.features?.length ? generated.features : property.features,
-    seoTitle: pickStringOrNull(generated.seoTitle, property.seoTitle),
-    seoDescription: pickStringOrNull(generated.seoDescription, property.seoDescription),
+    neighborhood: pickString(en.neighborhood, property.neighborhood),
+    fullAddress: pickStringOrNull(en.fullAddress, property.fullAddress),
+    shortDescription: pickString(en.shortDescription, property.shortDescription),
+    longDescription: pickString(en.longDescription, property.longDescription),
+    features: pickArray(en.features, property.features),
+    seoTitle: pickStringOrNull(en.seoTitle, property.seoTitle),
+    seoDescription: pickStringOrNull(en.seoDescription, property.seoDescription),
     agent: property.agent ? localizeAgent(property.agent, locale) : property.agent,
   };
 }
@@ -161,14 +158,17 @@ export function localizePageRecord<TPageKey extends PageKey>(
   locale: Locale
 ): PageRecord<TPageKey> {
   if (locale === "fr") return page;
-
-  const generated = translatePageRecordToEnglish(page);
+  const en = storedEn(page);
+  const translatedContent =
+    en.content && typeof en.content === "object" && !Array.isArray(en.content)
+      ? (en.content as PageContentMap[TPageKey])
+      : page.content;
 
   return {
     ...page,
-    title: pickString(generated.title, page.title),
-    seoTitle: pickStringOrNull(generated.seoTitle, page.seoTitle),
-    seoDescription: pickStringOrNull(generated.seoDescription, page.seoDescription),
-    content: generated.content,
+    title: pickString(en.title, page.title),
+    seoTitle: pickStringOrNull(en.seoTitle, page.seoTitle),
+    seoDescription: pickStringOrNull(en.seoDescription, page.seoDescription),
+    content: translatedContent,
   };
 }

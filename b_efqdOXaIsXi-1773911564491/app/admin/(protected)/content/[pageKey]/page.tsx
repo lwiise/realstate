@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { PageContentForm } from "@/components/admin/page-content-form";
+import { TranslationStatus } from "@/components/admin/translation-status";
 import { getMediaAssets, getPageContent } from "@/lib/admin-cms";
 import type { PageKey } from "@/lib/cms-types";
 
@@ -45,6 +46,8 @@ export default async function AdminPageContentPage({
           Modifier {pageLabels[key]}
         </h1>
       </div>
+
+      <TranslationStatus entityType="page-content" entityId={key} redirectTo={`/admin/content/${key}`} />
 
       <PageContentForm page={page} mediaAssets={mediaAssets} />
     </div>

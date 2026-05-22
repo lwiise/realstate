@@ -12,7 +12,9 @@ import type {
   PropertyType,
   SiteSettings,
   TransactionType,
+  TranslationMeta,
   TranslationPayload,
+  TranslationStatus,
 } from "@/lib/cms-types";
 import * as localCms from "@/lib/cms-local";
 import * as remoteCms from "@/lib/cms-remote";
@@ -146,11 +148,24 @@ export async function upsertContentTranslation(
   entityType: string,
   entityId: string | number,
   locale: "en",
-  payload: TranslationPayload
+  payload: TranslationPayload,
+  meta?: { sourceHash?: string | null; status?: TranslationStatus | null }
 ) {
   return writeWithProvider(
-    () => remoteCms.upsertContentTranslationRemote(entityType, entityId, locale, payload),
-    () => localCms.upsertContentTranslation(entityType, entityId, locale, payload)
+    () => remoteCms.upsertContentTranslationRemote(entityType, entityId, locale, payload, meta),
+    () => localCms.upsertContentTranslation(entityType, entityId, locale, payload, meta)
+  );
+}
+
+// Reads translation status/hash for change detection and the admin badge.
+// Intentionally NOT cached (unstable_cache) so the admin always sees fresh status.
+export async function getTranslationMeta(
+  entityType: string,
+  entityId: string | number
+): Promise<TranslationMeta> {
+  return readWithFallback(
+    () => remoteCms.getTranslationMetaRemote(entityType, entityId),
+    () => localCms.getTranslationMeta(entityType, entityId)
   );
 }
 

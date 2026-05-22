@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AgentForm } from "@/components/admin/agent-form";
+import { TranslationStatus } from "@/components/admin/translation-status";
 import { getAgentById, getMediaAssets } from "@/lib/admin-cms";
 
 interface AdminEditAgentPageProps {
@@ -29,6 +30,8 @@ export default async function AdminEditAgentPage({ params }: AdminEditAgentPageP
           Retour aux agents
         </Link>
       </div>
+
+      <TranslationStatus entityType="agent" entityId={id} redirectTo={`/admin/agents/${id}`} />
 
       <AgentForm agent={agent} mediaAssets={mediaAssets} />
     </div>

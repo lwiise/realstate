@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { TaxonomyForm } from "@/components/admin/taxonomy-form";
+import { TranslationStatus } from "@/components/admin/translation-status";
 import { getMediaAssets, getTransactionTypes } from "@/lib/admin-cms";
 
 interface AdminEditTransactionTypePageProps {
@@ -37,6 +38,8 @@ export default async function AdminEditTransactionTypePage({
           Retour aux types de transaction
         </Link>
       </div>
+
+      <TranslationStatus entityType="transaction-type" entityId={id} redirectTo={`/admin/transaction-types/${id}`} />
 
       <TaxonomyForm
         mode="transaction"

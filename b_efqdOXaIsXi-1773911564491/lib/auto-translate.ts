@@ -489,7 +489,9 @@ const phraseTranslations: Array<[RegExp, string]> = [
   [/\bexpertise\b/gi, "expertise"],
 ];
 
-const skipKeys = new Set([
+// Keys whose values are never translated (URLs, slugs, emails, phones, IDs, codes).
+// Exported so the Gemini translation service reuses the exact same exclusion list.
+export const skipKeys = new Set([
   "href",
   "ctaHref",
   "primaryHref",

@@ -13,7 +13,9 @@ import type {
   PropertyType,
   SiteSettings,
   TransactionType,
+  TranslationMeta,
   TranslationPayload,
+  TranslationStatus,
 } from "@/lib/cms-types";
 import { executeRemote, queryRemoteRow, queryRemoteRows } from "@/lib/remote-db";
 import { getSeedPage, seedFooter, seedNavigation, seedSiteSettings } from "@/lib/seed-data";
@@ -88,20 +90,56 @@ export async function upsertContentTranslationRemote(
   entityType: string,
   entityId: string | number,
   locale: "en",
-  payload: TranslationPayload
+  payload: TranslationPayload,
+  meta?: { sourceHash?: string | null; status?: TranslationStatus | null }
 ) {
   await executeRemote(
     `
       INSERT INTO content_translations (
-        entity_type, entity_id, locale, data_json, updated_at
+        entity_type, entity_id, locale, data_json, updated_at, source_hash, status
       ) VALUES (
-        $1, $2, $3, $4::jsonb, $5
+        $1, $2, $3, $4::jsonb, $5, $6, $7
       )
       ON CONFLICT (entity_type, entity_id, locale)
-      DO UPDATE SET data_json = EXCLUDED.data_json, updated_at = EXCLUDED.updated_at
+      DO UPDATE SET
+        data_json = EXCLUDED.data_json,
+        updated_at = EXCLUDED.updated_at,
+        source_hash = EXCLUDED.source_hash,
+        status = EXCLUDED.status
     `,
-    [entityType, String(entityId), locale, JSON.stringify(payload), new Date().toISOString()]
+    [
+      entityType,
+      String(entityId),
+      locale,
+      JSON.stringify(payload),
+      new Date().toISOString(),
+      meta?.sourceHash ?? null,
+      meta?.status ?? null,
+    ]
   );
+}
+
+// Reads translation metadata (hash/status) + the stored payload in one query.
+export async function getTranslationMetaRemote(
+  entityType: string,
+  entityId: string | number
+): Promise<TranslationMeta> {
+  const row = await queryRemoteRow<{
+    data_json: unknown;
+    source_hash: string | null;
+    status: string | null;
+    updated_at: string | null;
+  }>(
+    "SELECT data_json, source_hash, status, updated_at FROM content_translations WHERE entity_type = $1 AND entity_id = $2 AND locale = 'en'",
+    [entityType, String(entityId)]
+  );
+
+  return {
+    sourceHash: row?.source_hash ?? null,
+    status: (row?.status as TranslationStatus | undefined) ?? null,
+    updatedAt: row?.updated_at ?? null,
+    payload: parseJson<TranslationPayload | null>(row?.data_json, null),
+  };
 }
 
 function mapBoolean(value: number | boolean | string | null | undefined) {

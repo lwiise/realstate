@@ -338,6 +338,11 @@ const REMOTE_SCHEMA_SQL = `
     updated_at TIMESTAMPTZ NOT NULL,
     PRIMARY KEY (entity_type, entity_id, locale)
   );
+
+  -- Translation tracking columns (source_hash detects French changes; status is
+  -- translated | needs_translation | failed). IF NOT EXISTS keeps this idempotent.
+  ALTER TABLE content_translations ADD COLUMN IF NOT EXISTS source_hash TEXT;
+  ALTER TABLE content_translations ADD COLUMN IF NOT EXISTS status TEXT;
 `;
 
 async function migrateRemoteDatabase() {

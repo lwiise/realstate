@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { TaxonomyForm } from "@/components/admin/taxonomy-form";
+import { TranslationStatus } from "@/components/admin/translation-status";
 import { getMediaAssets, getPropertyTypes } from "@/lib/admin-cms";
 
 interface AdminEditPropertyTypePageProps {
@@ -37,6 +38,8 @@ export default async function AdminEditPropertyTypePage({
           Retour aux types de propriété
         </Link>
       </div>
+
+      <TranslationStatus entityType="property-type" entityId={id} redirectTo={`/admin/property-types/${id}`} />
 
       <TaxonomyForm mode="property" item={propertyType} mediaAssets={mediaAssets} />
     </div>

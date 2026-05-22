@@ -1,4 +1,5 @@
 import { FooterForm } from "@/components/admin/footer-form";
+import { TranslationStatus } from "@/components/admin/translation-status";
 import { getFooterSettings } from "@/lib/admin-cms";
 
 export default async function AdminFooterPage() {
@@ -10,6 +11,8 @@ export default async function AdminFooterPage() {
         <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground">Site</p>
         <h1 className="mt-2 font-serif text-3xl text-foreground">Paramètres du pied de page</h1>
       </div>
+
+      <TranslationStatus entityType="footer-settings" entityId="1" redirectTo="/admin/footer" />
 
       <FooterForm footer={footer} />
     </div>

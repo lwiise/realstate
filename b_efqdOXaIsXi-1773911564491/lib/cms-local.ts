@@ -13,7 +13,9 @@ import type {
   PropertyType,
   SiteSettings,
   TransactionType,
+  TranslationMeta,
   TranslationPayload,
+  TranslationStatus,
 } from "@/lib/cms-types";
 import { getDb } from "@/lib/db";
 import { getSeedPage, seedFooter, seedNavigation, seedSiteSettings } from "@/lib/seed-data";
@@ -76,15 +78,17 @@ export function upsertContentTranslation(
   entityType: string,
   entityId: string | number,
   locale: "en",
-  payload: TranslationPayload
+  payload: TranslationPayload,
+  meta?: { sourceHash?: string | null; status?: TranslationStatus | null }
 ) {
   const db = getDb();
+  // INSERT OR REPLACE rewrites the whole row, so source_hash/status must be included.
   db.prepare(
     `
       INSERT OR REPLACE INTO content_translations (
-        entity_type, entity_id, locale, data_json, updated_at
+        entity_type, entity_id, locale, data_json, updated_at, source_hash, status
       ) VALUES (
-        @entityType, @entityId, @locale, @dataJson, @updatedAt
+        @entityType, @entityId, @locale, @dataJson, @updatedAt, @sourceHash, @status
       )
     `
   ).run({
@@ -93,7 +97,29 @@ export function upsertContentTranslation(
     locale,
     dataJson: JSON.stringify(payload),
     updatedAt: new Date().toISOString(),
+    sourceHash: meta?.sourceHash ?? null,
+    status: meta?.status ?? null,
   });
+}
+
+// Reads translation metadata (hash/status) + the stored payload in one query.
+// Used by the translation service for change detection and by the admin status badge.
+export function getTranslationMeta(entityType: string, entityId: string | number): TranslationMeta {
+  const db = getDb();
+  const row = db
+    .prepare(
+      "SELECT data_json, source_hash, status, updated_at FROM content_translations WHERE entity_type = ? AND entity_id = ? AND locale = 'en'"
+    )
+    .get(entityType, String(entityId)) as
+    | { data_json?: string; source_hash?: string | null; status?: string | null; updated_at?: string | null }
+    | undefined;
+
+  return {
+    sourceHash: row?.source_hash ?? null,
+    status: (row?.status as TranslationStatus | undefined) ?? null,
+    updatedAt: row?.updated_at ?? null,
+    payload: parseJson<TranslationPayload | null>(row?.data_json, null),
+  };
 }
 
 function mapBoolean(value: number | boolean | null | undefined) {

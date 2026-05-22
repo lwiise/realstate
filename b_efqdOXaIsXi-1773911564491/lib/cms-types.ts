@@ -8,6 +8,16 @@ export interface TranslatableRecord {
   translationEn?: TranslationPayload | null;
 }
 
+// Status of a stored English translation. NULL/absent means "never translated".
+export type TranslationStatus = "translated" | "needs_translation" | "failed";
+
+export interface TranslationMeta {
+  sourceHash: string | null;
+  status: TranslationStatus | null;
+  updatedAt: string | null;
+  payload: TranslationPayload | null;
+}
+
 export type PageKey =
   | "home"
   | "buy"
