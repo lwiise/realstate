@@ -15,6 +15,9 @@ const OPENROUTER_ENDPOINT = "https://openrouter.ai/api/v1/chat/completions";
 // OPENROUTER_MODEL — e.g. "openai/gpt-4o" or "anthropic/claude-sonnet-4" for a
 // different quality/cost trade-off (any OpenRouter "provider/model" slug works).
 const DEFAULT_MODEL = "google/gemini-2.5-flash";
+// Cap output tokens so OpenRouter's per-request affordability check passes even on a
+// small credit balance (translations are short). Override with OPENROUTER_MAX_TOKENS.
+const DEFAULT_MAX_TOKENS = 8000;
 const REQUEST_TIMEOUT_MS = 30_000;
 
 const SYSTEM_PROMPT = [
@@ -41,6 +44,11 @@ function resolveApiKey(): string | undefined {
 
 function resolveModel(): string {
   return process.env.OPENROUTER_MODEL?.trim() || process.env.GEMINI_MODEL?.trim() || DEFAULT_MODEL;
+}
+
+function resolveMaxTokens(): number {
+  const raw = Number(process.env.OPENROUTER_MAX_TOKENS);
+  return Number.isFinite(raw) && raw > 0 ? raw : DEFAULT_MAX_TOKENS;
 }
 
 export function getGeminiModel(): string {
@@ -106,6 +114,7 @@ export async function translateJsonFrToEn(
       body: JSON.stringify({
         model,
         temperature: 0.2,
+        max_tokens: resolveMaxTokens(),
         response_format: { type: "json_object" },
         messages: [
           { role: "system", content: SYSTEM_PROMPT },
