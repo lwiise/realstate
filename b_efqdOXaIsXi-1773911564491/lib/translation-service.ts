@@ -189,6 +189,7 @@ async function safeUpsert(
 export interface SyncResult {
   status: TranslationStatus;
   skipped: boolean;
+  error?: string;
 }
 
 /**
@@ -230,10 +231,8 @@ export async function syncEntityTranslation(
     });
     return { status: "translated", skipped: false };
   } catch (error) {
-    console.error(
-      `[translation] Gemini translation failed for ${entityType}#${entityId}:`,
-      error instanceof Error ? error.message : error
-    );
+    const message = error instanceof Error ? error.message : String(error);
+    console.error(`[translation] Gemini translation failed for ${entityType}#${entityId}:`, message);
     // Preserve any previously-stored English; just flag it so a retry can pick it up.
     try {
       const existing = await readTranslationMeta(entityType, entityId).catch(() => null);
@@ -245,7 +244,7 @@ export async function syncEntityTranslation(
     } catch {
       // ignore — never throw out of the translation step
     }
-    return { status: "failed", skipped: false };
+    return { status: "failed", skipped: false, error: message };
   }
 }
 
@@ -321,41 +320,61 @@ export interface TranslateBatchResult {
   translatedNow: number;
   failed: number;
   remaining: number;
+  error?: string;
 }
 
 /**
  * Translates up to `limit` not-yet-translated entities in parallel. Kept small so a
  * single request stays within serverless time limits — call repeatedly until remaining === 0.
+ * Surfaces the first real error (e.g. the exact Gemini API message) so the admin can act on it.
  */
 export async function translatePendingBatch(limit = 6): Promise<TranslateBatchResult> {
   if (!isGeminiConfigured()) {
-    return { geminiConfigured: false, translatedNow: 0, failed: 0, remaining: 0 };
+    return {
+      geminiConfigured: false,
+      translatedNow: 0,
+      failed: 0,
+      remaining: 0,
+      error: "Aucune clé API Gemini détectée (variable google_api).",
+    };
   }
 
-  const entities = await listTranslatableEntities();
-  const statuses = await Promise.all(
-    entities.map(async (ref) => {
-      const meta = await readTranslationMeta(ref.entityType, ref.entityId).catch(() => null);
-      return { ref, translated: meta?.status === "translated" };
-    })
-  );
-  const pending = statuses.filter((entry) => !entry.translated).map((entry) => entry.ref);
-  const batch = pending.slice(0, limit);
+  try {
+    const entities = await listTranslatableEntities();
+    const statuses = await Promise.all(
+      entities.map(async (ref) => {
+        const meta = await readTranslationMeta(ref.entityType, ref.entityId).catch(() => null);
+        return { ref, translated: meta?.status === "translated" };
+      })
+    );
+    const pending = statuses.filter((entry) => !entry.translated).map((entry) => entry.ref);
+    const batch = pending.slice(0, limit);
 
-  let translatedNow = 0;
-  let failed = 0;
-  await Promise.all(
-    batch.map(async (ref) => {
-      const result = await syncEntityTranslation(ref.entityType, ref.entityId, ref.entity, { force: true });
-      if (result.status === "translated") translatedNow += 1;
-      else failed += 1;
-    })
-  );
+    let translatedNow = 0;
+    let failed = 0;
+    let firstError: string | undefined;
+    await Promise.all(
+      batch.map(async (ref) => {
+        const result = await syncEntityTranslation(ref.entityType, ref.entityId, ref.entity, { force: true });
+        if (result.status === "translated") {
+          translatedNow += 1;
+        } else {
+          failed += 1;
+          if (!firstError && result.error) firstError = result.error;
+        }
+      })
+    );
 
-  return {
-    geminiConfigured: true,
-    translatedNow,
-    failed,
-    remaining: Math.max(0, pending.length - translatedNow),
-  };
+    return {
+      geminiConfigured: true,
+      translatedNow,
+      failed,
+      remaining: Math.max(0, pending.length - translatedNow),
+      error: firstError,
+    };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("[translation] translatePendingBatch failed:", message);
+    return { geminiConfigured: true, translatedNow: 0, failed: 0, remaining: 0, error: message };
+  }
 }

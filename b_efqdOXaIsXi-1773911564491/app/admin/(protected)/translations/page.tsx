@@ -1,4 +1,5 @@
 import { getTranslationOverview } from "@/lib/translation-service";
+import { getGeminiModel } from "@/lib/gemini-translate";
 import { TranslationRunner } from "@/components/admin/translation-runner";
 
 export default async function AdminTranslationsPage() {
@@ -33,7 +34,11 @@ export default async function AdminTranslationsPage() {
         ))}
       </div>
 
-      <TranslationRunner initialPending={pending} geminiConfigured={overview.geminiConfigured} />
+      <TranslationRunner
+        initialPending={pending}
+        geminiConfigured={overview.geminiConfigured}
+        model={getGeminiModel()}
+      />
     </div>
   );
 }

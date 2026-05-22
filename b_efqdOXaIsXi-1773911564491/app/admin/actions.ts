@@ -47,6 +47,8 @@ import {
 } from "@/lib/cms";
 import { syncEntityTranslation, translatePendingBatch } from "@/lib/translation-service";
 import type { TranslatableEntityType, TranslateBatchResult } from "@/lib/translation-service";
+import { testGeminiConnection } from "@/lib/gemini-translate";
+import type { GeminiTestResult } from "@/lib/gemini-translate";
 import { getSeedPage } from "@/lib/seed-data";
 import { slugify } from "@/lib/slug";
 
@@ -581,6 +583,12 @@ export async function translatePendingBatchAction(): Promise<TranslateBatchResul
     revalidateSite();
   }
   return result;
+}
+
+// Verifies the Gemini key/model/connection with one tiny translation; surfaces the exact error.
+export async function testGeminiAction(): Promise<GeminiTestResult> {
+  await requireAdminUser();
+  return testGeminiConnection();
 }
 
 function parsePageContent<TPageKey extends PageKey>(

@@ -19,8 +19,23 @@ const TRANSLATION_PROMPT = [
   "Return JSON only using the exact same keys as the input. Translate only the string values.",
 ].join("\n");
 
+// The key is documented as `google_api` (Netlify), but accept the common variants too
+// so a casing/name mismatch doesn't silently disable translation.
+function resolveApiKey(): string | undefined {
+  const raw = process.env.google_api ?? process.env.GOOGLE_API ?? process.env.GEMINI_API_KEY;
+  return raw && raw.trim() ? raw.trim() : undefined;
+}
+
+function resolveModel(): string {
+  return process.env.GEMINI_MODEL?.trim() || DEFAULT_MODEL;
+}
+
+export function getGeminiModel(): string {
+  return resolveModel();
+}
+
 export function isGeminiConfigured(): boolean {
-  return Boolean(process.env.google_api && process.env.google_api.trim());
+  return Boolean(resolveApiKey());
 }
 
 class GeminiError extends Error {}
@@ -46,9 +61,9 @@ function stripCodeFence(text: string): string {
 export async function translateJsonFrToEn(
   fields: Record<string, unknown>
 ): Promise<Record<string, unknown>> {
-  const apiKey = process.env.google_api?.trim();
+  const apiKey = resolveApiKey();
   if (!apiKey) {
-    throw new GeminiError("google_api environment variable is not set.");
+    throw new GeminiError("No Gemini API key found (set the google_api environment variable).");
   }
 
   // Nothing translatable -> return as-is, no API call.
@@ -56,7 +71,7 @@ export async function translateJsonFrToEn(
     return {};
   }
 
-  const model = process.env.GEMINI_MODEL?.trim() || DEFAULT_MODEL;
+  const model = resolveModel();
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
@@ -104,5 +119,30 @@ export async function translateJsonFrToEn(
     return parsed as Record<string, unknown>;
   } finally {
     clearTimeout(timeout);
+  }
+}
+
+export interface GeminiTestResult {
+  ok: boolean;
+  model: string;
+  sample?: string;
+  error?: string;
+}
+
+/**
+ * Performs a single tiny translation to verify the key/model/connection.
+ * Never throws — returns the exact error string so the admin UI can show what's wrong.
+ */
+export async function testGeminiConnection(): Promise<GeminiTestResult> {
+  const model = resolveModel();
+  if (!resolveApiKey()) {
+    return { ok: false, model, error: "Aucune clé API Gemini détectée (variable google_api)." };
+  }
+  try {
+    const result = await translateJsonFrToEn({ greeting: "Bonjour, bienvenue chez MDK Immobilier" });
+    const sample = typeof result.greeting === "string" ? result.greeting : JSON.stringify(result);
+    return { ok: true, model, sample };
+  } catch (error) {
+    return { ok: false, model, error: error instanceof Error ? error.message : String(error) };
   }
 }
