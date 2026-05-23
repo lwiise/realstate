@@ -1,25 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { MessageCircle, Send } from "lucide-react";
-import { buildWhatsAppLink } from "@/lib/data";
+import { Send } from "lucide-react";
 import type { Locale } from "@/lib/cms-types";
 
 interface ContactFormProps {
   propertyId?: number;
   propertyTitle: string;
-  agentPhone?: string;
   locale?: Locale;
 }
 
-export function ContactForm({ propertyId, propertyTitle, agentPhone, locale = "fr" }: ContactFormProps) {
+export function ContactForm({ propertyId, propertyTitle, locale = "fr" }: ContactFormProps) {
   const text = {
     defaultMessage: locale === "en"
       ? `I am interested in "${propertyTitle}" and would like to schedule a viewing.`
       : `Je suis interesse par "${propertyTitle}" et je souhaite organiser une visite.`,
-    whatsappMessage: locale === "en"
-      ? `Hello, I am interested in "${propertyTitle}". Can you contact me?`
-      : `Bonjour, je suis interesse par "${propertyTitle}". Pouvez-vous me contacter ?`,
     sentTitle: locale === "en" ? "Message sent" : "Message envoye",
     sentBody: locale === "en" ? "Thank you. Our team will contact you shortly." : "Merci. Notre equipe vous contactera rapidement.",
     title: locale === "en" ? "Send an inquiry" : "Envoyer une demande",
@@ -32,7 +27,6 @@ export function ContactForm({ propertyId, propertyTitle, agentPhone, locale = "f
     phonePlaceholder: locale === "en" ? "Your phone" : "Votre telephone",
     sending: locale === "en" ? "Sending..." : "Envoi...",
     submit: locale === "en" ? "Send request" : "Envoyer la demande",
-    whatsapp: locale === "en" ? "Contact on WhatsApp" : "Contacter sur WhatsApp",
   };
   const [formState, setFormState] = useState({
     name: "",
@@ -67,14 +61,6 @@ export function ContactForm({ propertyId, propertyTitle, agentPhone, locale = "f
     if (response.ok) {
       setIsSubmitted(true);
     }
-  };
-
-  const handleWhatsApp = () => {
-    const href = buildWhatsAppLink(
-      agentPhone || "+212612345678",
-      text.whatsappMessage
-    );
-    window.open(href, "_blank");
   };
 
   if (isSubmitted) {
@@ -162,15 +148,6 @@ export function ContactForm({ propertyId, propertyTitle, agentPhone, locale = "f
               {text.submit}
             </>
           )}
-        </button>
-
-        <button
-          type="button"
-          onClick={handleWhatsApp}
-          className="w-full h-12 bg-[#25D366] text-white font-medium text-sm tracking-wide uppercase hover:bg-[#20BA5A] transition-all duration-300 flex items-center justify-center gap-2"
-        >
-          <MessageCircle className="w-5 h-5" />
-          {text.whatsapp}
         </button>
       </form>
     </div>

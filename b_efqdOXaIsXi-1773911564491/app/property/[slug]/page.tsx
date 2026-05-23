@@ -300,7 +300,6 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
                 <ContactForm
                   propertyId={property.id}
                   propertyTitle={property.title}
-                  agentPhone={property.agent?.phone}
                   locale={locale}
                 />
               </div>
