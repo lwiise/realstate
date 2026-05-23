@@ -42,6 +42,13 @@ export function PropertyCard({ property, siteSettings, locale }: PropertyCardPro
 
           {/* Top badges */}
           <div className="absolute top-4 left-4 flex gap-2">
+            {property.isUnavailable ? (
+              <span className="bg-red-600 text-white text-xs px-3 py-1.5 font-medium tracking-wide">
+                {property.priceMode === "sale"
+                  ? (locale === "en" ? "Sold" : "Vendu")
+                  : (locale === "en" ? "Rented" : "Loué")}
+              </span>
+            ) : null}
             <span className="bg-black text-white text-xs px-3 py-1.5 font-medium tracking-wide">
               {displayProperty.transactionType}
             </span>

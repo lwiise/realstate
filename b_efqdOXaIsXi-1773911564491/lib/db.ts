@@ -141,6 +141,7 @@ export function migrateDatabase(db: DatabaseSync) {
       property_type_id INTEGER NOT NULL REFERENCES property_types(id) ON DELETE RESTRICT,
       status TEXT NOT NULL CHECK(status IN ('draft', 'published', 'archived')),
       featured INTEGER NOT NULL DEFAULT 0,
+      is_unavailable INTEGER NOT NULL DEFAULT 0,
       city TEXT NOT NULL,
       neighborhood TEXT NOT NULL,
       full_address TEXT,
@@ -258,6 +259,19 @@ export function migrateDatabase(db: DatabaseSync) {
     }
   } catch (error) {
     console.warn("[db] Skipped translation column migration:", error);
+  }
+
+  // Availability flag on properties (sold/rented). Added incrementally so existing
+  // databases upgrade safely. Best-effort: a failure must never break getDb().
+  try {
+    const propertyColumns = db
+      .prepare("PRAGMA table_info(properties)")
+      .all() as Array<{ name: string }>;
+    if (!propertyColumns.some((column) => column.name === "is_unavailable")) {
+      db.exec("ALTER TABLE properties ADD COLUMN is_unavailable INTEGER NOT NULL DEFAULT 0");
+    }
+  } catch (error) {
+    console.warn("[db] Skipped property column migration:", error);
   }
 }
 

@@ -281,6 +281,7 @@ function mapProperty(row: PropertyRow): Property {
     propertyTypeSlug: String(row.property_slug),
     status: String(row.status) as Property["status"],
     featured: mapBoolean(row.featured as number),
+    isUnavailable: mapBoolean(row.is_unavailable as number),
     city: String(row.city),
     neighborhood: String(row.neighborhood),
     fullAddress: (row.full_address as string | null) ?? null,
@@ -1011,6 +1012,7 @@ export function upsertProperty(
     propertyTypeId: input.propertyTypeId,
     status: input.status,
     featured: input.featured ? 1 : 0,
+    isUnavailable: input.isUnavailable ? 1 : 0,
     city: input.city,
     neighborhood: input.neighborhood,
     fullAddress: input.fullAddress ?? null,
@@ -1050,6 +1052,7 @@ export function upsertProperty(
           property_type_id = @propertyTypeId,
           status = @status,
           featured = @featured,
+          is_unavailable = @isUnavailable,
           city = @city,
           neighborhood = @neighborhood,
           full_address = @fullAddress,
@@ -1083,13 +1086,13 @@ export function upsertProperty(
   const result = db.prepare(
     `
       INSERT INTO properties (
-        title, slug, transaction_type_id, property_type_id, status, featured, city,
+        title, slug, transaction_type_id, property_type_id, status, featured, is_unavailable, city,
         neighborhood, full_address, price, price_mode, price_suffix, short_description,
         long_description, bedrooms, bathrooms, area, area_unit, amenities_json, gallery_json,
         cover_image_url, video_url, virtual_tour_url, agent_id, seo_title, seo_description,
         og_image_url, sort_order, published_at, created_at, updated_at
       ) VALUES (
-        @title, @slug, @transactionTypeId, @propertyTypeId, @status, @featured, @city,
+        @title, @slug, @transactionTypeId, @propertyTypeId, @status, @featured, @isUnavailable, @city,
         @neighborhood, @fullAddress, @price, @priceMode, @priceSuffix, @shortDescription,
         @longDescription, @bedrooms, @bathrooms, @area, @areaUnit, @amenitiesJson, @galleryJson,
         @coverImageUrl, @videoUrl, @virtualTourUrl, @agentId, @seoTitle, @seoDescription,

@@ -11,9 +11,11 @@ interface PropertyGalleryProps {
   video?: string;
   title: string;
   locale?: Locale;
+  /** Localized "Sold"/"Rented" label, or undefined when the property is available. */
+  statusBadge?: string;
 }
 
-export function PropertyGallery({ images, video, title, locale = "fr" }: PropertyGalleryProps) {
+export function PropertyGallery({ images, video, title, locale = "fr", statusBadge }: PropertyGalleryProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   
@@ -96,6 +98,13 @@ export function PropertyGallery({ images, video, title, locale = "fr" }: Propert
           <div className="absolute bottom-4 left-4 bg-black/50 backdrop-blur-sm text-white text-sm px-3 py-1.5">
             {currentIndex + 1} / {allMedia.length}
           </div>
+
+          {/* Sold / Rented */}
+          {statusBadge ? (
+            <div className="absolute top-4 left-4 bg-red-600 text-white text-xs px-3 py-1.5 font-medium tracking-wide">
+              {statusBadge}
+            </div>
+          ) : null}
         </div>
         
         {/* Miniatures */}

@@ -75,6 +75,8 @@ export interface Property extends TranslatableRecord {
   propertyTypeSlug: string;
   status: ListingStatus;
   featured: boolean;
+  /** true = sold (sale) or rented (rent); rendered as a Sold/Rented badge. */
+  isUnavailable: boolean;
   city: string;
   neighborhood: string;
   fullAddress?: string | null;

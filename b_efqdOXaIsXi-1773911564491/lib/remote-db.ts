@@ -241,6 +241,7 @@ const REMOTE_SCHEMA_SQL = `
     property_type_id INTEGER NOT NULL REFERENCES property_types(id) ON DELETE RESTRICT,
     status TEXT NOT NULL CHECK (status IN ('draft', 'published', 'archived')),
     featured BOOLEAN NOT NULL DEFAULT FALSE,
+    is_unavailable BOOLEAN NOT NULL DEFAULT FALSE,
     city TEXT NOT NULL,
     neighborhood TEXT NOT NULL,
     full_address TEXT,
@@ -349,15 +350,21 @@ const TRANSLATION_COLUMN_MIGRATIONS = [
   "ALTER TABLE content_translations ADD COLUMN IF NOT EXISTS status TEXT",
 ];
 
+// Property availability flag (sold/rented). Best-effort like the translation columns:
+// a failure here must never break the core schema or reads.
+const PROPERTY_COLUMN_MIGRATIONS = [
+  "ALTER TABLE properties ADD COLUMN IF NOT EXISTS is_unavailable BOOLEAN NOT NULL DEFAULT FALSE",
+];
+
 async function migrateRemoteDatabase() {
   const pool = getRemotePool();
   await pool.query(REMOTE_SCHEMA_SQL);
-  for (const sql of TRANSLATION_COLUMN_MIGRATIONS) {
+  for (const sql of [...TRANSLATION_COLUMN_MIGRATIONS, ...PROPERTY_COLUMN_MIGRATIONS]) {
     try {
       await pool.query(sql);
     } catch (error) {
       console.warn(
-        "[remote-db] Skipped translation column migration:",
+        "[remote-db] Skipped column migration:",
         error instanceof Error ? error.message : error
       );
     }

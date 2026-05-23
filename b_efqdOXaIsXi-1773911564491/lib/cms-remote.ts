@@ -305,6 +305,7 @@ function mapProperty(row: RemotePropertyRow): Property {
     propertyTypeSlug: String(row.property_slug),
     status: String(row.status) as Property["status"],
     featured: mapBoolean(row.featured as boolean),
+    isUnavailable: mapBoolean(row.is_unavailable as boolean),
     city: String(row.city),
     neighborhood: String(row.neighborhood),
     fullAddress: (row.full_address as string | null) ?? null,
@@ -1092,6 +1093,7 @@ export async function upsertPropertyRemote(
     input.sortOrder,
     input.status === "published" ? input.publishedAt ?? updatedAt : null,
     updatedAt,
+    input.isUnavailable,
   ];
 
   if (input.id) {
@@ -1128,8 +1130,9 @@ export async function upsertPropertyRemote(
           og_image_url = $27,
           sort_order = $28,
           published_at = $29,
-          updated_at = $30
-        WHERE id = $31
+          updated_at = $30,
+          is_unavailable = $31
+        WHERE id = $32
       `,
       [...payload, input.id]
     );
@@ -1143,13 +1146,13 @@ export async function upsertPropertyRemote(
         neighborhood, full_address, price, price_mode, price_suffix, short_description,
         long_description, bedrooms, bathrooms, area, area_unit, amenities_json, gallery_json,
         cover_image_url, video_url, virtual_tour_url, agent_id, seo_title, seo_description,
-        og_image_url, sort_order, published_at, created_at, updated_at
+        og_image_url, sort_order, published_at, created_at, updated_at, is_unavailable
       ) VALUES (
         $1, $2, $3, $4, $5, $6, $7,
         $8, $9, $10, $11, $12, $13,
         $14, $15, $16, $17, $18, $19::jsonb, $20::jsonb,
         $21, $22, $23, $24, $25, $26,
-        $27, $28, $29, $30, $30
+        $27, $28, $29, $30, $30, $31
       )
       RETURNING id
     `,

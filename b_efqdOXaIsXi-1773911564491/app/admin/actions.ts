@@ -281,6 +281,7 @@ export async function savePropertyAction(formData: FormData) {
     propertyTypeId,
     status: getValue(formData, "status") as Property["status"],
     featured: getBooleanValue(formData, "featured"),
+    isUnavailable: getBooleanValue(formData, "isUnavailable"),
     city: getValue(formData, "city"),
     neighborhood: getValue(formData, "neighborhood"),
     fullAddress: getOptionalValue(formData, "fullAddress"),

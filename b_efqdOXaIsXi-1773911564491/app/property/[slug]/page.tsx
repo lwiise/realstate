@@ -147,6 +147,13 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
             video={property.video ?? undefined}
             title={property.title}
             locale={locale}
+            statusBadge={
+              property.isUnavailable
+                ? property.priceMode === "sale"
+                  ? locale === "en" ? "Sold" : "Vendu"
+                  : locale === "en" ? "Rented" : "Loué"
+                : undefined
+            }
           />
         </div>
       </section>

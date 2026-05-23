@@ -110,6 +110,11 @@ export function PropertyForm({
               <span className="text-sm text-foreground">Annonce mise en avant</span>
             </label>
 
+            <label className="flex items-center gap-3 rounded-md border border-border px-4 py-3">
+              <input type="checkbox" name="isUnavailable" defaultChecked={property?.isUnavailable} />
+              <span className="text-sm text-foreground">Vendu / Loué (bien non disponible)</span>
+            </label>
+
             <label className="space-y-2">
               <span className="text-xs uppercase tracking-wide text-muted-foreground">
                 Ordre de tri
