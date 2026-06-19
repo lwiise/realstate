@@ -1,9 +1,10 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { refreshSupabaseSession } from "@/lib/supabase/middleware";
 
 const LOCALE_COOKIE = "site-locale";
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const requestHeaders = new Headers(request.headers);
 
@@ -25,6 +26,9 @@ export function middleware(request: NextRequest) {
     requestHeaders.set("x-site-locale", "fr");
     const response = NextResponse.next({ request: { headers: requestHeaders } });
     response.headers.set("x-site-locale", "fr");
+    // Keep the Supabase Auth session fresh on every admin navigation so server
+    // components see a valid session and rotated tokens are persisted to cookies.
+    await refreshSupabaseSession(request, response);
     return response;
   }
 

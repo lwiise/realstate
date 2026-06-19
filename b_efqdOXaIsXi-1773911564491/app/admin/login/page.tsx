@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { getAdminAuthStatus, getCurrentAdminUser } from "@/lib/auth";
-import { loginAdminAction, setupAdminAction } from "@/app/admin/actions";
+import { loginAdminAction } from "@/app/admin/actions";
 
 export const dynamic = "force-dynamic";
 
@@ -9,12 +9,10 @@ interface AdminLoginPageProps {
 }
 
 const errorCopy: Record<string, string> = {
-  "setup-disabled": "La configuration initiale est déjà terminée.",
-  "setup-invalid": "Le nom, l’e-mail et un mot de passe d’au moins 8 caractères sont requis.",
   "missing-fields": "L’e-mail et le mot de passe sont requis.",
   "invalid-credentials": "E-mail ou mot de passe invalide.",
   "auth-unavailable":
-    "Le panneau d’administration ne peut pas se connecter à sa base de données pour le moment. Vérifiez vos variables d’environnement Netlify et Supabase, puis redéployez.",
+    "Le panneau d’administration ne peut pas se connecter à Supabase pour le moment. Vérifiez vos variables d’environnement, puis redéployez.",
 };
 
 function AuthShell({
@@ -46,7 +44,7 @@ export default async function AdminLoginPage({ searchParams }: AdminLoginPagePro
   const [admin, params, authStatus] = await Promise.all([
     getCurrentAdminUser(),
     searchParams,
-    getAdminAuthStatus(),
+    Promise.resolve(getAdminAuthStatus()),
   ]);
 
   if (admin) {
@@ -60,17 +58,14 @@ export default async function AdminLoginPage({ searchParams }: AdminLoginPagePro
     : errorKey
       ? errorCopy[errorKey]
       : "";
-  const hasUsers = authStatus.hasUsers;
 
   return (
     <AuthShell
-      title={!authStatus.available ? "Admin temporairement indisponible" : hasUsers ? "Connexion admin" : "Créer le premier compte admin"}
+      title={authStatus.available ? "Connexion admin" : "Admin temporairement indisponible"}
       description={
-        !authStatus.available
-          ? "Le site public reste en ligne, mais l’espace admin ne peut pas atteindre sa base de données distante."
-          : hasUsers
-            ? "Accédez à l’espace de gestion pour mettre à jour les pages, les annonces, les agents, les taxonomies et les médias."
-            : "Le CMS n’a pas encore été initialisé. Créez le premier compte admin pour activer l’espace de gestion protégé."
+        authStatus.available
+          ? "Accédez à l’espace de gestion pour mettre à jour les pages, les annonces, les agents, les taxonomies et les médias."
+          : "Le site public reste en ligne, mais l’espace admin ne peut pas atteindre Supabase."
       }
     >
       {errorMessage ? (
@@ -79,7 +74,7 @@ export default async function AdminLoginPage({ searchParams }: AdminLoginPagePro
         </div>
       ) : null}
 
-      {!authStatus.available ? null : hasUsers ? (
+      {!authStatus.available ? null : (
         <form action={loginAdminAction} className="space-y-5">
           <div className="space-y-2">
             <label htmlFor="email" className="text-xs uppercase tracking-wide text-muted-foreground">
@@ -114,58 +109,6 @@ export default async function AdminLoginPage({ searchParams }: AdminLoginPagePro
             className="cta-dark-button h-12 w-full rounded-md text-sm font-medium uppercase tracking-wide"
           >
             Se connecter
-          </button>
-        </form>
-      ) : (
-        <form action={setupAdminAction} className="space-y-5">
-          <div className="space-y-2">
-            <label htmlFor="name" className="text-xs uppercase tracking-wide text-muted-foreground">
-              Nom
-            </label>
-            <input
-              id="name"
-              name="name"
-              type="text"
-              required
-              className="h-12 w-full rounded-md border border-border bg-background px-4 text-sm"
-              placeholder="Nom de l’administrateur"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label htmlFor="email" className="text-xs uppercase tracking-wide text-muted-foreground">
-              E-mail
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              required
-              className="h-12 w-full rounded-md border border-border bg-background px-4 text-sm"
-              placeholder="admin@example.com"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label htmlFor="password" className="text-xs uppercase tracking-wide text-muted-foreground">
-              Mot de passe
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              minLength={8}
-              required
-              className="h-12 w-full rounded-md border border-border bg-background px-4 text-sm"
-              placeholder="Au moins 8 caractères"
-            />
-          </div>
-
-          <button
-            type="submit"
-            className="cta-dark-button h-12 w-full rounded-md text-sm font-medium uppercase tracking-wide"
-          >
-            Créer le compte admin
           </button>
         </form>
       )}

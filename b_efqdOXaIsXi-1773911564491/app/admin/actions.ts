@@ -2,14 +2,8 @@
 
 import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
-import {
-  countAdminUsers,
-  createInitialAdminUser,
-  isAdminAuthUnavailableError,
-  requireAdminUser,
-  signInAdmin,
-  signOutAdmin,
-} from "@/lib/auth";
+import { requireAdminUser } from "@/lib/auth";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type {
   FooterSettings,
   NavigationSettings,
@@ -183,69 +177,31 @@ async function buildUniquePropertySlug(rawSlug: string, title: string, currentId
   return nextSlug;
 }
 
-export async function setupAdminAction(formData: FormData) {
-  try {
-    if ((await countAdminUsers()) > 0) {
-      redirect("/admin/login?error=setup-disabled");
-    }
-
-    const name = getValue(formData, "name");
-    const email = getValue(formData, "email");
-    const password = getValue(formData, "password");
-
-    if (!name || !email || password.length < 8) {
-      redirect("/admin/login?error=setup-invalid");
-    }
-
-    await createInitialAdminUser({ name, email, password });
-    await signInAdmin({ email, password });
-
-    redirect("/admin");
-  } catch (error) {
-    if (isAdminAuthUnavailableError(error)) {
-      redirect("/admin/login?error=auth-unavailable");
-    }
-
-    throw error;
-  }
-}
-
 export async function loginAdminAction(formData: FormData) {
-  try {
-    const email = getValue(formData, "email");
-    const password = getValue(formData, "password");
+  const email = getValue(formData, "email");
+  const password = getValue(formData, "password");
 
-    if (!email || !password) {
-      redirect("/admin/login?error=missing-fields");
-    }
-
-    const success = await signInAdmin({ email, password });
-    if (!success) {
-      redirect("/admin/login?error=invalid-credentials");
-    }
-
-    redirect("/admin");
-  } catch (error) {
-    if (isAdminAuthUnavailableError(error)) {
-      redirect("/admin/login?error=auth-unavailable");
-    }
-
-    throw error;
+  if (!email || !password) {
+    redirect("/admin/login?error=missing-fields");
   }
+
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+  if (error) {
+    redirect("/admin/login?error=invalid-credentials");
+  }
+
+  redirect("/admin");
 }
 
 export async function logoutAdminAction() {
-  try {
-    await requireAdminUser();
-    await signOutAdmin();
-    redirect("/admin/login");
-  } catch (error) {
-    if (isAdminAuthUnavailableError(error)) {
-      redirect("/admin/login?error=auth-unavailable");
-    }
+  await requireAdminUser();
 
-    throw error;
-  }
+  const supabase = await createSupabaseServerClient();
+  await supabase.auth.signOut();
+
+  redirect("/admin/login");
 }
 
 export async function savePropertyAction(formData: FormData) {
